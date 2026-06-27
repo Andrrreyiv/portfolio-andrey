@@ -314,8 +314,38 @@ footer{padding:58px 0 44px}
 .foot-links a:hover{color:var(--accent)}
 .copy{font-size:13.5px;color:var(--ink-mute)}
 
-.reveal{opacity:0;transform:translateY(28px);transition:.8s var(--ease)}
-.reveal.in{opacity:1;transform:none}
+/* TESTIMONIALS — slider */
+.tcarousel{position:relative;max-width:1000px;margin:0 auto}
+.tviewport{overflow:hidden;border-radius:var(--radius-lg)}
+.ttrack{display:flex;transition:transform .7s var(--ease);will-change:transform}
+.tslide{min-width:100%;box-sizing:border-box}
+.tquote{background:var(--card);border:1px solid var(--line);border-radius:var(--radius-lg);padding:46px 50px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+.tquote::before{content:"\201C";position:absolute;top:6px;left:28px;font-family:'Fraunces',serif;font-size:150px;line-height:1;color:var(--accent);opacity:.12}
+.tquote>*{position:relative;z-index:1}
+.tstars{display:flex;gap:3px;margin-bottom:18px;color:var(--gold);font-size:15px}
+.tkick{display:inline-block;margin-bottom:18px}
+.tquote blockquote{font-family:'Fraunces',Georgia,serif;font-size:clamp(19px,2.3vw,26px);line-height:1.42;font-weight:500;letter-spacing:-.01em;margin-bottom:26px;color:var(--ink)}
+.tquote .who{display:flex;align-items:center;gap:14px}
+.tava{width:52px;height:52px;border-radius:50%;display:grid;place-items:center;color:#fff;font-family:'Fraunces',serif;font-weight:600;font-size:19px;flex-shrink:0;box-shadow:0 8px 20px -8px rgba(21,17,13,.4)}
+.who-txt .nm{font-weight:600;font-size:15.5px}
+.who-txt .rl{font-size:13.5px;color:var(--ink-mute)}
+.tctrl{display:flex;align-items:center;justify-content:center;gap:20px;margin-top:30px}
+.tarrow{width:48px;height:48px;border-radius:50%;border:1.5px solid var(--line-2);background:var(--card);display:grid;place-items:center;cursor:pointer;transition:.3s var(--ease);color:var(--ink)}
+.tarrow:hover{background:var(--ink);color:var(--paper);border-color:var(--ink);transform:translateY(-2px)}
+.tarrow:active{transform:translateY(0)}
+.tarrow svg{width:18px;height:18px}
+.tdots{display:flex;gap:9px}
+.tdot{width:9px;height:9px;border-radius:50%;background:var(--paper-3);border:none;cursor:pointer;padding:0;transition:.35s var(--ease)}
+.tdot.on{background:var(--accent);width:30px;border-radius:5px}
+
+/* cursor spotlight on cards */
+.pcard::before,.gcard::before{content:"";position:absolute;inset:0;border-radius:inherit;background:radial-gradient(260px circle at var(--mx,50%) var(--my,0%),rgba(224,82,46,.10),transparent 55%);opacity:0;transition:opacity .35s var(--ease);pointer-events:none;z-index:0}
+.pcard:hover::before,.gcard:hover::before{opacity:1}
+.pcard>*,.gcard>*{position:relative;z-index:1}
+
+.reveal{opacity:0;transform:translateY(30px) scale(.99);filter:blur(4px);transition:opacity .85s var(--ease),transform .85s var(--ease),filter .85s var(--ease)}
+.reveal.in{opacity:1;transform:none;filter:none}
+@media(prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;filter:none}.ttrack{transition:none}}
 
 @media(max-width:980px){
   .bento{grid-template-columns:repeat(2,1fr)}
@@ -353,6 +383,10 @@ footer{padding:58px 0 44px}
   .tbl .mono{font-size:11px}
   .dash-top,.dash-foot{padding-left:13px;padding-right:13px}
   .case-metrics,.hero-stats{gap:18px 26px}
+  .tquote{padding:34px 26px}
+  .tquote::before{font-size:110px;left:16px}
+  .tctrl{gap:14px;margin-top:24px}
+  .tarrow{width:44px;height:44px}
 }
 </style>
 </head>
@@ -368,6 +402,7 @@ footer{padding:58px 0 44px}
       <a href="#services">Что я делаю</a>
       <a href="#cases">Примеры работ</a>
       <a href="#process">Как работаю</a>
+      <a href="#principles">Принципы</a>
       <a href="#faq">Вопросы</a>
       <a href="#contact" class="btn btn-primary">Обсудить задачу</a>
     </div>
@@ -386,9 +421,9 @@ footer{padding:58px 0 44px}
           <a href="#cases" class="btn btn-ghost">Смотреть примеры</a>
         </div>
         <div class="hero-stats reveal">
-          <div class="hstat"><div class="v">9</div><div class="k">направлений работы</div></div>
+          <div class="hstat"><div class="v" data-count="9">9</div><div class="k">направлений работы</div></div>
           <div class="hstat"><div class="v"><em>24/7</em></div><div class="k">ответ помощника</div></div>
-          <div class="hstat"><div class="v">1</div><div class="k">подрядчик на всё</div></div>
+          <div class="hstat"><div class="v" data-count="1">1</div><div class="k">подрядчик на всё</div></div>
         </div>
       </div>
       <div class="hero-visual reveal">
@@ -722,11 +757,53 @@ footer{padding:58px 0 44px}
   </div>
 </section>
 
+<!-- PRINCIPLES -->
+<section id="principles">
+  <div class="wrap">
+    <div class="sec-head center reveal">
+      <span class="snum" style="display:block;margin-bottom:14px">05 / Принципы</span>
+      <h2>Как я <em>работаю</em></h2>
+      <p>Четыре правила, по которым я веду каждый проект — от первого звонка до поддержки после запуска.</p>
+    </div>
+    <div class="tcarousel reveal" id="tcar">
+      <div class="tviewport">
+        <div class="ttrack" id="ttrack">
+          <div class="tslide"><div class="tquote">
+            <span class="snum tkick">Принцип 01</span>
+            <blockquote>Беру задачу целиком — от идеи до запуска. Вам не нужно собирать команду из пяти подрядчиков и переводить между ними: смежные задачи я закрываю сам и не теряю контекст между ними.</blockquote>
+            <div class="who"><div class="tava" style="background:linear-gradient(135deg,#E0522E,#B73E1F)">АБ</div><div class="who-txt"><div class="nm">Андрей Брыкун</div><div class="rl">один подрядчик на всё</div></div></div>
+          </div></div>
+          <div class="tslide"><div class="tquote">
+            <span class="snum tkick">Принцип 02</span>
+            <blockquote>Цену и срок называю до старта — фиксированной сметой. По ходу работы не появляется внезапных доплат: вы заранее знаете, сколько это стоит и когда будет готово.</blockquote>
+            <div class="who"><div class="tava" style="background:linear-gradient(135deg,#E0522E,#B73E1F)">АБ</div><div class="who-txt"><div class="nm">Андрей Брыкун</div><div class="rl">прозрачная смета</div></div></div>
+          </div></div>
+          <div class="tslide"><div class="tquote">
+            <span class="snum tkick">Принцип 03</span>
+            <blockquote>Объясняю простым языком и показываю работу этапами. Вы видите промежуточный результат, а не «чёрный ящик», и принимаете решения по сути задачи, а не по терминам.</blockquote>
+            <div class="who"><div class="tava" style="background:linear-gradient(135deg,#E0522E,#B73E1F)">АБ</div><div class="who-txt"><div class="nm">Андрей Брыкун</div><div class="rl">без техножаргона</div></div></div>
+          </div></div>
+          <div class="tslide"><div class="tquote">
+            <span class="snum tkick">Принцип 04</span>
+            <blockquote>После запуска не исчезаю. Обучаю пользоваться, остаюсь на связи, а правки и поддержка в рамках задачи уже включены — довожу до результата, а не сдаю «как есть».</blockquote>
+            <div class="who"><div class="tava" style="background:linear-gradient(135deg,#E0522E,#B73E1F)">АБ</div><div class="who-txt"><div class="nm">Андрей Брыкун</div><div class="rl">довожу до результата</div></div></div>
+          </div></div>
+        </div>
+      </div>
+      <div class="tctrl">
+        <button class="tarrow" id="tprev" aria-label="Предыдущий принцип"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+        <div class="tdots" id="tdots" role="tablist" aria-label="Принципы"></div>
+        <button class="tarrow" id="tnext" aria-label="Следующий принцип"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></button>
+      </div>
+    </div>
+  </div>
+</section>
+
 <!-- FAQ -->
 <section id="faq">
   <div class="wrap">
     <div class="sec-head center reveal">
-      <span class="snum" style="display:block;margin-bottom:14px">05 / Частые вопросы</span>
+      <span class="snum" style="display:block;margin-bottom:14px">06 / Частые вопросы</span>
       <h2>Отвечаю <em>на главное</em></h2>
     </div>
     <div class="faq reveal">
@@ -801,6 +878,69 @@ if(tilt&&!reduce&&matchMedia('(pointer:fine)').matches){
     tilt.style.transform=`rotateY(${px*7}deg) rotateX(${-py*7}deg) translateZ(0)`;
   });
   v.addEventListener('mouseleave',()=>tilt.style.transform='');
+}
+
+// testimonials slider
+(function(){
+  const track=document.getElementById('ttrack');
+  if(!track)return;
+  const slides=[...track.children];
+  const dotsBox=document.getElementById('tdots');
+  const prev=document.getElementById('tprev'), next=document.getElementById('tnext');
+  let i=0, timer;
+  slides.forEach((_,n)=>{
+    const d=document.createElement('button');
+    d.className='tdot'+(n===0?' on':'');
+    d.setAttribute('role','tab');
+    d.setAttribute('aria-label','Принцип '+(n+1));
+    d.addEventListener('click',()=>go(n,true));
+    dotsBox.appendChild(d);
+  });
+  const dots=[...dotsBox.children];
+  function go(n,user){
+    i=(n+slides.length)%slides.length;
+    track.style.transform='translateX('+(-i*100)+'%)';
+    dots.forEach((d,k)=>d.classList.toggle('on',k===i));
+    if(user)restart();
+  }
+  function start(){if(!reduce)timer=setInterval(()=>go(i+1),6000);}
+  function restart(){clearInterval(timer);start();}
+  prev.addEventListener('click',()=>go(i-1,true));
+  next.addEventListener('click',()=>go(i+1,true));
+  const car=document.getElementById('tcar');
+  car.addEventListener('mouseenter',()=>clearInterval(timer));
+  car.addEventListener('mouseleave',start);
+  car.tabIndex=0;
+  car.addEventListener('keydown',e=>{if(e.key==='ArrowLeft')go(i-1,true);if(e.key==='ArrowRight')go(i+1,true);});
+  // swipe
+  let x0=null;
+  car.addEventListener('touchstart',e=>x0=e.touches[0].clientX,{passive:true});
+  car.addEventListener('touchend',e=>{if(x0===null)return;const dx=e.changedTouches[0].clientX-x0;if(Math.abs(dx)>40)go(i+(dx<0?1:-1),true);x0=null;},{passive:true});
+  start();
+})();
+
+// count-up hero stats
+const cio=new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting){const el=e.target,end=+el.dataset.count;let t0=null;const dur=900;function step(ts){if(!t0)t0=ts;const p=Math.min((ts-t0)/dur,1);el.textContent=Math.round((1-Math.pow(1-p,3))*end);if(p<1)requestAnimationFrame(step);}if(!reduce)requestAnimationFrame(step);cio.unobserve(el);}})},{threshold:.6});
+document.querySelectorAll('[data-count]').forEach(el=>cio.observe(el));
+
+// magnetic buttons
+if(!reduce&&matchMedia('(pointer:fine)').matches){
+  document.querySelectorAll('.btn-primary,.btn-tg').forEach(b=>{
+    b.addEventListener('mousemove',e=>{const r=b.getBoundingClientRect();b.style.transform='translate('+((e.clientX-r.left-r.width/2)*.18)+'px,'+((e.clientY-r.top-r.height/2)*.28)+'px)';});
+    b.addEventListener('mouseleave',()=>b.style.transform='');
+  });
+}
+
+// cursor spotlight on cards
+document.querySelectorAll('.pcard,.gcard').forEach(c=>{
+  c.addEventListener('pointermove',e=>{const r=c.getBoundingClientRect();c.style.setProperty('--mx',(e.clientX-r.left)+'px');c.style.setProperty('--my',(e.clientY-r.top)+'px');});
+});
+
+// parallax orbs
+const orbs=[...document.querySelectorAll('.bg b')];
+if(orbs.length&&!reduce){
+  let ticking=false;
+  addEventListener('scroll',()=>{if(ticking)return;ticking=true;requestAnimationFrame(()=>{const y=scrollY;orbs.forEach((o,k)=>{o.style.transform='translateY('+(y*(.04+k*.03))+'px)';});ticking=false;});},{passive:true});
 }
 </script>
 </body>
