@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ТД Спаркс — AI-ассистент</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<style>
+/* ══════════════════════════════════════════════
+   ЦВЕТА — взяты с sparks.su (computed styles).
+   Дизайнеру: менять только эти переменные.
+   ══════════════════════════════════════════════ */
+:root{
+  --brand:        #2677C2;
+  --brand-dark:   #145AA4;
+  --brand-deep:   #0D4479;
+  --brand-light:  #EBF4FF;
+  --accent:       #F97316;
+  --accent-dark:  #EA6C0C;
+  --text:         #12263B;
+  --muted:        #5A7A96;
+  --muted-soft:   #8AA6C0;
+  --border:       #D8E6F5;
+  --surface:      #F4F6FB;
+  --ok:           #16A34A;
+  --shadow:       rgba(22,78,140,.14);
+  --font:-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font);background:
+  radial-gradient(1200px 600px at 80% -10%,#DCEBFA,transparent),
+  radial-gradient(900px 500px at -10% 110%,#E4EEF9,transparent),#E8F0F8;
+  min-height:100vh;color:var(--text)}
+
+/* ── Демо-подложка ── */
+.page{max-width:820px;margin:0 auto;padding:48px 20px 180px}
+.brand-row{display:flex;align-items:center;gap:14px;margin-bottom:26px}
+.brand-icon{width:54px;height:54px;border-radius:15px;flex-shrink:0;
+  background:linear-gradient(135deg,var(--brand-deep),var(--brand));
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 8px 22px -6px rgba(38,119,194,.5)}
+.brand-row h1{font-size:22px;font-weight:800;color:var(--brand-deep);line-height:1.1;letter-spacing:-.3px}
+.brand-row p{font-size:12px;color:var(--muted);margin-top:4px}
+
+.info-card{background:#fff;border:1px solid var(--border);border-radius:18px;
+  padding:24px 28px;box-shadow:0 6px 26px -8px var(--shadow)}
+.info-card h2{font-size:16px;font-weight:700;margin-bottom:7px}
+.info-card p{font-size:13.5px;color:var(--muted);line-height:1.7}
+.tokens{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
+.tk{display:flex;align-items:center;gap:7px;background:var(--surface);
+  border-radius:9px;padding:6px 11px;font-size:11px;color:var(--muted)}
+.tk i{width:16px;height:16px;border-radius:5px;flex-shrink:0;border:1px solid #0001}
+.note{margin-top:16px;font-size:12px;color:var(--muted);
+  background:#FFF7ED;border:1px solid #FDE4C8;border-radius:10px;padding:10px 13px;line-height:1.6}
+.note b{color:var(--accent-dark)}
+
+/* ══ ВИДЖЕТ ══════════════════════════════════════ */
+.cw-btn{
+  position:fixed;right:26px;bottom:26px;width:66px;height:66px;
+  border:none;border-radius:50%;cursor:pointer;z-index:200;
+  background:linear-gradient(140deg,var(--brand),var(--brand-deep));
+  box-shadow:0 12px 34px -6px rgba(38,119,194,.6);
+  display:flex;align-items:center;justify-content:center;
+  transition:box-shadow .2s;
+}
+.cw-btn:hover{box-shadow:0 16px 44px -6px rgba(38,119,194,.8)}
+.cw-btn svg{transition:transform .3s}
+.cw-ring{position:absolute;inset:-10px;border-radius:50%;
+  border:2px solid rgba(38,119,194,.35);pointer-events:none}
+.cw-notif{position:absolute;top:2px;right:2px;width:22px;height:22px;
+  background:var(--accent);border:2.5px solid #fff;border-radius:50%;
+  font-size:11px;font-weight:800;color:#fff;
+  display:flex;align-items:center;justify-content:center}
+
+/* — Панель — */
+.cw-panel{
+  position:fixed;right:26px;bottom:112px;
+  width:396px;max-width:calc(100vw - 20px);
+  height:648px;max-height:calc(100vh - 148px);
+  background:#fff;border-radius:24px;z-index:201;
+  box-shadow:0 34px 80px -18px rgba(15,45,90,.32),0 10px 28px -10px rgba(15,45,90,.16);
+  display:flex;flex-direction:column;overflow:hidden;pointer-events:none;
+}
+
+/* — Шапка — */
+.cw-head{
+  background:linear-gradient(145deg,var(--brand-deep) 0%,var(--brand) 55%,#4096DC 100%);
+  padding:18px 18px 16px;flex-shrink:0;position:relative;overflow:hidden;
+}
+.cw-head::before{content:'';position:absolute;right:-40px;top:-46px;
+  width:150px;height:150px;border-radius:50%;background:rgba(255,255,255,.08)}
+.cw-head::after{content:'';position:absolute;right:44px;top:20px;
+  width:70px;height:70px;border-radius:50%;background:rgba(255,255,255,.05)}
+.cw-head-row{display:flex;align-items:center;gap:12px;position:relative;z-index:1}
+.cw-avatar{width:48px;height:48px;border-radius:15px;flex-shrink:0;
+  background:rgba(255,255,255,.16);border:1.5px solid rgba(255,255,255,.3);
+  display:flex;align-items:center;justify-content:center;position:relative}
+.ai-badge{position:absolute;bottom:-6px;right:-6px;
+  background:var(--accent);border:2px solid #fff;border-radius:8px;
+  font-size:8px;font-weight:900;color:#fff;padding:2px 5px;letter-spacing:.3px}
+.cw-name{flex:1}
+.cw-name h3{font-size:15.5px;font-weight:700;color:#fff;margin-bottom:3px}
+.cw-online{display:flex;align-items:center;gap:6px;font-size:11.5px;color:rgba(255,255,255,.85)}
+.cw-dot{width:7px;height:7px;background:#4ADE80;border-radius:50%;flex-shrink:0;
+  box-shadow:0 0 0 0 rgba(74,222,128,.6)}
+.cw-x{width:32px;height:32px;border-radius:50%;border:none;
+  background:rgba(255,255,255,.14);color:rgba(255,255,255,.9);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;
+  transition:background .15s;flex-shrink:0}
+.cw-x:hover{background:rgba(255,255,255,.26)}
+
+/* быстрые темы */
+.cw-topics{background:var(--brand-light);border-bottom:1px solid var(--border);
+  padding:10px 14px;display:flex;gap:7px;overflow-x:auto;flex-shrink:0}
+.cw-topics::-webkit-scrollbar{display:none}
+.cw-t{white-space:nowrap;font-size:11px;font-weight:600;color:var(--brand);
+  background:#fff;border:1.5px solid var(--border);border-radius:20px;
+  padding:6px 12px;cursor:pointer;transition:.15s;flex-shrink:0}
+.cw-t:hover{background:var(--brand);color:#fff;border-color:var(--brand)}
+
+/* — лента — */
+.cw-body{flex:1;overflow-y:auto;padding:16px 14px;
+  background:linear-gradient(180deg,#f6faff 0%,#fff 80%);
+  display:flex;flex-direction:column;gap:9px}
+.cw-body::-webkit-scrollbar{width:3px}
+.cw-body::-webkit-scrollbar-thumb{background:#C8DCF0;border-radius:3px}
+
+.msg{max-width:84%;padding:11px 14px;border-radius:18px;font-size:14px;line-height:1.55}
+.msg.bot{background:#fff;color:var(--text);align-self:flex-start;
+  border:1px solid var(--border);border-bottom-left-radius:5px;
+  box-shadow:0 2px 8px -2px var(--shadow)}
+.msg.user{background:linear-gradient(135deg,var(--brand),var(--brand-dark));
+  color:#fff;align-self:flex-end;border-bottom-right-radius:5px;
+  box-shadow:0 4px 14px -4px rgba(38,119,194,.5)}
+.msg small{display:block;margin-top:5px;font-size:11px;color:var(--muted-soft);line-height:1.45}
+
+/* чипы */
+.chips{display:flex;flex-wrap:wrap;gap:7px;align-self:flex-start;max-width:97%}
+.chip{font-size:13px;font-weight:500;padding:9px 14px;border-radius:22px;
+  background:#fff;border:1.5px solid var(--border);color:var(--brand);
+  cursor:pointer;transition:all .18s}
+.chip:hover{background:var(--brand);color:#fff;border-color:var(--brand);
+  transform:translateY(-2px);box-shadow:0 6px 16px -4px rgba(38,119,194,.38)}
+
+/* карточка товара */
+.prod-card{align-self:flex-start;max-width:93%;
+  background:#fff;border:1px solid var(--border);border-radius:16px;
+  overflow:hidden;box-shadow:0 6px 22px -6px var(--shadow)}
+.prod-img{height:96px;position:relative;overflow:hidden;
+  background:linear-gradient(135deg,var(--brand-light) 0%,#CBDFFA 100%);
+  display:flex;align-items:center;justify-content:center}
+.prod-img .shine{position:absolute;top:0;left:-60%;width:45%;height:100%;
+  background:linear-gradient(105deg,transparent,rgba(255,255,255,.55),transparent);
+  transform:skewX(-18deg)}
+.prod-body{padding:13px 15px 15px}
+.prod-tag{display:inline-flex;align-items:center;gap:5px;margin-bottom:8px;
+  background:#EAF7EE;color:var(--ok);
+  font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;
+  text-transform:uppercase;letter-spacing:.4px}
+.prod-card h4{font-size:14.5px;font-weight:700;margin-bottom:5px}
+.prod-specs{font-size:12px;color:var(--muted);line-height:1.65;margin-bottom:8px}
+.prod-hint{font-size:11px;color:var(--muted-soft);margin-bottom:12px;
+  display:flex;align-items:center;gap:5px}
+.prod-btns{display:flex;gap:8px}
+.prod-btns button{flex:1;font-size:12px;font-weight:600;padding:9px;
+  border-radius:10px;cursor:pointer;border:none;font-family:var(--font);transition:.15s}
+.btn-ghost{background:#fff;border:1.5px solid var(--border)!important;color:var(--brand)}
+.btn-ghost:hover{border-color:var(--brand)!important;background:var(--brand-light)}
+.btn-cta{background:linear-gradient(135deg,var(--accent),var(--accent-dark));
+  color:#fff;box-shadow:0 4px 12px -3px rgba(249,115,22,.4)}
+.btn-cta:hover{transform:translateY(-1px);box-shadow:0 7px 18px -3px rgba(249,115,22,.5)}
+
+/* форма лида */
+.lead{align-self:flex-start;max-width:93%;width:93%;
+  background:#fff;border:1px solid var(--border);border-radius:16px;
+  padding:14px 15px;box-shadow:0 6px 22px -6px var(--shadow)}
+.lead h4{font-size:13.5px;font-weight:700;margin-bottom:10px}
+.lead input{width:100%;border:1.5px solid var(--border);border-radius:10px;
+  padding:9px 12px;font-size:13px;font-family:var(--font);margin-bottom:8px;outline:none;
+  transition:border-color .2s,box-shadow .2s}
+.lead input:focus{border-color:var(--brand);box-shadow:0 0 0 3px rgba(38,119,194,.1)}
+.consent{display:flex;gap:8px;align-items:flex-start;font-size:10.5px;
+  color:var(--muted);line-height:1.5;margin:2px 0 10px}
+.consent input{width:16px;height:16px;margin:1px 0 0;flex-shrink:0;accent-color:var(--brand)}
+.consent a{color:var(--brand);text-decoration:underline}
+.lead .btn-cta{width:100%;padding:10px;border-radius:11px;font-size:13px}
+
+/* ── ЭТАП 2: бейдж, цена/наличие, оператор, калькулятор ── */
+.s2{display:inline-flex;align-items:center;gap:4px;
+  background:linear-gradient(135deg,#7C3AED,#6D28D9);color:#fff;
+  font-size:9px;font-weight:800;padding:2px 7px;border-radius:20px;
+  letter-spacing:.4px;vertical-align:middle}
+.s2.dot::before{content:'';width:5px;height:5px;border-radius:50%;background:#fff}
+
+.price-row{display:flex;align-items:baseline;gap:8px;margin:2px 0 8px}
+.price-row .p{font-size:18px;font-weight:800;color:var(--brand-deep)}
+.price-row .u{font-size:11px;color:var(--muted)}
+.stock{display:inline-flex;align-items:center;gap:5px;font-size:11px;
+  font-weight:700;color:var(--ok);margin-bottom:10px}
+.stock i{width:7px;height:7px;border-radius:50%;background:var(--ok);
+  box-shadow:0 0 0 3px rgba(22,163,74,.15)}
+.stock.low{color:var(--accent-dark)} .stock.low i{background:var(--accent);box-shadow:0 0 0 3px rgba(249,115,22,.15)}
+
+/* оператор */
+.msg.op{background:#F3EEFF;border:1px solid #DED2FA;color:var(--text);
+  align-self:flex-start;border-bottom-left-radius:5px;position:relative}
+.op-tag{display:flex;align-items:center;gap:6px;margin-bottom:5px;
+  font-size:11px;font-weight:700;color:#6D28D9}
+.op-tag .av{width:18px;height:18px;border-radius:50%;
+  background:linear-gradient(135deg,#7C3AED,#6D28D9);color:#fff;
+  font-size:9px;font-weight:800;display:flex;align-items:center;justify-content:center}
+
+/* калькулятор */
+.calc{align-self:flex-start;max-width:93%;width:93%;
+  background:#fff;border:1px solid var(--border);border-radius:16px;
+  padding:14px 15px;box-shadow:0 6px 22px -6px var(--shadow)}
+.calc h4{font-size:13px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:7px}
+.calc-res{display:flex;flex-direction:column;gap:9px}
+.calc-line{display:flex;justify-content:space-between;align-items:center;
+  padding:9px 12px;background:var(--surface);border-radius:10px;font-size:12.5px}
+.calc-line span{color:var(--muted)} .calc-line b{color:var(--brand-deep);font-size:14px}
+.calc-line.hi{background:linear-gradient(135deg,var(--brand-light),#DCEBFA);border:1px solid var(--border)}
+.calc-line.hi b{color:var(--brand);font-size:16px}
+.calc-bar{height:7px;border-radius:6px;background:var(--border);overflow:hidden;margin-top:2px}
+.calc-bar i{display:block;height:100%;border-radius:6px;
+  background:linear-gradient(90deg,var(--brand),var(--accent))}
+
+/* печатает... */
+.typing-row{align-self:flex-start;display:flex;gap:5px;
+  background:#fff;border:1px solid var(--border);
+  padding:13px 17px;border-radius:18px;border-bottom-left-radius:5px;
+  box-shadow:0 2px 8px -2px var(--shadow)}
+.typing-row span{width:7px;height:7px;background:var(--brand);border-radius:50%;
+  opacity:.4;animation:bob 1.2s infinite}
+.typing-row span:nth-child(2){animation-delay:.18s}
+.typing-row span:nth-child(3){animation-delay:.36s}
+@keyframes bob{0%,60%,100%{opacity:.3;transform:translateY(0)}
+               30%{opacity:1;transform:translateY(-4px)}}
+
+/* — поле ввода — */
+.cw-foot{border-top:1px solid var(--border);padding:11px 13px;
+  background:#fff;display:flex;gap:9px;align-items:center;flex-shrink:0}
+.cw-field{flex:1;display:flex;align-items:center;
+  border:1.5px solid var(--border);border-radius:26px;overflow:hidden;
+  transition:border-color .2s,box-shadow .2s}
+.cw-field:focus-within{border-color:var(--brand);box-shadow:0 0 0 3px rgba(38,119,194,.1)}
+.cw-field input{flex:1;border:none;padding:10px 14px;font-size:14px;outline:none;
+  font-family:var(--font);color:var(--text);background:transparent}
+.cw-go{width:40px;height:40px;border:none;border-radius:50%;
+  background:linear-gradient(135deg,var(--brand),var(--brand-dark));
+  color:#fff;cursor:pointer;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  margin-right:2px;transition:transform .15s}
+.cw-go:hover{transform:scale(1.1)}
+.cw-powered{font-size:10px;color:var(--muted-soft);text-align:center;padding:0 0 9px;flex-shrink:0}
+
+@media(max-width:460px){
+  .cw-panel{right:0;bottom:0;left:0;width:100%;max-width:100vw;
+    height:100dvh;max-height:100dvh;border-radius:0;
+    padding-bottom:env(safe-area-inset-bottom)}
+  .cw-btn{right:18px;bottom:18px}
+  .lead input{font-size:16px}
+}
+</style>
+</head>
+<body>
+
+<!-- ── Демо-подложка ── -->
+<div class="page">
+  <div class="brand-row">
+    <div class="brand-icon">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none"
+           stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+      </svg>
+    </div>
+    <div>
+      <h1>ООО ТД «Спаркс»</h1>
+      <p>Демо AI-ассистента · референс для дизайнера · sparks.su</p>
+    </div>
+  </div>
+
+  <div class="info-card">
+    <h2>Что здесь показано</h2>
+    <p>Нажмите синюю кнопку внизу справа и пройдите сценарий подбора оборудования.
+    Дизайнер видит структуру диалога, компоненты и анимации — рисует свой визуал поверх.
+    Цвета уже взяты с <b>sparks.su</b>.</p>
+    <div class="tokens">
+      <div class="tk"><i style="background:#2677C2"></i>#2677C2 — основной</div>
+      <div class="tk"><i style="background:#145AA4"></i>#145AA4 — тёмный</div>
+      <div class="tk"><i style="background:#F97316"></i>#F97316 — CTA «Заявка»</div>
+      <div class="tk"><i style="background:#F4F6FB"></i>#F4F6FB — поверхность</div>
+    </div>
+    <div class="note">Показан <b>весь функционал</b>. <b>1 этап</b>: подбор по параметрам,
+    навигация, заявка в AmoCRM. Всё, что помечено фиолетовым бейджем
+    <span style="background:linear-gradient(135deg,#7C3AED,#6D28D9);color:#fff;font-size:9px;font-weight:800;padding:2px 7px;border-radius:20px;letter-spacing:.4px">2 ЭТАП</span>
+    — расширение: цена/наличие из 1С, инженерный расчёт, живой чат-оператор.</div>
+  </div>
+</div>
+
+<!-- ── Кнопка запуска ── -->
+<button class="cw-btn" id="cwBtn" aria-label="Открыть AI-ассистента">
+  <div class="cw-ring" id="cwRing"></div>
+  <div class="cw-notif" id="cwNotif">1</div>
+  <svg width="27" height="27" viewBox="0 0 24 24" fill="none"
+       stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+  </svg>
+</button>
+
+<!-- ── Панель ── -->
+<div class="cw-panel" id="cwPanel" aria-hidden="true" role="dialog" aria-label="AI-ассистент ТД Спаркс">
+  <div class="cw-head">
+    <div class="cw-head-row">
+      <div style="position:relative">
+        <div class="cw-avatar">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
+               stroke="rgba(255,255,255,.92)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="11" width="18" height="10" rx="2"/>
+            <path d="M9 11V7a3 3 0 0 1 6 0v4"/>
+            <circle cx="9.5" cy="16.5" r="1" fill="rgba(255,255,255,.92)" stroke="none"/>
+            <circle cx="14.5" cy="16.5" r="1" fill="rgba(255,255,255,.92)" stroke="none"/>
+            <line x1="12" y1="3" x2="12" y2="5" stroke-width="2"/>
+          </svg>
+        </div>
+        <div class="ai-badge">AI</div>
+      </div>
+      <div class="cw-name">
+        <h3>Ассистент Спаркс</h3>
+        <div class="cw-online"><div class="cw-dot" id="cwDot"></div>онлайн · sparks.su</div>
+      </div>
+      <button class="cw-x" id="cwClose" aria-label="Закрыть">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="cw-topics">
+    <div class="cw-t">🔍 Подобрать</div>
+    <div class="cw-t">🧮 Расчёт</div>
+    <div class="cw-t">📦 Каталог</div>
+    <div class="cw-t">🚚 Доставка</div>
+    <div class="cw-t">👤 Менеджер</div>
+  </div>
+
+  <div class="cw-body" id="cwBody"></div>
+
+  <div class="cw-foot">
+    <div class="cw-field">
+      <input type="text" id="cwInput" placeholder="Напишите вопрос…" autocomplete="off">
+    </div>
+    <button class="cw-go" id="cwSend" aria-label="Отправить">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+           stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="22" y1="2" x2="11" y2="13"/>
+        <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+      </svg>
+    </button>
+  </div>
+  <div class="cw-powered">Работает на базе ИИ · ТД Спаркс</div>
+</div>
+
+<script>
+gsap.set('#cwPanel', { autoAlpha: 0 });
+gsap.fromTo('#cwRing',
+  { scale: 0.9, opacity: 0.7 },
+  { scale: 1.7, opacity: 0, duration: 1.8, repeat: -1, ease: 'power2.out' });
+gsap.to('#cwDot', { boxShadow: '0 0 0 6px rgba(74,222,128,0)', duration: 1.4, repeat: -1, ease: 'power1.out' });
+
+let open = false, started = false;
+const panel = document.getElementById('cwPanel');
+
+function openPanel() {
+  open = true;
+  panel.style.pointerEvents = 'auto';
+  panel.setAttribute('aria-hidden','false');
+  gsap.to('#cwNotif', { autoAlpha: 0, scale: 0, duration: 0.2, ease: 'back.in' });
+  gsap.fromTo(panel,
+    { autoAlpha: 0, y: 28, scale: 0.94, transformOrigin: 'bottom right' },
+    { autoAlpha: 1, y: 0,  scale: 1,    duration: 0.42, ease: 'back.out(1.5)' });
+  if (!started) { started = true; setTimeout(start, 380); }
+  document.getElementById('cwInput').focus();
+}
+const rot = 0;
+function closePanel() {
+  open = false;
+  panel.style.pointerEvents = 'none';
+  panel.setAttribute('aria-hidden','true');
+  gsap.to(panel, { autoAlpha: 0, y: 18, scale: 0.95, duration: 0.22, ease: 'power2.in' });
+}
+document.getElementById('cwBtn').onclick   = () => open ? closePanel() : openPanel();
+document.getElementById('cwClose').onclick = closePanel;
+document.addEventListener('keydown', e => { if(e.key==='Escape' && open) closePanel(); });
+
+const body = document.getElementById('cwBody');
+function scroll() { body.scrollTop = body.scrollHeight; }
+
+function botMsg(html) {
+  const d = document.createElement('div');
+  d.className = 'msg bot'; d.innerHTML = html;
+  gsap.set(d, { autoAlpha: 0, y: 10 });
+  body.appendChild(d);
+  gsap.to(d, { autoAlpha: 1, y: 0, duration: 0.28, ease: 'power2.out' });
+  scroll();
+}
+function userMsg(txt) {
+  const d = document.createElement('div');
+  d.className = 'msg user'; d.textContent = txt;
+  gsap.set(d, { autoAlpha: 0, y: 8, x: 10 });
+  body.appendChild(d);
+  gsap.to(d, { autoAlpha: 1, y: 0, x: 0, duration: 0.22, ease: 'power2.out' });
+  scroll();
+}
+function addChips(opts) {
+  const w = document.createElement('div'); w.className = 'chips';
+  opts.forEach(o => {
+    const c = document.createElement('button'); c.className = 'chip'; c.textContent = o.label;
+    c.onclick = () => { userMsg(o.label); w.remove(); thinking(o.next); };
+    gsap.set(c, { autoAlpha: 0, y: 10, scale: 0.9 });
+    w.appendChild(c);
+  });
+  body.appendChild(w);
+  gsap.to(w.children, { autoAlpha: 1, y: 0, scale: 1, duration: 0.26, stagger: 0.07, ease: 'back.out(1.6)' });
+  scroll();
+}
+function thinking(next) {
+  const t = document.createElement('div'); t.className = 'typing-row';
+  t.innerHTML = '<span></span><span></span><span></span>';
+  gsap.set(t, { autoAlpha: 0, y: 6 });
+  body.appendChild(t);
+  gsap.to(t, { autoAlpha: 1, y: 0, duration: 0.18 });
+  scroll();
+  setTimeout(() => { t.remove(); next(); }, 820);
+}
+function prodCard() {
+  const c = document.createElement('div'); c.className = 'prod-card';
+  c.innerHTML = `
+    <div class="prod-img">
+      <span class="shine" id="shine"></span>
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none"
+           stroke="#2677C2" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
+           style="position:relative;z-index:1">
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06
+          a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09
+          A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83
+          l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09
+          A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83
+          l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09
+          a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83
+          l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09
+          a1.65 1.65 0 0 0-1.51 1z"/>
+      </svg>
+    </div>
+    <div class="prod-body">
+      <div class="prod-tag">
+        <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#16A34A" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        Совпадает по параметрам
+      </div>
+      <h4>Мотор-редуктор NMRV 063</h4>
+      <p class="prod-specs">Мощность 2.2 кВт · передат. число 30 · монтаж фланцевый · IP54</p>
+      <div style="margin:8px 0 4px"><span class="s2">2 ЭТАП</span></div>
+      <div class="price-row"><span class="p">18 940 ₽</span><span class="u">за шт., с НДС</span></div>
+      <div class="stock"><i></i>В наличии на складе · Москва (7 шт.)</div>
+      <div class="prod-hint">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#8AA6C0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        Цена и наличие тянутся из 1С (на 1 этапе скрыты)
+      </div>
+      <div class="prod-btns">
+        <button class="btn-ghost" onclick="userMsg('Открываю карточку в каталоге')">Открыть в каталоге</button>
+        <button class="btn-cta" onclick="handoff()">Оставить заявку</button>
+      </div>
+    </div>`;
+  gsap.set(c, { autoAlpha: 0, y: 18, scale: 0.96 });
+  body.appendChild(c);
+  gsap.to(c, { autoAlpha: 1, y: 0, scale: 1, duration: 0.38, ease: 'back.out(1.2)' });
+  gsap.fromTo(c.querySelector('#shine'), { x: -60 }, { x: 260, duration: 1, delay: 0.35, ease: 'power2.inOut' });
+  scroll();
+}
+function leadForm(kind) {
+  const isCall = kind === 'call';
+  const wrap = document.createElement('div'); wrap.className = 'lead';
+  wrap.innerHTML = `
+    <h4>${isCall ? 'Обратный звонок' : 'Заявка менеджеру'}</h4>
+    <input type="text" placeholder="Ваше имя">
+    <input type="tel" placeholder="Телефон">
+    ${isCall ? '' : '<input type="text" placeholder="Что подбираем (необязательно)">'}
+    <label class="consent">
+      <input type="checkbox" id="cwConsent">
+      <span>Согласен на обработку персональных данных
+      <a href="#" onclick="return false">(политика 152-ФЗ)</a></span>
+    </label>
+    <button class="btn-cta" id="cwSubmit">${isCall ? 'Жду звонка' : 'Отправить заявку'}</button>`;
+  gsap.set(wrap, { autoAlpha: 0, y: 16, scale: 0.97 });
+  body.appendChild(wrap);
+  gsap.to(wrap, { autoAlpha: 1, y: 0, scale: 1, duration: 0.34, ease: 'back.out(1.3)' });
+  scroll();
+  wrap.querySelector('#cwSubmit').onclick = () => {
+    if (!wrap.querySelector('#cwConsent').checked) {
+      const cb = wrap.querySelector('.consent');
+      gsap.fromTo(cb, { x: -5 }, { x: 5, duration: 0.07, repeat: 3, yoyo: true, clearProps: 'x' });
+      return;
+    }
+    gsap.to(wrap, { autoAlpha: 0, height: 0, marginBottom: -9, padding: 0, duration: 0.3,
+      onComplete: () => { wrap.remove();
+        thinking(() => botMsg('Готово! ✅ Заявка ушла в AmoCRM.<br>Менеджер свяжется с вами в течение 15 минут.'
+          + '<small>Диалог и контакт сохранены в карточке сделки.</small>')); } });
+  };
+}
+
+/* ══ Сценарии ══ */
+function start() {
+  botMsg('Здравствуйте! 👋 Я AI-ассистент ТД <b>Спаркс</b>.<br>'
+       + 'Помогу подобрать оборудование из каталога 400 000+ позиций, '
+       + 'подскажу по разделам сайта или соединю с менеджером.');
+  setTimeout(() => addChips([
+    { label:'🔍 Подобрать оборудование', next: sType },
+    { label:'🧮 Инженерный расчёт',      next: sCalc },
+    { label:'❓ Вопрос по сайту',         next: sQuestion },
+    { label:'👤 Связаться с менеджером', next: handoff },
+  ]), 400);
+}
+function sType() {
+  thinking(() => {
+    botMsg('Что подбираем?');
+    addChips([
+      { label:'Мотор-редуктор',            next: sPower },
+      { label:'Частотный преобразователь', next: sPower },
+      { label:'Редуктор цилиндрический',   next: sPower },
+      { label:'Нестандартная позиция',     next: sManagerOnly },
+    ]);
+  });
+}
+function sPower() {
+  thinking(() => {
+    botMsg('Укажите нужную мощность, кВт:');
+    addChips([
+      { label:'до 1.5 кВт',    next: sMount },
+      { label:'1.5 – 5.5 кВт', next: sMount },
+      { label:'5.5 – 15 кВт',  next: sMount },
+      { label:'больше 15 кВт', next: sMount },
+    ]);
+  });
+}
+function sMount() {
+  thinking(() => {
+    botMsg('Тип монтажа / исполнение:');
+    addChips([
+      { label:'Фланцевый',         next: sResult },
+      { label:'На лапах',          next: sResult },
+      { label:'Комбинированный',   next: sResult },
+      { label:'Не знаю, помогите', next: sHelp },
+    ]);
+  });
+}
+function sResult() {
+  thinking(() => {
+    botMsg('По вашим параметрам подходит позиция из каталога:');
+    prodCard();
+    setTimeout(() => {
+      botMsg('Подходит? Могу уточнить передаточное число и условия эксплуатации или передать менеджеру.');
+      addChips([
+        { label:'✅ Подходит — заявка', next: handoff },
+        { label:'🔄 Уточнить параметры', next: sPower  },
+        { label:'👤 Менеджер',          next: handoff },
+      ]);
+    }, 520);
+  });
+}
+function sHelp() {
+  thinking(() => {
+    botMsg('Опишите задачу: что нужно вращать, какая мощность и обороты, условия эксплуатации.'
+         + ' По этим данным подберу вариант или подключу инженера.');
+    addChips([
+      { label:'📝 Опишу задачу',      next: sResult },
+      { label:'👤 Позвать менеджера', next: handoff },
+    ]);
+  });
+}
+function sManagerOnly() {
+  thinking(() => {
+    botMsg('По этой позиции в каталоге пока нет полных характеристик — '
+         + 'такой подбор ведёт инженер вручную, чтобы не ошибиться.'
+         + '<small>Правило из вашего ТЗ: позиции без параметров — только через менеджера.</small>');
+    addChips([
+      { label:'👤 Передать инженеру', next: handoff },
+      { label:'← В начало',           next: start   },
+    ]);
+  });
+}
+function sQuestion() {
+  thinking(() => {
+    botMsg('Задавайте — отвечу по каталогу, разделам сайта и доставке sparks.su.');
+    addChips([
+      { label:'🚚 Сроки доставки',
+        next:() => thinking(()=>botMsg('Доставка по России 1–7 рабочих дней транспортными компаниями. Самовывоз со склада — в день обращения.')) },
+      { label:'🗂️ Как устроен каталог',
+        next:() => thinking(()=>botMsg('Каталог разбит по типам оборудования и параметрам. Подскажу нужный раздел или подберу позицию по фильтрам — что интересует?')) },
+      { label:'← Назад', next:() => thinking(start) },
+    ]);
+  });
+}
+function isWorkHours() {
+  const h = new Date().getHours(), d = new Date().getDay();
+  return d >= 1 && d <= 5 && h >= 9 && h < 18;
+}
+function handoff() {
+  thinking(() => {
+    const work = isWorkHours();
+    botMsg(work
+      ? 'Сейчас рабочее время — менеджер на связи. Как удобнее?'
+      : 'Сейчас нерабочее время (Пн–Пт 9:00–18:00). Оставьте заявку — перезвоним с утра.');
+    const opts = [
+      { label:'📝 Оставить заявку',   next:()=>leadForm('lead') },
+      { label:'📞 Обратный звонок',   next:()=>leadForm('call') },
+    ];
+    if (work) opts.push({ label:'💬 Чат с оператором', next: liveChat });
+    addChips(opts);
+  });
+}
+
+/* ── ЭТАП 2: инженерный расчёт ── */
+function sCalc() {
+  thinking(() => {
+    botMsg('<span class="s2 dot">2 ЭТАП</span> Подберу привод по нагрузке. Что нужно вращать?');
+    addChips([
+      { label:'Конвейер / транспортёр', next: sCalcPower },
+      { label:'Насос / вентилятор',     next: sCalcPower },
+      { label:'Мешалка / смеситель',    next: sCalcPower },
+    ]);
+  });
+}
+function sCalcPower() {
+  thinking(() => {
+    botMsg('Требуемая мощность на валу?');
+    addChips([
+      { label:'≈ 1.5 кВт', next: sCalcRpm },
+      { label:'≈ 2.2 кВт', next: sCalcRpm },
+      { label:'≈ 4 кВт',   next: sCalcRpm },
+    ]);
+  });
+}
+function sCalcRpm() {
+  thinking(() => {
+    botMsg('Нужные обороты выходного вала?');
+    addChips([
+      { label:'≈ 47 об/мин',  next: calcCard },
+      { label:'≈ 70 об/мин',  next: calcCard },
+      { label:'≈ 140 об/мин', next: calcCard },
+    ]);
+  });
+}
+function calcCard() {
+  thinking(() => {
+    botMsg('Готово — рассчитал по формулам из инженерной методики:');
+    const c = document.createElement('div'); c.className = 'calc';
+    c.innerHTML = `
+      <h4><span class="s2 dot">2 ЭТАП</span> Результат расчёта привода</h4>
+      <div class="calc-res">
+        <div class="calc-line"><span>Момент на валу</span><b>447 Н·м</b></div>
+        <div class="calc-line"><span>Передаточное число</span><b>i = 30</b></div>
+        <div class="calc-line"><span>Сервис-фактор</span><b>1.4</b></div>
+        <div class="calc-line hi"><span>Рекомендуемый привод</span><b>NMRV 063 · 2.2 кВт</b></div>
+        <div class="calc-bar"><i style="width:0%" id="calcBar"></i></div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">Запас по нагрузке 40% — привод подобран корректно</div>
+      </div>`;
+    gsap.set(c, { autoAlpha: 0, y: 18, scale: 0.96 });
+    body.appendChild(c);
+    gsap.to(c, { autoAlpha: 1, y: 0, scale: 1, duration: 0.4, ease: 'back.out(1.2)' });
+    gsap.to('#calcBar', { width: '72%', duration: 0.9, delay: 0.35, ease: 'power2.out' });
+    scroll();
+    setTimeout(() => {
+      botMsg('Показать карточку этой позиции или передать инженеру для проверки?');
+      addChips([
+        { label:'📦 Карточка позиции', next:()=>thinking(()=>{ botMsg('Вот подобранная позиция:'); prodCard(); }) },
+        { label:'👤 Проверка инженером', next: handoff },
+      ]);
+    }, 1100);
+  });
+}
+
+/* ── ЭТАП 2: живой чат с оператором ── */
+function opMsg(html) {
+  const d = document.createElement('div');
+  d.className = 'msg op';
+  d.innerHTML = '<div class="op-tag"><span class="av">М</span>Мария · менеджер</div>' + html;
+  gsap.set(d, { autoAlpha: 0, y: 10 });
+  body.appendChild(d);
+  gsap.to(d, { autoAlpha: 1, y: 0, duration: 0.3, ease: 'power2.out' });
+  scroll();
+}
+function liveChat() {
+  thinking(() => {
+    botMsg('<span class="s2 dot">2 ЭТАП</span> Подключаю оператора и передаю историю диалога…');
+    setTimeout(() => thinking(() => {
+      opMsg('Здравствуйте! Меня зовут Мария. Вижу, вы подбирали мотор-редуктор NMRV 063 — подскажу по наличию и цене. Отгрузка нужна на когда?');
+      addChips([
+        { label:'На этой неделе', next:()=>thinking(()=>opMsg('Отлично, на складе есть — успеем. Оставите номер, я оформлю счёт?')) },
+        { label:'Пока просто уточняю', next:()=>thinking(()=>opMsg('Хорошо! Держите артикул NMRV 063. Напишите, когда решите — я на связи 👌')) },
+        { label:'📝 Оставить контакт', next:()=>leadForm('lead') },
+      ]);
+    }), 900);
+  });
+}
+
+document.querySelectorAll('.cw-t').forEach(t => {
+  t.onclick = () => {
+    const l = t.textContent.trim();
+    if (l.includes('Подобрать')) { userMsg('Подобрать'); thinking(sType); }
+    else if (l.includes('Расчёт')) { userMsg('Инженерный расчёт'); thinking(sCalc); }
+    else if (l.includes('Менеджер')) { userMsg('Менеджер'); thinking(handoff); }
+    else if (l.includes('Доставка')) { userMsg('Доставка'); thinking(sQuestion); }
+    else if (l.includes('Каталог')) { userMsg('Каталог'); thinking(sQuestion); }
+    else { userMsg('Подобрать'); thinking(sType); }
+  };
+});
+
+function send() {
+  const inp = document.getElementById('cwInput');
+  const v = inp.value.trim();
+  if (!v) return;
+  userMsg(v); inp.value = '';
+  thinking(() => {
+    botMsg('Понял запрос. В боевой версии я отвечу по базе каталога sparks.su и предложу подходящие позиции. '
+         + 'Давайте подберу по параметрам — так точнее:');
+    addChips([
+      { label:'🔍 Подобрать оборудование', next: sType },
+      { label:'👤 Менеджер',               next: handoff },
+    ]);
+  });
+}
+document.getElementById('cwInput').addEventListener('keydown', e => { if(e.key==='Enter') send(); });
+document.getElementById('cwSend').onclick = send;
+
+const mm = gsap.matchMedia();
+mm.add('(prefers-reduced-motion: reduce)', () => { gsap.globalTimeline.timeScale(20); });
+</script>
+</body>
+</html>
