@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AI-ассистент ТД «Спаркс» — рабочая версия виджета</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --brand:#0060AA; --brand-deep:#0D4479; --accent:#2677C2;
+    --text:#363B49; --muted:#787D84; --border:#ECEDF0; --surface:#F4F6FB;
+    --font:'Inter',-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+    --font-head:'Manrope','Inter',-apple-system,Arial,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:var(--font);color:var(--text);line-height:1.65;
+    background:radial-gradient(1200px 600px at 80% -10%,#DCEBFA,transparent),
+               radial-gradient(900px 500px at -10% 110%,#E4EEF9,transparent),#EEF3F9;
+    min-height:100vh;padding:44px 20px 150px}
+  .page{max-width:760px;margin:0 auto}
+  .head{display:flex;align-items:center;gap:14px;margin-bottom:26px}
+  .logo{width:54px;height:54px;border-radius:15px;flex-shrink:0;
+    background:linear-gradient(135deg,var(--brand-deep),var(--brand));
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 8px 22px -6px rgba(38,119,194,.5)}
+  h1{font-family:var(--font-head);font-size:23px;font-weight:800;color:var(--brand-deep);
+     line-height:1.15;letter-spacing:-.3px}
+  .sub{font-size:12.5px;color:var(--muted);margin-top:4px}
+  .card{background:#fff;border:1px solid var(--border);border-radius:18px;
+    padding:26px 30px;box-shadow:0 6px 26px -8px rgba(0,96,170,.14);margin-bottom:16px}
+  h2{font-family:var(--font-head);font-size:16.5px;font-weight:700;margin-bottom:10px}
+  p{font-size:14.5px;margin-bottom:10px}
+  p:last-child{margin-bottom:0}
+  ul{margin:8px 0 0 20px;font-size:14.5px}
+  li{margin-bottom:7px}
+  .cta{background:linear-gradient(135deg,#EAF3FC,#DCEBFA);border:1px solid #C9DFF5;
+    border-radius:14px;padding:16px 20px;font-size:14.5px;margin-top:6px}
+  .cta b{color:var(--brand-deep)}
+  .note{background:#FFF8E6;border:1px solid #F5E3B3;border-radius:12px;
+    padding:14px 18px;font-size:13.5px;color:#7A5B18;margin-top:14px}
+  .note b{color:#5C4310}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+  .item{background:var(--surface);border-radius:11px;padding:12px 15px;font-size:13px}
+  .item b{display:block;font-size:12px;color:var(--brand);margin-bottom:3px;font-weight:700}
+  .tokens{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+  .tk{display:flex;align-items:center;gap:7px;background:var(--surface);
+    border-radius:9px;padding:6px 11px;font-size:11.5px;color:var(--muted)}
+  .tk i{width:16px;height:16px;border-radius:5px;border:1px solid #0001}
+  @media(max-width:560px){ .grid{grid-template-columns:1fr} body{padding:28px 14px 130px} .card{padding:20px 18px} }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="head">
+    <div class="logo">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7"
+           stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="11" width="18" height="10" rx="2"/><path d="M9 11V7a3 3 0 0 1 6 0v4"/>
+        <circle cx="9.5" cy="16.5" r="1" fill="#fff" stroke="none"/>
+        <circle cx="14.5" cy="16.5" r="1" fill="#fff" stroke="none"/>
+        <line x1="12" y1="3" x2="12" y2="5" stroke-width="2"/>
+      </svg>
+    </div>
+    <div>
+      <h1>AI-ассистент ТД «Спаркс»</h1>
+      <div class="sub">Рабочая версия виджета, первый этап · sparks.su</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Как посмотреть</h2>
+    <p>Нажмите синюю кнопку в правом нижнем углу и пройдите подбор оборудования.
+    Это тот самый виджет, который встанет на сайт: интерфейс, диалог и форма заявки
+    работают так же, как будут работать в готовом виде.</p>
+    <div class="cta">
+      <b>Попробуйте сценарий:</b> «Подобрать оборудование» → «Мотор-редуктор» →
+      мощность → тип монтажа. Дальше можно оставить заявку и посмотреть форму
+      с согласием на обработку данных.
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Что уже работает</h2>
+    <div class="grid">
+      <div class="item"><b>Подбор по шагам</b>Вопросы задаются последовательно, каждый ответ сужает выбор</div>
+      <div class="item"><b>Заявка в AmoCRM</b>С контролем повторов, историей диалога и согласием по 152-ФЗ</div>
+      <div class="item"><b>Рабочее время</b>Считается по Новосибирску, а не по часам посетителя</div>
+      <div class="item"><b>Передача менеджеру</b>Отдельная ветка для позиций без характеристик в базе</div>
+      <div class="item"><b>Ваш фирменный стиль</b>Палитра и шрифты по брендбуку</div>
+      <div class="item"><b>Мобильные</b>Панель разворачивается на весь экран</div>
+    </div>
+    <div class="tokens">
+      <div class="tk"><i style="background:#0060AA"></i>#0060AA основной</div>
+      <div class="tk"><i style="background:#145AA4"></i>#145AA4 тёмный</div>
+      <div class="tk"><i style="background:#2677C2"></i>#2677C2 акцент</div>
+      <div class="tk"><i style="background:#F4F6FB"></i>#F4F6FB фон</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Что показано условно</h2>
+    <p>Несколько вещей ждут информации с вашей стороны, поэтому в демонстрации они
+    заполнены условно:</p>
+    <ul>
+      <li><b>Карточка найденной позиции.</b> Конкретная модель, характеристики и ссылка появятся
+      после подключения выгрузки каталога.</li>
+      <li><b>Вопросы подбора.</b> Сейчас показан предварительный вариант. Финальную схему
+      задаёт заполненный шаблон подбора.</li>
+      <li><b>Ответы на типовые вопросы.</b> Тексты подставим из вашего списка.</li>
+    </ul>
+    <div class="note">
+      <b>Заявка из этой страницы никуда не отправляется.</b> Демонстрация работает
+      в браузере, без обращения к серверу и без записи данных. Передача заявок в AmoCRM
+      уже сделана и проверена отдельно, на рабочем стенде.
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Для дизайнера</h2>
+    <p>Логика и вёрстка готовы, менять их не нужно. От дизайнера нужны только материалы:
+    аватар ассистента для шапки чата, иконка на круглой кнопке, при желании иконки
+    для быстрых кнопок вверху панели и правки текстов реплик под голос бренда.</p>
+  </div>
+
+</div>
+
+<!-- Заглушка сервера: демонстрация работает без бэкенда -->
+<script src="demo-mock.js"></script>
+<!-- Виджет из рабочего проекта, без изменений -->
+<script src="widget/widget.js"></script>
+<script>
+  (function () {
+    var base = location.href.replace(/[^/]*$/, '').replace(/\/$/, '');
+    window.SparksWidget.boot({ apiBase: base, version: 'demo', policyUrl: 'https://sparks.su/' });
+  })();
+</script>
+</body>
+</html>
