@@ -5,26 +5,30 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>ТД Спаркс — AI-ассистент</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
 <style>
 /* ══════════════════════════════════════════════
-   ЦВЕТА — взяты с sparks.su (computed styles).
+   ЦВЕТА и ШРИФТЫ — по брендбуку ТД Спаркс.
    Дизайнеру: менять только эти переменные.
    ══════════════════════════════════════════════ */
 :root{
-  --brand:        #2677C2;
+  --brand:        #0060AA;
   --brand-dark:   #145AA4;
   --brand-deep:   #0D4479;
-  --brand-light:  #EBF4FF;
-  --accent:       #F97316;
-  --accent-dark:  #EA6C0C;
-  --text:         #12263B;
-  --muted:        #5A7A96;
-  --muted-soft:   #8AA6C0;
-  --border:       #D8E6F5;
+  --brand-light:  #E3F0FF;
+  --accent:       #2677C2;
+  --accent-dark:  #1F63A6;
+  --text:         #363B49;
+  --muted:        #787D84;
+  --muted-soft:   #ABAFB1;
+  --border:       #ECEDF0;
   --surface:      #F4F6FB;
   --ok:           #16A34A;
-  --shadow:       rgba(22,78,140,.14);
-  --font:-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+  --shadow:       rgba(0,96,170,.14);
+  --font:'Inter',-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+  --font-head:'Manrope','Inter',-apple-system,"Segoe UI",Arial,sans-serif;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:var(--font);background:
@@ -39,19 +43,19 @@ body{font-family:var(--font);background:
   background:linear-gradient(135deg,var(--brand-deep),var(--brand));
   display:flex;align-items:center;justify-content:center;
   box-shadow:0 8px 22px -6px rgba(38,119,194,.5)}
-.brand-row h1{font-size:22px;font-weight:800;color:var(--brand-deep);line-height:1.1;letter-spacing:-.3px}
+.brand-row h1{font-family:var(--font-head);font-size:22px;font-weight:800;color:var(--brand-deep);line-height:1.1;letter-spacing:-.3px}
 .brand-row p{font-size:12px;color:var(--muted);margin-top:4px}
 
 .info-card{background:#fff;border:1px solid var(--border);border-radius:18px;
   padding:24px 28px;box-shadow:0 6px 26px -8px var(--shadow)}
-.info-card h2{font-size:16px;font-weight:700;margin-bottom:7px}
+.info-card h2{font-family:var(--font-head);font-size:16px;font-weight:700;margin-bottom:7px}
 .info-card p{font-size:13.5px;color:var(--muted);line-height:1.7}
 .tokens{display:flex;flex-wrap:wrap;gap:8px;margin-top:18px}
 .tk{display:flex;align-items:center;gap:7px;background:var(--surface);
   border-radius:9px;padding:6px 11px;font-size:11px;color:var(--muted)}
 .tk i{width:16px;height:16px;border-radius:5px;flex-shrink:0;border:1px solid #0001}
 .note{margin-top:16px;font-size:12px;color:var(--muted);
-  background:#FFF7ED;border:1px solid #FDE4C8;border-radius:10px;padding:10px 13px;line-height:1.6}
+  background:#F1F5FE;border:1px solid #D8E6F5;border-radius:10px;padding:10px 13px;line-height:1.6}
 .note b{color:var(--accent-dark)}
 
 /* ══ ВИДЖЕТ ══════════════════════════════════════ */
@@ -99,7 +103,7 @@ body{font-family:var(--font);background:
   background:var(--accent);border:2px solid #fff;border-radius:8px;
   font-size:8px;font-weight:900;color:#fff;padding:2px 5px;letter-spacing:.3px}
 .cw-name{flex:1}
-.cw-name h3{font-size:15.5px;font-weight:700;color:#fff;margin-bottom:3px}
+.cw-name h3{font-family:var(--font-head);font-size:16px;font-weight:700;color:#fff;margin-bottom:3px}
 .cw-online{display:flex;align-items:center;gap:6px;font-size:11.5px;color:rgba(255,255,255,.85)}
 .cw-dot{width:7px;height:7px;background:#4ADE80;border-radius:50%;flex-shrink:0;
   box-shadow:0 0 0 0 rgba(74,222,128,.6)}
@@ -167,8 +171,8 @@ body{font-family:var(--font);background:
 .btn-ghost{background:#fff;border:1.5px solid var(--border)!important;color:var(--brand)}
 .btn-ghost:hover{border-color:var(--brand)!important;background:var(--brand-light)}
 .btn-cta{background:linear-gradient(135deg,var(--accent),var(--accent-dark));
-  color:#fff;box-shadow:0 4px 12px -3px rgba(249,115,22,.4)}
-.btn-cta:hover{transform:translateY(-1px);box-shadow:0 7px 18px -3px rgba(249,115,22,.5)}
+  color:#fff;box-shadow:0 4px 12px -3px rgba(0,96,170,.32)}
+.btn-cta:hover{transform:translateY(-1px);box-shadow:0 7px 18px -3px rgba(0,96,170,.45)}
 
 /* форма лида */
 .lead{align-self:flex-start;max-width:93%;width:93%;
@@ -199,7 +203,7 @@ body{font-family:var(--font);background:
   font-weight:700;color:var(--ok);margin-bottom:10px}
 .stock i{width:7px;height:7px;border-radius:50%;background:var(--ok);
   box-shadow:0 0 0 3px rgba(22,163,74,.15)}
-.stock.low{color:var(--accent-dark)} .stock.low i{background:var(--accent);box-shadow:0 0 0 3px rgba(249,115,22,.15)}
+.stock.low{color:var(--accent-dark)} .stock.low i{background:var(--accent);box-shadow:0 0 0 3px rgba(38,119,194,.15)}
 
 /* оператор */
 .msg.op{background:#F3EEFF;border:1px solid #DED2FA;color:var(--text);
@@ -285,11 +289,11 @@ body{font-family:var(--font);background:
     <h2>Что здесь показано</h2>
     <p>Нажмите синюю кнопку внизу справа и пройдите сценарий подбора оборудования.
     Дизайнер видит структуру диалога, компоненты и анимации — рисует свой визуал поверх.
-    Цвета уже взяты с <b>sparks.su</b>.</p>
+    Цвета и шрифты — по брендбуку клиента (Manrope + Inter).</p>
     <div class="tokens">
-      <div class="tk"><i style="background:#2677C2"></i>#2677C2 — основной</div>
+      <div class="tk"><i style="background:#0060AA"></i>#0060AA — основной</div>
       <div class="tk"><i style="background:#145AA4"></i>#145AA4 — тёмный</div>
-      <div class="tk"><i style="background:#F97316"></i>#F97316 — CTA «Заявка»</div>
+      <div class="tk"><i style="background:#2677C2"></i>#2677C2 — акцент</div>
       <div class="tk"><i style="background:#F4F6FB"></i>#F4F6FB — поверхность</div>
     </div>
     <div class="note">Показан <b>весь функционал</b>. <b>1 этап</b>: подбор по параметрам,
