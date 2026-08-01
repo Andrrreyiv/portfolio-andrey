@@ -85,28 +85,59 @@
     els.body.appendChild(w); scrollDown();
   }
 
-  /* Заглушка карточки: реальная позиция появится после импорта каталога (дни 8-12). */
-  function resultCard() {
-    var c = h('div', 'prod-card');
+  /* Карточка найденной позиции. Состав характеристик задаёт сервер (config/presentation.json),
+     клиент только рисует: правки состава не должны требовать выката виджета. */
+  function positionCard(item) {
+    var c = h('div', 'pos-card');
+    var specs = '';
+    for (var i = 0; i < (item.specs || []).length; i++) {
+      specs += '<div class="pos-spec"><span>' + esc(item.specs[i].label) + '</span>' +
+               '<b>' + esc(item.specs[i].value) + '</b></div>';
+    }
+    // Ссылка есть не у всех позиций: у редукторов её нельзя собрать из выгрузки.
+    // Показываем кнопку только когда ссылка реально пришла, а не ведём в никуда.
+    var link = item.url
+      ? '<a class="pos-link" href="' + esc(item.url) + '" target="_blank" rel="noopener">Открыть карточку на сайте</a>'
+      : '<span class="pos-nolink">Карточка на сайте: уточните у менеджера</span>';
+
     c.innerHTML =
-      '<div class="prod-img">' +
-      '<svg width="46" height="46" viewBox="0 0 24 24" fill="none" stroke="#2677C2" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">' +
-      '<circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="9"/></svg>' +
-      '</div>' +
-      '<div class="prod-body">' +
-      '<div class="prod-tag">Подбор по параметрам</div>' +
-      '<h4>Позиция из каталога</h4>' +
-      '<p class="prod-specs">' + esc(state.selection.join(' · ') || 'по заданным параметрам') + '</p>' +
-      '<div class="prod-hint">Точная модель и ссылка на карточку — после подключения каталога</div>' +
-      '</div>';
-    els.body.appendChild(c); scrollDown();
+      '<div class="pos-name">' + esc(item.name) + '</div>' +
+      (specs ? '<div class="pos-specs">' + specs + '</div>' : '') +
+      link;
+    return c;
+  }
+
+  /* Таблица подбора. Приходит с сервера в середине разговора: сначала несколько
+     позиций, затем подсказки, чем сузить выбор. */
+  function resultTable(node) {
+    var items = node.items || [];
+    if (!items.length) { return; }
+
+    var wrap = h('div', 'pos-list');
+    for (var i = 0; i < items.length; i++) {
+      wrap.appendChild(positionCard(items[i]));
+    }
+    els.body.appendChild(wrap);
+
+    if (node.total && node.shown && node.total > node.shown) {
+      var more = h('div', 'pos-more');
+      more.textContent = 'Показаны ' + node.shown + ' из ' + node.total +
+                         '. Уточните параметр ниже, чтобы сузить выбор.';
+      els.body.appendChild(more);
+    }
+    if (node.disclaimer) {
+      var d = h('div', 'pos-note');
+      d.textContent = node.disclaimer;
+      els.body.appendChild(d);
+    }
+    scrollDown();
   }
 
   /* ── рендер узла, пришедшего с сервера ── */
   function renderNode(node) {
     if (!node) { return; }
     if (node.text) { botMsg(esc(node.text)); }
-    if (node.type === 'result') { resultCard(); }
+    if (node.type === 'table') { resultTable(node); }
     if (node.placeholder_note) { botMsg('<small>' + esc(node.placeholder_note) + '</small>'); }
     chips(node.chips);
   }
@@ -120,9 +151,10 @@
       withTyping(Promise.resolve(null), function () { leadForm(c.kind || 'lead'); });
       return;
     }
+    if (c.reset) { state.selection = []; }         // новый подбор — прошлые параметры не тянем
     if (c.set) { state.selection.push(c.label); }   // копим, что подбирал — уйдёт в CRM
 
-    sendStep({ next: c.next, set: c.set || {}, label: c.label });
+    sendStep({ next: c.next, set: c.set || {}, label: c.label, reset: !!c.reset });
   }
 
   /* Единая точка отправки шага: label нужен серверу для транскрипта диалога в CRM. */
@@ -131,7 +163,7 @@
     state.busy = true;
     var body = payload.message
       ? { session_id: state.session, message: payload.message }
-      : { session_id: state.session, next: payload.next, set: payload.set || {}, label: payload.label || '' };
+      : { session_id: state.session, next: payload.next, set: payload.set || {}, label: payload.label || '', reset: !!payload.reset };
     withTyping(api('chat', body), function (node) {
       state.busy = false;
       state.lastRequest = null;
