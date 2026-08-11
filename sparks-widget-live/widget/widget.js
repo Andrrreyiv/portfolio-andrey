@@ -30,6 +30,18 @@
   }
   function scrollDown() { if (els.body) { els.body.scrollTop = els.body.scrollHeight; } }
 
+  /* Прокрутка к сообщению, а не в конец ленты. Нужна там, где после текста идёт
+     блок карточек: иначе текст уезжает за верхний край и остаётся непрочитанным. */
+  function scrollToMessage(el) {
+    if (!els.body || !el) { scrollDown(); return; }
+    /* Считаем смещение относительно самой ленты, а не через offsetTop:
+       offsetTop меряется от ближайшего позиционированного предка, и если это
+       не лента, сообщение уезжает выше края (проверено, промах был 111 пикселей). */
+    var delta = el.getBoundingClientRect().top - els.body.getBoundingClientRect().top;
+    var top = els.body.scrollTop + delta - 8;
+    els.body.scrollTop = top > 0 ? top : 0;
+  }
+
   /* ── примитивы ленты ── */
   function botMsg(html) {
     var d = h('div', 'msg bot');
@@ -124,6 +136,19 @@
       more.textContent = 'Показаны ' + node.shown + ' из ' + node.total +
                          '. Уточните параметр ниже, чтобы сузить выбор.';
       els.body.appendChild(more);
+
+      /* Второй выход из большой выдачи: каталог сайта с уже проставленным фильтром.
+         Адрес собирает сервер и присылает не всегда: раздел на сайте может быть
+         не описан, серия не выбрана, или ни один ответ покупателя в фильтр сайта
+         не переносится. Поэтому рисуем только когда адрес пришёл. Обычная ссылка,
+         а не кнопка сценария: кнопки ведут диалог дальше и исчезают после нажатия,
+         а эта уводит на сайт и должна пережить нажатие. */
+      if (node.catalog_url) {
+        var all = h('div', 'pos-more-link');
+        all.innerHTML = '<a href="' + esc(node.catalog_url) + '" target="_blank" rel="noopener">' +
+                        'Посмотреть все ' + node.total + ' в каталоге</a>';
+        els.body.appendChild(all);
+      }
     }
     if (node.disclaimer) {
       var d = h('div', 'pos-note');
@@ -136,10 +161,46 @@
   /* ── рендер узла, пришедшего с сервера ── */
   function renderNode(node) {
     if (!node) { return; }
-    if (node.text) { botMsg(esc(node.text)); }
-    if (node.type === 'table') { resultTable(node); }
+    var msgEl = node.text ? botMsg(esc(node.text)) : null;
+
+    /* Таблица подбора показывается с паузой после текста. Без неё список
+       прокручивается мгновенно, покупатель оказывается внизу и не успевает
+       прочитать, какой запас надёжности ему рассчитали (замечание Заказчика 07.08).
+       Во время паузы держим «печатает…», чтобы ожидание выглядело осмысленным. */
+    if (node.type === 'table') {
+      var delay = node.delay_ms || 0;
+      if (delay > 0 && (node.items || []).length) {
+        var t = typing();
+        setTimeout(function () {
+          if (t && t.parentNode) { t.parentNode.removeChild(t); }
+          resultTable(node);
+          if (node.placeholder_note) { botMsg('<small>' + esc(node.placeholder_note) + '</small>'); }
+          chips(node.chips);
+          /* Ставим ленту так, чтобы сообщение «нужен запас не ниже …» осталось
+             наверху экрана. Без этого лента прокручивается в самый низ, покупатель
+             оказывается на последней карточке и не видит, что ему рассчитали:
+             ровно на это жаловался Заказчик 07.08. Одной паузы мало, потому что
+             карточки всё равно уводят ленту вниз. */
+          scrollToMessage(msgEl);
+        }, delay);
+        return;
+      }
+      resultTable(node);
+      scrollToMessage(msgEl);
+    }
+
     if (node.placeholder_note) { botMsg('<small>' + esc(node.placeholder_note) + '</small>'); }
     chips(node.chips);
+
+    /* Шаг, который ждёт число в чат (ветка «Мне известен запас прочности»).
+       Подсказываем прямо в поле и ставим туда курсор: иначе человек ищет кнопку,
+       которой на этом шаге нет. На остальных шагах подпись возвращаем обычную. */
+    if (els.input) {
+      els.input.placeholder = node.type === 'input'
+        ? (node.placeholder || 'Напишите число…')
+        : 'Напишите вопрос…';
+      if (node.type === 'input') { els.input.focus(); }
+    }
   }
 
   function onChip(c) {
