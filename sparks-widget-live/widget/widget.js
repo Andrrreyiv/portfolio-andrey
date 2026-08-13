@@ -11,7 +11,16 @@
   var CFG = { apiBase: '', version: '', policyUrl: '#' };
   var root = null;
   var els = {};
-  var state = { session: null, started: false, open: false, busy: false, mounted: false, selection: [], lastRequest: null };
+  var state = { session: null, started: false, open: false, busy: false, mounted: false, selection: [], lastRequest: null, header: null };
+
+  /* Значки действий карточки. Ключи совпадают с config/presentation.json, card_actions.
+     Свои контуры, а не шрифт значков: сторонний файл замедлил бы загрузку страницы
+     Заказчика ради трёх картинок. */
+  var ICONS = {
+    compare:  '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 15V8M10 15V4M16 15v-5" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/></svg>',
+    favorite: '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 16.5 4.2 11a3.4 3.4 0 0 1 4.8-4.8l1 1 1-1A3.4 3.4 0 0 1 15.8 11z" stroke="currentColor" stroke-width="1.7" fill="none" stroke-linejoin="round"/></svg>',
+    cart:     '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M3 4h2l2 8h8l2-6H6" stroke="currentColor" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round"/><circle cx="8.5" cy="16" r="1.3" fill="currentColor"/><circle cx="14.5" cy="16" r="1.3" fill="currentColor"/></svg>'
+  };
 
   /* ── утилиты ── */
   function h(tag, cls, txt) {
@@ -108,15 +117,49 @@
     }
     // Ссылка есть не у всех позиций: у редукторов её нельзя собрать из выгрузки.
     // Показываем кнопку только когда ссылка реально пришла, а не ведём в никуда.
+    var acts = item.actions || {};
     var link = item.url
-      ? '<a class="pos-link" href="' + esc(item.url) + '" target="_blank" rel="noopener">Открыть карточку на сайте</a>'
+      ? '<a class="pos-link" href="' + esc(item.url) + '" target="_blank" rel="noopener">' +
+        esc(acts.open_label || 'Открыть') + '</a>'
       : '<span class="pos-nolink">Карточка на сайте: уточните у менеджера</span>';
 
     c.innerHTML =
       '<div class="pos-name">' + esc(item.name) + '</div>' +
       (specs ? '<div class="pos-specs">' + specs + '</div>' : '') +
-      link;
+      '<div class="pos-actions">' + link + '<div class="pos-icons"></div></div>';
+
+    if (acts.enabled && (acts.items || []).length) {
+      c.querySelector('.pos-icons').appendChild(cardIcons(item, acts));
+    }
     return c;
+  }
+
+  /* Иконки сравнения, избранного и корзины. Виджет живёт в Shadow DOM на странице
+     Заказчика, а не в iframe, поэтому своих корзины и избранного у него нет и быть
+     не может: он лишь сообщает сайту о нажатии событием на window. Сайт ловит его
+     своим скриптом и вызывает уже собственные механизмы.
+     Признак «сайт обработал» — preventDefault(). Если обработчика нет, молча
+     ничего не делать хуже всего: открываем карточку, там всё это есть на сайте. */
+  function cardIcons(item, acts) {
+    var frag = document.createDocumentFragment();
+    (acts.items || []).forEach(function (a) {
+      var b = h('button', 'pos-act');
+      b.type = 'button';
+      b.title = a.title || '';
+      b.setAttribute('aria-label', a.title || a.key);
+      b.innerHTML = ICONS[a.key] || '';
+      b.onclick = function () {
+        var ev = new CustomEvent(acts.event, {
+          bubbles: true,
+          cancelable: true,
+          detail: { action: a.key, id: item.id, sku: item.sku, name: item.name, url: item.url }
+        });
+        var handled = !window.dispatchEvent(ev);
+        if (!handled && item.url) { window.open(item.url, '_blank', 'noopener'); }
+      };
+      frag.appendChild(b);
+    });
+    return frag;
   }
 
   /* Таблица подбора. Приходит с сервера в середине разговора: сначала несколько
@@ -134,7 +177,7 @@
     if (node.total && node.shown && node.total > node.shown) {
       var more = h('div', 'pos-more');
       more.textContent = 'Показаны ' + node.shown + ' из ' + node.total +
-                         '. Уточните параметр ниже, чтобы сузить выбор.';
+                         '. Уточним параметры, чтобы сузить выбор.';
       els.body.appendChild(more);
 
       /* Второй выход из большой выдачи: каталог сайта с уже проставленным фильтром.
@@ -328,6 +371,7 @@
         return;
       }
       state.session = res.session_id;
+      if (res.header && res.header.length) { state.header = res.header; buildTopics(); }
       if (res.greeting) { botMsg(esc(res.greeting)); }
       if (res.node) { setTimeout(function () { renderNode(res.node); }, 350); }
     }).catch(function () {
@@ -405,14 +449,19 @@
     buildTopics();
   }
 
-  /* Быстрые темы ведут к узлам сценария — состав задаётся сценарием, не кодом. */
+  /* Быстрые темы ведут к узлам сценария — состав задаётся сценарием, не кодом.
+     Список приходит с сервера (scenario.json, ключ header), поэтому переименование
+     кнопки это правка конфига. Запасной список нужен ровно до ответа /api/session:
+     шапка рисуется при монтировании, а сессия начинается при первом открытии. */
   function buildTopics() {
-    [
-      { label: 'Подобрать', next: 'type' },
+    var fallback = [
+      { label: 'Подобрать', next: 'equipment', reset: true },
       { label: 'Каталог', next: 'faq' },
       { label: 'Доставка', next: 'faq_delivery' },
       { label: 'Менеджер', next: 'handoff' }
-    ].forEach(function (t) {
+    ];
+    els.topics.innerHTML = '';
+    (state.header && state.header.length ? state.header : fallback).forEach(function (t) {
       var el = h('div', 'cw-t', t.label);
       el.onclick = function () {
         if (!state.session || state.busy) { return; }
@@ -420,8 +469,9 @@
         // и пользователь может увести подбор в несогласованное состояние.
         var stale = els.body.querySelectorAll('.chips');
         for (var i = 0; i < stale.length; i++) { stale[i].remove(); }
+        if (t.reset) { state.selection = []; }
         userMsg(t.label);
-        sendStep({ next: t.next, label: t.label });
+        sendStep({ next: t.next, label: t.label, reset: !!t.reset });
       };
       els.topics.appendChild(el);
     });
