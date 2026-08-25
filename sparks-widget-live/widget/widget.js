@@ -11,7 +11,7 @@
   var CFG = { apiBase: '', version: '', policyUrl: '#' };
   var root = null;
   var els = {};
-  var state = { session: null, started: false, open: false, busy: false, mounted: false, selection: [], lastRequest: null, header: null };
+  var state = { session: null, started: false, open: false, busy: false, mounted: false, selection: [], lastRequest: null, header: null, manual: false };
 
   /* Значки действий карточки. Ключи совпадают с config/presentation.json, card_actions.
      Свои контуры, а не шрифт значков: сторонний файл замедлил бы загрузку страницы
@@ -123,13 +123,26 @@
         esc(acts.open_label || 'Открыть') + '</a>'
       : '<span class="pos-nolink">Карточка на сайте: уточните у менеджера</span>';
 
+    /* Кнопка заявки прямо в карточке: «в карточке товара нужно добавить возможность
+       оставить заявку», стрелкой на место между «Открыть» и значками (комментарий
+       Заказчика 3 от 21.08). Надпись и сам факт кнопки приходят с сервера: 12.08
+       он же просил кнопку из карточки убрать, и следующая перемена должна быть
+       правкой конфига, а не выкатом виджета. */
+    var lead = acts.lead_enabled
+      ? '<button type="button" class="pos-lead">' + esc(acts.lead_label || 'Оставить заявку') + '</button>'
+      : '';
+
     c.innerHTML =
       '<div class="pos-name">' + esc(item.name) + '</div>' +
       (specs ? '<div class="pos-specs">' + specs + '</div>' : '') +
-      '<div class="pos-actions">' + link + '<div class="pos-icons"></div></div>';
+      '<div class="pos-actions">' + link + lead + '<div class="pos-icons"></div></div>';
 
     if (acts.enabled && (acts.items || []).length) {
       c.querySelector('.pos-icons').appendChild(cardIcons(item, acts));
+    }
+    var leadBtn = c.querySelector('.pos-lead');
+    if (leadBtn) {
+      leadBtn.onclick = function () { state.selection.push(item.name); leadForm('lead'); };
     }
     return c;
   }
@@ -175,12 +188,9 @@
     els.body.appendChild(wrap);
 
     if (node.total && node.shown && node.total > node.shown) {
-      var more = h('div', 'pos-more');
-      more.textContent = 'Показаны ' + node.shown + ' из ' + node.total +
-                         '. Уточним параметры, чтобы сузить выбор.';
-      els.body.appendChild(more);
-
-      /* Второй выход из большой выдачи: каталог сайта с уже проставленным фильтром.
+      /* Порядок блоков взят с фото Заказчика (комментарий 12 от 12.08): сначала
+         ссылка в каталог, под ней строка «Показаны N из M», ниже пояснение.
+         Второй выход из большой выдачи: каталог сайта с уже проставленным фильтром.
          Адрес собирает сервер и присылает не всегда: раздел на сайте может быть
          не описан, серия не выбрана, или ни один ответ покупателя в фильтр сайта
          не переносится. Поэтому рисуем только когда адрес пришёл. Обычная ссылка,
@@ -192,6 +202,11 @@
                         'Посмотреть все ' + node.total + ' в каталоге</a>';
         els.body.appendChild(all);
       }
+
+      var more = h('div', 'pos-more');
+      more.textContent = 'Показаны ' + node.shown + ' из ' + node.total +
+                         '. Уточним параметры, чтобы сузить выбор.';
+      els.body.appendChild(more);
     }
     if (node.disclaimer) {
       var d = h('div', 'pos-note');
@@ -205,6 +220,24 @@
   function renderNode(node) {
     if (!node) { return; }
     var msgEl = node.text ? botMsg(esc(node.text)) : null;
+
+    /* Справка блоками, а не сплошным текстом: «разделить режимы, каждый начинается
+       с красной строки, а название режимов используются как заголовки» (комментарий
+       Заказчика 7 от 21.08, тем же способом сделана справка о сервис-факторе из
+       комментария 2). Сервер отдаёт заголовок и абзац отдельно — вёрстка здесь. */
+    if ((node.blocks || []).length) {
+      var help = h('div', 'msg bot cw-help');
+      var helpHtml = '';
+      for (var b = 0; b < node.blocks.length; b++) {
+        helpHtml += '<div class="help-block"><div class="help-block-title">' +
+                    esc(node.blocks[b].title) + '</div>' + esc(node.blocks[b].text) + '</div>';
+      }
+      help.innerHTML = helpHtml;
+      els.body.appendChild(help);
+      scrollDown();
+    }
+
+    if (node.type === 'multiselect') { multiselectField(node); }
 
     /* Таблица подбора показывается с паузой после текста. Без неё список
        прокручивается мгновенно, покупатель оказывается внизу и не успевает
@@ -239,11 +272,86 @@
        Подсказываем прямо в поле и ставим туда курсор: иначе человек ищет кнопку,
        которой на этом шаге нет. На остальных шагах подпись возвращаем обычную. */
     if (els.input) {
-      els.input.placeholder = node.type === 'input'
-        ? (node.placeholder || 'Напишите число…')
-        : 'Напишите вопрос…';
-      if (node.type === 'input') { els.input.focus(); }
+      var manual = node.type === 'input';
+      els.input.placeholder = manual ? (node.placeholder || 'Напишите число…') : 'Напишите вопрос…';
+      /* «Везде в ассистенте логика, что вопрос и на него есть ответ в кнопке — тут
+         имеется ввод вручную. Нужно… сделать чтобы текст стал медленно мигающим»
+         (комментарии Заказчика 1 и 8 от 21.08: обороты и «я знаю значение»).
+         Метка снимается на шагах с кнопками, иначе поле мигало бы до конца диалога. */
+      state.manual = manual;
+      if (els.field) { els.field.classList.toggle('cw-blink', manual); }
+      if (manual) { els.input.focus(); }
     }
+  }
+
+  /* Поле множественного выбора после таблицы: «можно будет выбрать несколько вариантов
+     в поле „Вид“, „Габарит“, „Число полюсов“» (комментарий Заказчика 6 от 21.08).
+     Флажки, а не кнопки: кнопка это один ответ и сразу шаг диалога, а здесь покупатель
+     отмечает сколько нужно и нажимает «показать» один раз. Состав полей и надпись
+     кнопки считает сервер по текущей выборке — виджет только рисует и собирает
+     отмеченное. Одно поле уходит на сервер массивом значений. */
+  function multiselectField(node) {
+    var fields = node.fields || [];
+    if (!fields.length) { return; }
+
+    var submit = node.submit || {};
+    var wrap = h('div', 'ms-field');
+    var html = '';
+    for (var i = 0; i < fields.length; i++) {
+      html += '<div class="ms-group"><div class="ms-title">' + esc(fields[i].title) + '</div>' +
+              '<div class="ms-opts">';
+      for (var j = 0; j < (fields[i].options || []).length; j++) {
+        html += '<label class="ms-opt"><input type="checkbox" data-field="' + esc(fields[i].field) +
+                '" value="' + esc(fields[i].options[j].value) + '">' +
+                '<span>' + esc(fields[i].options[j].label) + '</span></label>';
+      }
+      html += '</div></div>';
+    }
+    html += '<button type="button" class="ms-go">' + esc(submit.label || 'показать') + '</button>';
+    wrap.innerHTML = html;
+    els.body.appendChild(wrap); scrollDown();
+
+    wrap.querySelector('.ms-go').onclick = function () {
+      if (state.busy) { return; }
+
+      // Признак «уточнение сделано» приходит с сервера в submit.set: от него зависят
+      // состав кнопок таблицы и снятие фразы про запас (комментарии 5 и 6).
+      var set = {};
+      var base = submit.set || {};
+      for (var k in base) {
+        if (Object.prototype.hasOwnProperty.call(base, k)) { set[k] = base[k]; }
+      }
+
+      var boxes = wrap.querySelectorAll('.ms-opt input:checked');
+      for (var n = 0; n < boxes.length; n++) {
+        var box = boxes[n];
+        var f = box.getAttribute('data-field');
+        if (!set[f]) { set[f] = []; }
+        set[f].push(box.value);
+      }
+
+      // Что именно отметил покупатель, показываем его же репликой и копим для CRM:
+      // иначе в транскрипте останется одно слово «показать».
+      var shown = [];
+      for (var g = 0; g < fields.length; g++) {
+        var picked = set[fields[g].field];
+        if (picked && picked.length) { shown.push(fields[g].title + ': ' + picked.join(', ')); }
+      }
+
+      wrap.remove();
+      /* Кнопки шага («Назад») убирают себя сами только по нажатию на них же, а отправку
+         тут делает «показать» — своя кнопка поля. Без этой уборки «Назад» оставалась
+         висеть между вопросом и ответом и оставалась нажимаемой: покупатель мог увести
+         подбор в несогласованное состояние. Замер в браузере 25.08 — DIV.chips «Назад»
+         между репликами 21 и 23. Приём тот же, что в buildTopics(). */
+      var stale = els.body.querySelectorAll('.chips');
+      for (var s = 0; s < stale.length; s++) { stale[s].remove(); }
+      if (shown.length) {
+        userMsg(shown.join(' · '));
+        state.selection.push(shown.join(' · '));
+      }
+      sendStep({ next: submit.next, set: set, label: shown.length ? shown.join(' · ') : (submit.label || 'показать') });
+    };
   }
 
   function onChip(c) {
@@ -437,6 +545,7 @@
     els.notif = root.querySelector('.cw-notif');
     els.panel = root.querySelector('.cw-panel');
     els.body = root.querySelector('.cw-body');
+    els.field = root.querySelector('.cw-field');
     els.input = root.querySelector('.cw-field input');
     els.topics = root.querySelector('.cw-topics');
 
@@ -444,6 +553,12 @@
     root.querySelector('.cw-x').onclick = closePanel;
     root.querySelector('.cw-go').onclick = send;
     els.input.addEventListener('keydown', function (e) { if (e.key === 'Enter') { send(); } });
+    /* Мигание гасим по первому введённому знаку, а не по фокусу: курсор в поле
+       ставит сам виджет, и по фокусу метка снималась бы раньше, чем покупатель
+       её увидит. Пустое поле снова мигает — подсказка на месте и после стирания. */
+    els.input.addEventListener('input', function () {
+      if (els.field) { els.field.classList.toggle('cw-blink', state.manual && els.input.value === ''); }
+    });
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && state.open) { closePanel(); } });
 
     buildTopics();
@@ -456,9 +571,8 @@
   function buildTopics() {
     var fallback = [
       { label: 'Подобрать', next: 'equipment', reset: true },
-      { label: 'Каталог', next: 'faq' },
-      { label: 'Доставка', next: 'faq_delivery' },
-      { label: 'Менеджер', next: 'handoff' }
+      { label: 'Вопрос-ответ', next: 'faq_answers' },
+      { label: 'Контакты', next: 'handoff' }
     ];
     els.topics.innerHTML = '';
     (state.header && state.header.length ? state.header : fallback).forEach(function (t) {
