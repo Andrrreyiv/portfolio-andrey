@@ -433,7 +433,8 @@
         consent: true,
         hp: hpEl.value,
         form_ts: openedAt,
-        what_selected: state.selection.join(' · ')
+        what_selected: state.selection.join(' · '),
+        roistat_visit: roistatVisit()
       }).then(function (res) {
         wrap.remove();
         if (res && res.status === 'accepted') {
@@ -452,6 +453,17 @@
     };
   }
   function validPhone(v) { var d = String(v || '').replace(/\D/g, ''); return d.length === 10 || d.length === 11; }
+
+  /* Номер визита Roistat. Сделку создаёт наш сервер через API AmoCRM, а не форма Амо,
+     поэтому Roistat не проставит метку сам — номер берём из его же cookie и передаём.
+     Виджет живёт в Shadow DOM на странице сайта, домен тот же, cookie читается.
+     Куки нет (прямой заход, блокировщик) — заявка уходит как обычно, просто без номера. */
+  function roistatVisit() {
+    try {
+      var m = String(document.cookie || '').match(/(?:^|;\s*)roistat_visit=([^;]+)/);
+      return m ? decodeURIComponent(m[1]).slice(0, 64) : '';
+    } catch (e) { return ''; }
+  }
 
   /* ── свободный текст ── */
   function send() {
@@ -581,7 +593,6 @@
   function buildTopics() {
     var fallback = [
       { label: 'Подобрать', next: 'equipment', reset: true },
-      { label: 'Вопрос-ответ', next: 'faq_answers' },
       { label: 'Контакты', next: 'handoff' }
     ];
     els.topics.innerHTML = '';
