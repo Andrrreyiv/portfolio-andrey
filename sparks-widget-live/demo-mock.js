@@ -12,7 +12,38 @@
 (function () {
   'use strict';
 
-  var DISCLAIMER = 'Подбор носит справочный характер, итоговую конфигурацию подтверждает менеджер.';
+  /* Строка под таблицей. Комментарий Заказчика 4 от 21.08 отменил согласованную
+     03.08 формулировку «подбор носит справочный характер…» и заменил её вопросом
+     покупателю. Держим ту же строку, что на боевом (config/presentation.json). */
+  var DISCLAIMER = 'Достаточно информации для выбора или требуется дополнительное уточнение?';
+
+  /* Кнопки карточки приходят с сервера полем actions (config/presentation.json,
+     ключ card_actions): комм. 3 от 21.08 вернул «Оставить заявку» в карточку между
+     «Открыть» и значками, комм. 11 запретил счётчики у значков. Без этого поля виджет
+     рисует карточку без кнопки и без значков, то есть демо показывает не то,
+     что согласовано. */
+  var CARD_ACTIONS = {
+    enabled: true,
+    show_counters: false,
+    event_name: 'sparks:card-action',
+    open_label: 'Открыть',
+    lead_label: 'Оставить заявку',
+    lead_enabled: true,
+    items: [
+      { key: 'compare',  title: 'Добавить к сравнению' },
+      { key: 'favorite', title: 'Добавить в избранное' },
+      { key: 'cart',     title: 'Добавить в корзину' }
+    ]
+  };
+
+  /* Состав шапки задаётся сценарием, а не кодом виджета (scenario.json, ключ header).
+     Сейчас кнопки ДВЕ: «Вопрос-ответ» убрана письмом Заказчика 27.08 «пока готовлю
+     не показываем в боте», хотя комм. 1 от 12.08 требовал трёх. Вернётся строкой
+     { label: 'Вопрос-ответ', next: 'faq' } — правкой конфига, не программы. */
+  var HEADER = [
+    { label: 'Подобрать', next: 'equipment', reset: true },
+    { label: 'Контакты',  next: 'handoff' }
+  ];
 
   // Мощности мотор-редукторов и число позиций за каждой (из каталога).
   var POWER = [
@@ -82,7 +113,10 @@
       sf_starts: { type: 'menu', text: 'Сколько запусков и остановок в час?', chips: [
         { label: 'менее 10', next: 'sf_hours', set: { sf_starts: 'lt10' } },
         { label: 'от 10 до 50', next: 'sf_hours', set: { sf_starts: '10_50' } },
-        { label: 'от 80 до 100', next: 'sf_hours', set: { sf_starts: '80_100' } },
+        // Комм. 14.1 от 12.08: «в выборе количества запусков 80-100 заменить на 50-100».
+        // Это разворачивает его же ответ от 07.08, где 50-100 названо опечаткой;
+        // окончателен вариант от 12.08, он и стоит на боевом.
+        { label: 'от 50 до 100', next: 'sf_hours', set: { sf_starts: '50_100' } },
         { label: 'от 100 до 200', next: 'sf_hours', set: { sf_starts: '100_200' } } ] },
 
       sf_hours: { type: 'menu', text: 'Сколько часов в сутки работает?', chips: [
@@ -91,9 +125,28 @@
         { label: 'от 9 до 16', next: 'mr_table', set: { sf_hours: '9_16' } },
         { label: 'круглосуточно', next: 'mr_table', set: { sf_hours: '17_24' } } ] },
 
-      mr_table: { type: 'table', chips: [
-        { label: 'Оставить заявку', next: 'handoff' },
-        { label: 'Начать подбор заново', next: 'equipment' } ] },
+      /* Состав кнопок под таблицей дословно из комм. 4 от 21.08: «Уточнить»,
+         «Написать менеджеру», «Обратный звонок». «Оставить заявку» ушла отсюда
+         в карточку (комм. 3), «Начать подбор заново» в его списке отсутствует
+         и убрана. Комм. 6 добавил пятую кнопку «Новый подбор», но ТОЛЬКО
+         на таблице после уточнения — это chips_refined. */
+      mr_table: { type: 'table',
+        chips: [
+          { label: 'Уточнить', next: 'mr_refine' },
+          { label: 'Написать менеджеру', next: 'handoff' },
+          { label: 'Обратный звонок', next: 'handoff' } ],
+        chips_refined: [
+          { label: 'Уточнить', next: 'mr_refine' },
+          { label: 'Написать менеджеру', next: 'handoff' },
+          { label: 'Обратный звонок', next: 'handoff' },
+          { label: 'Новый подбор', next: 'equipment' } ] },
+
+      /* Уточнение: несколько значений в каждом поле сразу. Варианты сервер
+         считает по текущей выборке, а не по всему каталогу, — здесь так же,
+         поэтому список меняется вместе с рассчитанным запасом надёжности. */
+      mr_refine: { type: 'multiselect',
+        text: 'Чем уточним подбор? Можно отметить несколько значений в каждом поле.',
+        submit: { label: 'показать', next: 'mr_table', set: { refined: true } } },
 
       demo_other: { type: 'menu', text: 'В демонстрации подробно показана ветка мотор-редукторов. Остальные типы на сервере уже работают так же: свои шаги подбора и своя таблица результатов.', chips: [
         { label: 'Показать мотор-редукторы', next: 'mr_entry' },
@@ -127,33 +180,29 @@
       name: 'Мотор-редуктор червячный NMRV-S63-20-140-1,5-M1-AM90-MS-2081-2P sf=1,13',
       url: 'https://sparks.su/product/nmrv-s63-20-140-00-1-5-pam90-2p-sf-1-13/',
       specs: [ { label: 'Мощность', value: '1.5 кВт' }, { label: 'Обороты на выходе', value: '140 об/мин' },
-               { label: 'Передаточное число', value: '20' }, { label: 'Сервис-фактор', value: '1,13' },
-               { label: 'Габарит', value: '63' } ] },
+               { label: 'Передаточное число', value: '20' }, { label: 'Сервис-фактор', value: '1,13' } ] },
     { sku: '1038187', sf: 1.47, size: 63, pol: '4P',
       name: 'Мотор-редуктор червячный NMRV-S63-10-140-1,5-M1-AM90-MS-2081-4P sf=1,47',
       url: 'https://sparks.su/product/nmrv-s63-10-140-00-1-5-pam90-4p-sf-1-47/',
       specs: [ { label: 'Мощность', value: '1.5 кВт' }, { label: 'Обороты на выходе', value: '140 об/мин' },
-               { label: 'Передаточное число', value: '10' }, { label: 'Сервис-фактор', value: '1,47' },
-               { label: 'Габарит', value: '63' } ] },
+               { label: 'Передаточное число', value: '10' }, { label: 'Сервис-фактор', value: '1,47' } ] },
     { sku: '1038189', sf: 2.11, size: 75, pol: '4P',
       name: 'Мотор-редуктор червячный NMRV-S75-10-140-1,5-M1-AM90-MS-2081-4P sf=2,11',
       url: 'https://sparks.su/product/nmrv-s75-10-140-00-1-5-pam90-4p-sf-2-11/',
       specs: [ { label: 'Мощность', value: '1.5 кВт' }, { label: 'Обороты на выходе', value: '140 об/мин' },
-               { label: 'Передаточное число', value: '10' }, { label: 'Сервис-фактор', value: '2,11' },
-               { label: 'Габарит', value: '75' } ] },
+               { label: 'Передаточное число', value: '10' }, { label: 'Сервис-фактор', value: '2,11' } ] },
     { sku: '1038345', sf: 3.35, size: 90, pol: '4P',
       name: 'Мотор-редуктор червячный NMRV-S90-10-140-1,5-M1-AM90-MS-2081-4P sf=3,35',
       url: 'https://sparks.su/product/nmrv-s90-10-140-00-1-5-pam90-4p-sf-3-35/',
       specs: [ { label: 'Мощность', value: '1.5 кВт' }, { label: 'Обороты на выходе', value: '140 об/мин' },
-               { label: 'Передаточное число', value: '10' }, { label: 'Сервис-фактор', value: '3,35' },
-               { label: 'Габарит', value: '90' } ] }
+               { label: 'Передаточное число', value: '10' }, { label: 'Сервис-фактор', value: '3,35' } ] }
   ];
 
   // Таблица сервис-фактора Заказчика: нагрузка → запусков в час → часов в сутки.
   var SF_TABLE = {
-    smooth:   { lt10: [0.75, 1, 1.25, 1.5], '10_50': [1, 1.25, 1.5, 1.75], '80_100': [1.25, 1.5, 1.75, 2], '100_200': [1.5, 1.75, 2, 2.2] },
-    moderate: { lt10: [1, 1.25, 1.5, 1.75], '10_50': [1.25, 1.5, 1.75, 2], '80_100': [1.5, 1.75, 2, 2.2], '100_200': [1.75, 2, 2.2, 2.5] },
-    heavy:    { lt10: [1.25, 1.5, 1.75, 2], '10_50': [1.5, 1.75, 2, 2.2], '80_100': [1.75, 2, 2.2, 2.5], '100_200': [2, 2.2, 2.5, 3] }
+    smooth:   { lt10: [0.75, 1, 1.25, 1.5], '10_50': [1, 1.25, 1.5, 1.75], '50_100': [1.25, 1.5, 1.75, 2], '100_200': [1.5, 1.75, 2, 2.2] },
+    moderate: { lt10: [1, 1.25, 1.5, 1.75], '10_50': [1.25, 1.5, 1.75, 2], '50_100': [1.5, 1.75, 2, 2.2], '100_200': [1.75, 2, 2.2, 2.5] },
+    heavy:    { lt10: [1.25, 1.5, 1.75, 2], '10_50': [1.5, 1.75, 2, 2.2], '50_100': [1.75, 2, 2.2, 2.5], '100_200': [2, 2.2, 2.5, 3] }
   };
   var HOURS_IDX = { lt2: 0, '2_8': 1, '9_16': 2, '17_24': 3 };
 
@@ -184,6 +233,29 @@
     return workday && hour >= 9 && hour < 20;
   }
 
+  /* Текущая выборка: та же, что уходит в таблицу. Уточнение обязано считать
+     варианты по ней, а не по всему каталогу (комм. 6 Заказчика). */
+  function selection() {
+    var need = requiredSf();
+    var pool = (need === null) ? DEMO_ITEMS.slice()
+      : DEMO_ITEMS.filter(function (i) { return i.sf >= need; });
+
+    // Отмеченное в уточнении сужает выборку: внутри поля «или», между полями «и».
+    REFINE_FIELDS.forEach(function (f) {
+      var picked = state[f.field];
+      if (!picked || !picked.length) { return; }
+      pool = pool.filter(function (i) { return picked.indexOf(String(f.of(i))) !== -1; });
+    });
+    return pool;
+  }
+
+  // Поля уточнения: заголовки дословно из боевого scenario.json → mr_refine.
+  var REFINE_FIELDS = [
+    { field: 'series',     title: 'Вид',           of: function (i) { return i.name.split('-')[0]; } },
+    { field: 'frame_size', title: 'Габарит',       of: function (i) { return i.size; } },
+    { field: 'poles',      title: 'Число полюсов', of: function (i) { return i.pol; } }
+  ];
+
   function render(id) {
     var node = SCENARIO.nodes[id] || SCENARIO.nodes[SCENARIO.start];
 
@@ -200,17 +272,52 @@
     // как это делает боевой сервер.
     if (node.type === 'table') {
       var need = requiredSf();
-      var items = (need === null) ? DEMO_ITEMS : DEMO_ITEMS.filter(function (i) { return i.sf >= need; });
-      out.items = items;
+      var items = selection();
+      /* Кнопки карточки боевой сервер подставляет каждой позиции сам, из
+         config/presentation.json. Без них виджет рисует голую ссылку, и Заказчик
+         в демо не увидит согласованных им же кнопок. */
+      out.items = items.map(function (i) {
+        var copy = {};
+        Object.keys(i).forEach(function (k) { copy[k] = i[k]; });
+        copy.actions = CARD_ACTIONS;
+        return copy;
+      });
       out.total = items.length;
       out.shown = items.length;
       out.disclaimer = DISCLAIMER;
-      out.text = need === null
+      // Комм. 6: пятая кнопка живёт только на таблице, показанной после уточнения.
+      if (state.refined && node.chips_refined) { out.chips = node.chips_refined; }
+      /* Комм. 5: после уточнения фраза про запас больше не нужна — покупатель
+         её уже прочитал, а теперь смотрит на суженный список. */
+      out.text = (need === null || state.refined)
         ? 'Подходящих позиций: ' + items.length + '.'
-        : 'Нужен сервис-фактор не ниже ' + String(need).replace('.', ',') + '. Подходящих позиций: ' + items.length + '.';
+        // Слово в слово как боевой DialogService: покупателю говорят «запас надёжности».
+        : 'Нужен запас надёжности не ниже ' + String(need).replace('.', ',') + '. Подходящих позиций: ' + items.length + '.';
       if (items.length === 0) {
         out.text = 'Под такие условия в демонстрационной выборке позиций нет. На сервере в этом случае бот предлагает расширить допуск или передаёт менеджеру.';
       }
+    }
+
+    /* Уточнение. Поле, у которого в выборке остался один вариант, не показывается
+       вовсе — выбирать в нём не из чего. */
+    if (node.type === 'multiselect') {
+      var pool = selection();
+      out.fields = [];
+      REFINE_FIELDS.forEach(function (f) {
+        var seen = [], count = {};
+        pool.forEach(function (i) {
+          var v = String(f.of(i));
+          if (seen.indexOf(v) === -1) { seen.push(v); count[v] = 0; }
+          count[v] += 1;
+        });
+        if (seen.length > 1) {
+          seen.sort();
+          out.fields.push({ field: f.field, title: f.title,
+            // Форма варианта дословно как у боевого DialogService: value, label, count.
+            options: seen.map(function (v) { return { value: v, label: v, count: count[v] }; }) });
+        }
+      });
+      out.submit = node.submit;
     }
 
     if (node.placeholder_note) { out.placeholder_note = node.placeholder_note; }
@@ -236,6 +343,7 @@
     if (path.indexOf('/api/session') !== -1) {
       state = {};
       return delay({ session_id: 'demo-' + Date.now(), is_work_hours: isWorkHours(),
+                     header: HEADER,
                      greeting: SCENARIO.greeting, node: render(SCENARIO.start) });
     }
     if (path.indexOf('/api/chat') !== -1) {
