@@ -1,0 +1,52 @@
+/* ── Шрифты: свои копии, собраны из google/fonts скриптом (см. CLAUDE.md, «Шрифты»).
+   Playfair: opsz закреплён на 144, живые оси — ширина 87.5–100 и вес 400–700.
+   Курсив закреплён целиком (ширина 87.5), живой только вес 400–600. */
+@font-face{font-family:'Playfair';src:url(../fonts/playfair.woff2) format('woff2');
+  font-weight:400 700;font-stretch:87.5% 100%;font-style:normal;font-display:swap}
+@font-face{font-family:'Playfair';src:url(../fonts/playfair-italic.woff2) format('woff2');
+  font-weight:400 600;font-style:italic;font-display:swap}
+@font-face{font-family:'Onest';src:url(../fonts/onest.woff2) format('woff2');
+  font-weight:400 700;font-display:swap}
+@font-face{font-family:'JetBrains Mono';src:url(../fonts/jetbrains-mono-latin.woff2) format('woff2');
+  font-weight:400 600;font-display:swap;
+  unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
+@font-face{font-family:'JetBrains Mono';src:url(../fonts/jetbrains-mono-cyrillic.woff2) format('woff2');
+  font-weight:400 600;font-display:swap;unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116}
+
+/* ── Ночь — тема по умолчанию. Уголь тонирован в тёплое, чистого чёрного нет.
+   Контраст на --bg: --fg-3 5.2:1, --accent 6.2:1. */
+:root{
+  color-scheme:dark;
+  --bg-rgb:16,14,12;--fg-rgb:239,232,221;
+  --bg:#100E0C;--bg-2:#171411;--bg-3:#221E1A;--surface:#1A1714;
+  --fg:#EFE8DD;--fg-2:#BDB3A6;--fg-3:#8E8478;
+  --accent:#FF5B2E;--accent-2:#FF8A5C;--on-accent:#160B06;
+  --cool:#9DB4C8;--ok:#6FBF95;--warn:#E5B653;--bad:#E8664F;--violet:#B294E0;
+  --line:rgba(var(--fg-rgb),.10);--line-2:rgba(var(--fg-rgb),.18);
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 28px 70px -28px rgba(0,0,0,.85);
+  --grain-op:.08;--grain-blend:overlay;
+
+  --f-display:'Playfair',Georgia,'Times New Roman',serif;
+  --f-text:'Onest',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --f-mono:'JetBrains Mono',ui-monospace,Consolas,monospace;
+
+  --wrap:1320px;--gut:clamp(16px,4vw,48px);
+  --r:18px;--r-lg:28px;
+
+  /* движение (emil-design-eng): интерфейс ≤ 300 мс, раскрытия 600–1200 мс */
+  --e-out:cubic-bezier(.23,1,.32,1);
+  --e-io:cubic-bezier(.77,0,.175,1);
+  --t-ui:220ms;--t-reveal:900ms;
+}
+
+/* ── День — прежняя «бумажная» палитра 08.08. Акцент затемнён до 4.6:1 на бумаге. */
+:root[data-theme="light"]{
+  color-scheme:light;
+  --bg-rgb:246,242,235;--fg-rgb:21,17,13;
+  --bg:#F6F2EB;--bg-2:#EFE9DF;--bg-3:#E7DECF;--surface:#FFFEFB;
+  --fg:#15110D;--fg-2:#4A433C;--fg-3:#6E655B;
+  --accent:#BF401C;--accent-2:#E0522E;--on-accent:#FFFFFF;
+  --cool:#2B5E8A;--ok:#1E6B52;--warn:#A87C1E;--bad:#C0392B;--violet:#6A4C93;
+  --shadow:0 1px 2px rgba(21,17,13,.05),0 28px 70px -30px rgba(21,17,13,.30);
+  --grain-op:.35;--grain-blend:multiply;
+}

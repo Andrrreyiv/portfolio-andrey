@@ -1,0 +1,146 @@
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+/* Lenis ведёт прокрутку сам: родная плавность ему мешает. */
+html.lenis,html.lenis body{height:auto}
+.lenis.lenis-smooth{scroll-behavior:auto!important}
+.lenis.lenis-stopped{overflow:hidden}
+body{font-family:var(--f-text);font-size:17px;line-height:1.6;background:var(--bg);color:var(--fg);
+  -webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;overflow-x:clip;
+  transition:background-color .4s var(--e-out)}
+img,svg,video,canvas{display:block;max-width:100%}
+img{height:auto}
+a{color:inherit;text-decoration:none}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+ul,ol{list-style:none}
+::selection{background:var(--accent);color:var(--on-accent)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:4px;border-radius:6px}
+
+h1,h2,h3,h4{font-family:var(--f-display);font-weight:500;line-height:1;letter-spacing:-.02em;
+  font-stretch:87.5%;text-wrap:balance}
+em{font-style:italic}
+h1 em,h2 em,h3 em{color:var(--accent);font-weight:400}
+p{text-wrap:pretty}
+.mono{font-family:var(--f-mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--fg-3)}
+
+.wrap{max-width:var(--wrap);margin-inline:auto;padding-inline:var(--gut)}
+section{position:relative;padding-block:clamp(88px,11vw,150px)}
+.skip{position:fixed;left:16px;top:-80px;z-index:300;background:var(--accent);color:var(--on-accent);
+  padding:12px 18px;border-radius:12px;font-weight:600;transition:top var(--t-ui) var(--e-out)}
+.skip:focus{top:16px}
+
+/* ── заголовок секции: номер моно, крупный дисплей, вводный абзац ── */
+.sec-head{display:grid;grid-template-columns:minmax(0,1fr);gap:22px;margin-bottom:clamp(48px,7vw,96px);max-width:1100px}
+.sec-head .mono{display:flex;align-items:center;gap:14px}
+.sec-head .mono::after{content:"";height:1px;flex:0 0 64px;background:var(--line-2)}
+.sec-head h2{font-size:clamp(44px,7.4vw,120px)}
+.sec-head p{max-width:620px;color:var(--fg-2);font-size:clamp(17px,1.4vw,19px)}
+
+/* ── кнопки. Магнит пишет --tx/--ty, нажатие — --press: три движения в одном transform
+   не перебивают друг друга (грабля 08.08: инлайновый transform глушил :active). ── */
+.btn{--tx:0px;--ty:0px;--press:1;display:inline-flex;align-items:center;justify-content:center;gap:10px;
+  min-height:50px;padding:14px 26px;border-radius:100px;font-weight:600;font-size:15px;line-height:1.1;
+  transform:translate(var(--tx),var(--ty)) scale(var(--press));
+  transition:background-color var(--t-ui) var(--e-out),color var(--t-ui) var(--e-out),
+    border-color var(--t-ui) var(--e-out),transform 380ms var(--e-out)}
+.btn:active{--press:.96}
+.btn-accent{background:var(--accent);color:var(--on-accent)}
+.btn-accent:hover{background:var(--accent-2)}
+.btn-line{border:1px solid var(--line-2);color:var(--fg)}
+.btn-line:hover{border-color:var(--fg);background:var(--fg);color:var(--bg)}
+.btn svg{width:18px;height:18px;flex-shrink:0}
+.btn .arr{display:inline-block;transition:transform var(--t-ui) var(--e-out)}
+.btn:hover .arr{transform:translateX(4px)}
+.btn:hover .arr.ne{transform:translate(3px,-3px)}
+
+/* ── общие детали главной и кейсов ── */
+.chip{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:10px 16px;border-radius:100px;border:1px solid var(--line-2);
+  font-size:14px;color:var(--fg-2);transition:color var(--t-ui) var(--e-out),border-color var(--t-ui) var(--e-out)}
+.chip:hover{color:var(--fg);border-color:var(--fg)}
+.shot{position:relative;border-radius:var(--r);overflow:hidden;background:var(--bg-3);border:1px solid var(--line);box-shadow:var(--shadow)}
+.shot img{width:100%}
+.did{display:grid;gap:10px}
+.did li{display:flex;gap:12px;color:var(--fg-2);font-size:15.5px}
+.did li::before{content:"→";color:var(--accent);font-weight:700;flex:none}
+.link-arrow{display:inline-flex;gap:8px;font-weight:600;padding-bottom:4px;border-bottom:1px solid var(--line-2);
+  transition:color var(--t-ui) var(--e-out),border-color var(--t-ui) var(--e-out)}
+.link-arrow:hover{color:var(--accent);border-color:var(--accent)}
+/* общий элемент перехода «главная ↔ кейс»: кадр работы летит между страницами */
+.vt-jetron{view-transition-name:shot-jetron}
+.vt-sparks{view-transition-name:shot-sparks}
+.vt-stenarium{view-transition-name:shot-stenarium}
+
+/* ── навигация: прозрачная над первым экраном, плотная после; прячется вниз по ходу ── */
+.nav{position:fixed;inset:0 0 auto;z-index:100;transition:transform .5s var(--e-out),background-color .3s var(--e-out)}
+.nav.scrolled{background:rgba(var(--bg-rgb),.86);box-shadow:0 1px 0 var(--line)}
+.nav.hide{transform:translateY(-100%)}
+.nav-in{display:flex;align-items:center;justify-content:space-between;gap:20px;height:76px}
+.nav.scrolled .nav-in{height:64px}
+.logo{display:flex;align-items:center;gap:12px;font-weight:600;font-size:15px;letter-spacing:-.01em}
+.logo-mark{width:38px;height:38px;border-radius:50%;border:1px solid var(--line-2);display:grid;place-items:center;
+  font-family:var(--f-display);font-style:italic;font-size:17px;color:var(--accent);
+  transition:background-color var(--t-ui) var(--e-out),color var(--t-ui) var(--e-out)}
+.logo:hover .logo-mark{background:var(--accent);color:var(--on-accent)}
+.nav-links{display:flex;align-items:center;gap:30px}
+.nav-links a:not(.btn){font-size:14px;color:var(--fg-2);position:relative;padding-block:6px;transition:color var(--t-ui) var(--e-out)}
+.nav-links a:not(.btn)::after{content:"";position:absolute;left:0;right:0;bottom:0;height:1px;background:var(--accent);
+  transform:scaleX(0);transform-origin:right;transition:transform 300ms var(--e-out)}
+.nav-links a:not(.btn):hover{color:var(--fg)}
+.nav-links a:not(.btn):hover::after{transform:scaleX(1);transform-origin:left}
+.nav-tools{display:flex;align-items:center;gap:10px}
+.nav .btn{min-height:44px;padding:11px 20px;font-size:14px}
+
+/* ── переключатель темы: новая тема вырастает кругом из кнопки (View Transitions) ── */
+.theme-btn{width:44px;height:44px;border-radius:50%;border:1px solid var(--line-2);display:grid;place-items:center;
+  transition:border-color var(--t-ui) var(--e-out),transform 300ms var(--e-out)}
+.theme-btn:hover{border-color:var(--fg)}
+.theme-btn:active{transform:scale(.92)}
+.theme-btn svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.theme-btn .sun{display:none}
+:root[data-theme="light"] .theme-btn .sun{display:block}
+:root[data-theme="light"] .theme-btn .moon{display:none}
+::view-transition-old(root),::view-transition-new(root){animation:none;mix-blend-mode:normal}
+::view-transition-old(root){z-index:1}
+::view-transition-new(root){z-index:2;animation:vt-reveal 680ms var(--e-out) both}
+@keyframes vt-reveal{
+  from{clip-path:circle(0 at var(--vt-x,50%) var(--vt-y,0))}
+  to{clip-path:circle(var(--vt-r,150vmax) at var(--vt-x,50%) var(--vt-y,0))}
+}
+/* Переход между страницами кейсов: документы сменяются плавно, общая картинка летит. */
+@view-transition{navigation:auto}
+::view-transition-group(case-shot){animation-duration:700ms;animation-timing-function:var(--e-io)}
+
+/* ── фон: зерно на fixed-слое (не на body — иначе перерисовка при каждом кадре) ── */
+.grain{position:fixed;inset:0;z-index:90;pointer-events:none;opacity:var(--grain-op);mix-blend-mode:var(--grain-blend);
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+.progress{position:fixed;inset:0 0 auto;height:2px;z-index:110;background:var(--accent);transform:scaleX(0);transform-origin:0 50%}
+
+/* ── футер ── */
+.foot{padding-block:48px 40px;border-top:1px solid var(--line)}
+.foot-in{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:24px}
+.foot-links{display:flex;flex-wrap:wrap;gap:24px;font-size:14px;color:var(--fg-2)}
+.foot-links a:hover{color:var(--fg)}
+.foot .copy{font-size:13px;color:var(--fg-3)}
+
+/* ── появление: стартовые состояния только при живом JS (класс .js ставится в <head>),
+   иначе страница без скриптов осталась бы пустой ── */
+.js [data-reveal]{opacity:0;transform:translateY(28px)}
+/* Заголовок с выездом слов ждёт скрипта, иначе он мелькнёт целиком и тут же спрячется под маску. */
+.js .hero-title,.js .c-title{visibility:hidden}
+
+@media (max-width:900px){
+  .nav-links a:not(.btn){display:none}
+  .nav-links{gap:10px}
+  .nav-in{height:64px}
+}
+@media (max-width:420px){
+  .logo-name{display:none}
+  .nav .btn{padding:10px 16px}
+}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;
+    transition-duration:.01ms!important;scroll-behavior:auto!important}
+  .js [data-reveal]{opacity:1;transform:none}
+  .js .hero-title,.js .c-title{visibility:visible}
+  ::view-transition-new(root){animation:vt-fade 160ms linear both}
+  @keyframes vt-fade{from{opacity:0}to{opacity:1}}
+}

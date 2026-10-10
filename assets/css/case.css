@@ -1,0 +1,66 @@
+/* ── страница кейса: крупный заголовок, вводная с паспортом, обложка, блоки «заголовок слева — суть справа» ── */
+.case-main{padding-top:clamp(104px,12vw,140px)}
+.c-hero{display:grid;gap:26px;padding-bottom:clamp(48px,6vw,80px)}
+.c-back{display:inline-flex;align-items:center;gap:10px;justify-self:start;min-height:44px;transition:color var(--t-ui) var(--e-out)}
+.c-back:hover{color:var(--fg)}
+.c-kicker{display:flex;align-items:center;gap:14px}
+.c-kicker span{color:var(--accent);font-weight:600}
+.c-title{font-size:clamp(40px,5.6vw,96px);line-height:.96;letter-spacing:-.03em;max-width:21ch}
+.c-intro{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:32px clamp(32px,6vw,96px);align-items:start;margin-top:14px}
+.c-lead{font-size:clamp(18px,1.5vw,22px);line-height:1.55;color:var(--fg-2)}
+.c-meta div{display:grid;grid-template-columns:88px minmax(0,1fr);gap:16px;padding-block:14px;border-top:1px solid var(--line)}
+.c-meta div:last-child{border-bottom:1px solid var(--line)}
+.c-meta dt{font:500 12px/1.6 var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--fg-3)}
+.c-meta dd{font-size:15px}
+.c-acts{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:6px}
+
+.c-cover{margin-bottom:clamp(72px,10vw,140px)}
+
+.c-block{display:grid;grid-template-columns:minmax(0,4fr) minmax(0,8fr);gap:28px clamp(32px,6vw,96px);
+  padding-block:clamp(48px,6vw,88px);border-top:1px solid var(--line)}
+.c-h{font-size:clamp(34px,3.8vw,60px);line-height:1;align-self:start;position:sticky;top:104px}
+.c-body p{font-size:clamp(17px,1.35vw,20px);line-height:1.6;color:var(--fg-2);max-width:62ch}
+.c-body p+p{margin-top:20px}
+.c-block--wide{grid-template-columns:minmax(0,1fr)}
+.c-block--wide .c-h{position:static;margin-bottom:clamp(16px,3vw,40px)}
+
+.c-prods{display:grid;gap:clamp(56px,7vw,112px)}
+.c-prod{display:grid;grid-template-columns:minmax(0,7fr) minmax(0,5fr);gap:clamp(24px,4vw,64px);align-items:center}
+.c-prod:nth-child(even) .shot{order:2}
+.c-prod--tall .shot{width:min(320px,100%);justify-self:center}
+.c-prod h3{font-size:clamp(28px,2.8vw,44px);line-height:1.04;margin:10px 0 18px}
+.c-prod .did{margin-bottom:24px}
+
+.c-split{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:clamp(24px,4vw,56px);align-items:center}
+.c-split-shot{width:min(380px,100%)}
+.c-split-list li{font-size:17px;padding-block:6px}
+
+.c-metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+.c-metrics:has(>div:nth-child(3):last-child){grid-template-columns:repeat(3,minmax(0,1fr))}
+.c-metrics div{padding:24px 24px 28px 0;border-top:1px solid var(--line)}
+.c-metrics dt{font-family:var(--f-display);font-size:clamp(34px,3.6vw,60px);line-height:1.02;letter-spacing:-.02em;font-variant-numeric:lining-nums}
+.c-metrics .ar{font-family:var(--f-text);font-weight:300;font-size:.6em;vertical-align:.12em;color:var(--accent);margin-inline:.12em}
+.c-metrics dd{margin-top:12px;max-width:28ch;font-size:14.5px;line-height:1.45;color:var(--fg-3)}
+
+.c-list li{display:grid;grid-template-columns:48px minmax(0,1fr);gap:16px;padding-block:20px;border-top:1px solid var(--line)}
+.c-list li p{font-size:17px;color:var(--fg-2);max-width:68ch}
+.c-list .mono{color:var(--accent);padding-top:4px}
+
+.c-gallery{display:grid;grid-template-columns:minmax(0,3fr) minmax(0,1fr);gap:clamp(16px,2.4vw,32px);align-items:start;padding-block:clamp(40px,5vw,72px)}
+
+.c-next{border-top:1px solid var(--line);margin-top:clamp(40px,6vw,80px)}
+.c-next-in{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px 32px;align-items:end;padding-block:clamp(56px,8vw,120px)}
+.c-next .mono{grid-column:1/-1}
+.c-next-title{font-family:var(--f-display);font-size:clamp(36px,5.6vw,96px);line-height:.98;letter-spacing:-.03em;font-stretch:87.5%;
+  transition:color var(--t-ui) var(--e-out)}
+.c-next-arr{font-size:clamp(40px,5.6vw,92px);line-height:1;color:var(--accent);transition:transform .6s var(--e-out)}
+.c-next-in:hover .c-next-title{color:var(--accent)}
+.c-next-in:hover .c-next-arr{transform:translateX(16px)}
+
+@media (max-width:900px){
+  .c-intro,.c-block,.c-prod,.c-split,.c-gallery{grid-template-columns:minmax(0,1fr)}
+  .c-metrics,.c-metrics:has(>div:nth-child(3):last-child){grid-template-columns:minmax(0,1fr)}
+  .c-h{position:static}
+  .c-prod:nth-child(even) .shot{order:0}
+  .c-gallery .shot--tall{width:min(320px,100%)}
+}

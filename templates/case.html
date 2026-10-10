@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{pageTitle}}</title>
+<meta name="description" content="{{description}}">
+<link rel="canonical" href="{{url}}">
+<meta property="og:type" content="article">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="{{url}}">
+<meta property="og:title" content="{{pageTitle}}">
+<meta property="og:description" content="{{description}}">
+<meta property="og:image" content="{{ogImage}}">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#100E0C">
+<link rel="icon" href="{{root}}favicon.svg" type="image/svg+xml">
+<link rel="icon" href="{{root}}favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="{{root}}apple-touch-icon.png">
+<link rel="preload" href="{{root}}assets/fonts/playfair.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="{{root}}assets/fonts/onest.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="{{root}}assets/css/tokens.css">
+<link rel="stylesheet" href="{{root}}assets/css/base.css">
+<link rel="stylesheet" href="{{root}}assets/css/case.css">
+<script>
+(function(){var d=document.documentElement;d.classList.add('js');
+try{if(localStorage.getItem('theme')==='light')d.dataset.theme='light';}catch(e){}
+setTimeout(function(){if(!window.__siteOk)d.classList.remove('js');},4000);})();
+</script>
+<script type="application/ld+json">{{jsonld}}</script>
+</head>
+<body class="case-body">
+<a class="skip" href="#main">К содержанию</a>
+<div class="grain" aria-hidden="true"></div>
+<div class="progress" aria-hidden="true"></div>
+{{nav}}
+{{main}}
+{{footer}}
+<script defer src="{{root}}assets/vendor/gsap.min.js"></script>
+<script defer src="{{root}}assets/vendor/ScrollTrigger.min.js"></script>
+<script defer src="{{root}}assets/vendor/SplitText.min.js"></script>
+<script defer src="{{root}}assets/vendor/lenis.min.js"></script>
+<script type="module" src="{{root}}assets/js/case.js"></script>
+</body>
+</html>
