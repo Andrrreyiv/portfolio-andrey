@@ -84,12 +84,18 @@ if (themeBtn) {
 /* ── магнит на главных кнопках: пишет только --tx/--ty, нажатие остаётся за CSS ── */
 if (fine && !reduce) {
   document.querySelectorAll('[data-magnet]').forEach((b) => {
-    b.addEventListener('pointermove', (e) => {
+    let raf = 0, ev = null;
+    const apply = () => {
+      raf = 0;
       const r = b.getBoundingClientRect();
-      b.style.setProperty('--tx', ((e.clientX - r.left - r.width / 2) * 0.2).toFixed(1) + 'px');
-      b.style.setProperty('--ty', ((e.clientY - r.top - r.height / 2) * 0.3).toFixed(1) + 'px');
+      b.style.setProperty('--tx', ((ev.clientX - r.left - r.width / 2) * 0.2).toFixed(1) + 'px');
+      b.style.setProperty('--ty', ((ev.clientY - r.top - r.height / 2) * 0.3).toFixed(1) + 'px');
+    };
+    b.addEventListener('pointermove', (e) => { ev = e; if (!raf) raf = requestAnimationFrame(apply); });
+    b.addEventListener('pointerleave', () => {
+      cancelAnimationFrame(raf); raf = 0;
+      b.style.removeProperty('--tx'); b.style.removeProperty('--ty');
     });
-    b.addEventListener('pointerleave', () => { b.style.removeProperty('--tx'); b.style.removeProperty('--ty'); });
   });
 }
 
@@ -120,9 +126,13 @@ export function countUp(scope = document) {
   if (reduce) return;
   scope.querySelectorAll('[data-count]').forEach((el) => {
     const end = +el.dataset.count, o = { v: 0 };
+    let shown = null;
     ScrollTrigger.create({
       trigger: el, start: 'top 92%', once: true,
-      onEnter: () => gsap.to(o, { v: end, duration: 1.1, ease: 'power3.out', onUpdate: () => { el.textContent = Math.round(o.v); } }),
+      onEnter: () => gsap.to(o, {
+        v: end, duration: 1.1, ease: 'power3.out',
+        onUpdate: () => { const n = Math.round(o.v); if (n !== shown) el.textContent = shown = n; },
+      }),
     });
   });
 }

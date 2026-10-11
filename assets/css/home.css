@@ -3,8 +3,10 @@
 .gl-on .gl{opacity:1}
 main{position:relative;z-index:1}
 
-.dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--ok);flex:none;animation:ping 2.6s var(--e-out) infinite}
-@keyframes ping{0%{box-shadow:0 0 0 0 rgba(111,191,149,.55)}70%,100%{box-shadow:0 0 0 10px rgba(111,191,149,0)}}
+/* пульс точки «свободен» — кольцом на псевдоэлементе через transform/opacity, без перерисовки тени */
+.dot{position:relative;display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--ok);flex:none}
+.dot::after{content:"";position:absolute;inset:0;border-radius:50%;background:var(--ok);animation:ping 2.6s var(--e-out) infinite}
+@keyframes ping{0%{transform:scale(1);opacity:.55}70%,100%{transform:scale(3.4);opacity:0}}
 
 /* ════════ первый экран ════════ */
 .hero{min-height:100svh;display:flex;align-items:flex-end;padding-block:112px 64px;overflow:clip}
@@ -41,7 +43,6 @@ main{position:relative;z-index:1}
 /* ════════ манифест ════════ */
 .manifest-kicker{margin-bottom:28px}
 .manifest-text{font-family:var(--f-display);font-size:clamp(30px,4.4vw,70px);line-height:1.08;letter-spacing:-.02em;font-stretch:87.5%;max-width:22ch}
-.manifest-text .w{transition:opacity .2s linear}
 .manifest-cols{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:clamp(32px,6vw,96px);margin-top:clamp(56px,8vw,112px);align-items:start}
 .manifest-note{color:var(--fg-2);font-size:17px;max-width:46ch}
 .pledges{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 clamp(24px,4vw,56px)}

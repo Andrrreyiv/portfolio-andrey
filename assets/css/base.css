@@ -39,9 +39,10 @@ section{position:relative;padding-block:clamp(88px,11vw,150px)}
    не перебивают друг друга (грабля 08.08: инлайновый transform глушил :active). ── */
 .btn{--tx:0px;--ty:0px;--press:1;display:inline-flex;align-items:center;justify-content:center;gap:10px;
   min-height:50px;padding:14px 26px;border-radius:100px;font-weight:600;font-size:15px;line-height:1.1;
-  transform:translate(var(--tx),var(--ty)) scale(var(--press));
+  /* сдвиг и нажатие — разные свойства с разной скоростью: магнит плавный, отклик на нажатие ≤150 мс */
+  translate:var(--tx) var(--ty);scale:var(--press);
   transition:background-color var(--t-ui) var(--e-out),color var(--t-ui) var(--e-out),
-    border-color var(--t-ui) var(--e-out),transform 380ms var(--e-out)}
+    border-color var(--t-ui) var(--e-out),translate 380ms var(--e-out),scale 140ms var(--e-out)}
 .btn:active{--press:.96}
 .btn-accent{background:var(--accent);color:var(--on-accent)}
 .btn-accent:hover{background:var(--accent-2)}
