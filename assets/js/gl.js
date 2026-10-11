@@ -12,6 +12,7 @@ uniform float uFrom, uTo, uMix, uTime, uAspect, uSize, uDpr, uMouseOn;
 uniform vec3 uAnchor[5];
 uniform float uAlpha[5];
 uniform vec2 uMouse;
+uniform vec3 uPulse;
 uniform vec3 uColA, uColB;
 out float vA; out vec3 vC;
 vec2 shape(float i){
@@ -32,13 +33,19 @@ void main(){
   float dust = (uFrom == 1. ? 1. - t : 0.) + (uTo == 1. ? t : 0.);
   float tt = uTime * .35;
   p += vec2(sin(tt * (.6 + aR.y) + aR.z * 6.283), cos(tt * (.5 + aR.x) + aR.y * 6.283)) * (.004 + .01 * aR.z + .05 * dust);
-  // курсор раздвигает точки
+  // курсор раздвигает и закручивает точки, рядом с ним они загораются акцентом
   vec2 m = p - uMouse;
-  p += normalize(m + 1e-5) * uMouseOn * smoothstep(.3, 0., length(m)) * .11;
+  vec2 nm = normalize(m + 1e-5);
+  float f = uMouseOn * smoothstep(.46, 0., length(m));
+  p += nm * f * .17 + vec2(-nm.y, nm.x) * f * .06;
+  // клик или касание: волна от точки нажатия
+  vec2 q = p - uPulse.xy;
+  float w = uPulse.z * smoothstep(.9, 0., length(q));
+  p += normalize(q + 1e-5) * w * .22;
   gl_Position = vec4(p.x / uAspect, p.y, 0., 1.);
-  gl_PointSize = uSize * uDpr * (.55 + aR.y * .9);
-  vA = mix(uAlpha[int(uFrom + .5)], uAlpha[int(uTo + .5)], t) * (.45 + .55 * aR.z);
-  vC = mix(uColA, uColB, step(.9, aR.x));
+  gl_PointSize = uSize * uDpr * (.55 + aR.y * .9) * (1. + f * .5);
+  vA = mix(uAlpha[int(uFrom + .5)], uAlpha[int(uTo + .5)], t) * (.45 + .55 * aR.z) * (1. + f * .9 + w);
+  vC = mix(mix(uColA, uColB, step(.9, aR.x)), uColB, min(1., f * 1.4 + w));
 }`;
 
 const FRAG = `#version 300 es
@@ -148,7 +155,7 @@ export function createGL(canvas, { count, layout }) {
   gl.useProgram(prog);
 
   const U = {};
-  ['uFrom', 'uTo', 'uMix', 'uTime', 'uAspect', 'uSize', 'uDpr', 'uMouseOn', 'uAnchor', 'uAlpha', 'uMouse', 'uColA', 'uColB']
+  ['uFrom', 'uTo', 'uMix', 'uTime', 'uAspect', 'uSize', 'uDpr', 'uMouseOn', 'uAnchor', 'uAlpha', 'uMouse', 'uPulse', 'uColA', 'uColB']
     .forEach((n) => { U[n] = gl.getUniformLocation(prog, n); });
 
   const vao = gl.createVertexArray();
@@ -176,7 +183,7 @@ export function createGL(canvas, { count, layout }) {
   gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
   gl.clearColor(0, 0, 0, 0);
 
-  const state = { from: 0, to: 0, mix: 0, mx: 9, my: 9, tx: 9, ty: 9, running: false, raf: 0, t0: performance.now() };
+  const state = { from: 0, to: 0, mix: 0, mx: 9, my: 9, tx: 9, ty: 9, px: 9, py: 9, pulse: 0, running: false, raf: 0, t0: performance.now() };
   let dpr = 1;
 
   function resize() {
@@ -211,6 +218,8 @@ export function createGL(canvas, { count, layout }) {
     gl.uniform1f(U.uTo, state.to);
     gl.uniform1f(U.uMix, state.mix);
     gl.uniform2f(U.uMouse, state.mx, state.my);
+    state.pulse *= .94;
+    gl.uniform3f(U.uPulse, state.px, state.py, state.pulse);
     gl.clear(gl.COLOR_BUFFER_BIT);
     gl.drawArrays(gl.POINTS, 0, count);
   }
@@ -224,6 +233,11 @@ export function createGL(canvas, { count, layout }) {
   addEventListener('pointermove', (e) => {
     state.tx = (e.clientX / innerWidth * 2 - 1) * aspect;
     state.ty = 1 - e.clientY / innerHeight * 2;
+  }, { passive: true });
+  addEventListener('pointerdown', (e) => {
+    state.px = (e.clientX / innerWidth * 2 - 1) * aspect;
+    state.py = 1 - e.clientY / innerHeight * 2;
+    state.pulse = 1;
   }, { passive: true });
   document.addEventListener('visibilitychange', () => (document.hidden ? stop() : start()));
   start();

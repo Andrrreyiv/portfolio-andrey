@@ -154,7 +154,11 @@ section{position:relative;padding-block:clamp(88px,11vw,150px)}
 }
 @media (max-width:420px){
   .logo-name{display:none}
-  .nav .btn{padding:10px 16px}
+  .nav .btn{padding:10px 16px;white-space:nowrap}
+}
+@media (max-width:360px){
+  .nav .btn{padding:10px 12px;font-size:13px}
+  .nav-tools{gap:6px}
   .nav-tools{gap:8px}
 }
 @media (prefers-reduced-motion:reduce){

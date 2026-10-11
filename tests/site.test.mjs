@@ -63,6 +63,17 @@ test('честность: у каждой цифры реального кейс
   }
 });
 
+test('честность: цифры первого экрана взяты из кейсов с источником', () => {
+  const cases = loadCases();
+  const sourced = new Set(cases.flatMap((c) => c.blocks.filter((b) => b.type === 'metrics')
+    .flatMap((b) => b.items.filter((m) => m.source).map((m) => m.v))));
+  sourced.add(String(cases.length)); // «N сайтов клиентов» = число кейсов с боевыми ссылками
+  const stats = out['index.html'].match(/<dl class="hero-stats"[\s\S]*?<\/dl>/)[0];
+  for (const [, v] of stats.matchAll(/<dt[^>]*>([^<]+)<\/dt>/g)) {
+    assert.ok(sourced.has(v.replace(/&nbsp;/g, ' ').trim()), `первый экран: у «${v}» нет источника в content/cases.json`);
+  }
+});
+
 test('у картинок есть размеры и alt', () => {
   for (const [p, html] of pages) {
     for (const [tag] of html.matchAll(/<img\b[^>]*>/g)) {

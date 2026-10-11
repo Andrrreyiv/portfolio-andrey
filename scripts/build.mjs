@@ -90,15 +90,15 @@ export function renderMain(c, all, root) {
   <a class="c-back mono" href="${root}#work"><span aria-hidden="true">←</span> Все работы</a>
   <p class="c-kicker mono"><span>${esc(c.index)}</span>${esc(c.kicker)}</p>
   <h1 class="c-title" data-split>${c.titleHtml}</h1>
-  <div class="c-intro">
-    <p class="c-lead" data-reveal>${esc(c.lead)}</p>
-    <dl class="c-meta" data-reveal>${c.meta.map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join('')}</dl>
-  </div>
   <div class="c-acts" data-reveal>
       ${links}
   </div>
 </header>
 <figure class="c-cover wrap"><div class="shot vt-${c.slug}">${img(c.cover, root, '(min-width:1320px) 1224px, 92vw', true)}</div></figure>
+<section class="c-intro wrap" aria-label="Коротко о проекте">
+  <p class="c-lead" data-reveal>${esc(c.lead)}</p>
+  <dl class="c-meta" data-reveal>${c.meta.map(([k, v]) => `<div><dt>${esc(k)}</dt><dd>${esc(v)}</dd></div>`).join('')}</dl>
+</section>
 ${c.blocks.map((b) => blocks[b.type](b, root)).join('\n')}
 <nav class="c-next" aria-label="Следующий кейс">
   <a class="wrap c-next-in" href="../${next.slug}/">

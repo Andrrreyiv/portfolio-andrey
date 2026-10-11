@@ -1,5 +1,5 @@
 // Сценарий главной страницы.
-import { gsap, ScrollTrigger, SplitText, reduce, ready, splitHeading, batchReveal, countUp } from './core.js';
+import { gsap, ScrollTrigger, SplitText, lenis, reduce, ready, splitHeading, batchReveal, countUp } from './core.js';
 
 const root = document.documentElement;
 const $ = (s, el = document) => el.querySelector(s);
@@ -16,7 +16,8 @@ ready(() => {
   work();
   bars();
   processLine();
-  principles();
+  servicePreview();
+  finale();
   startGL();
 });
 
@@ -72,18 +73,48 @@ function work() {
   mm.add('(min-width: 1024px) and (prefers-reduced-motion: no-preference)', () => {
     root.classList.add('has-pin');
     const dist = () => track.scrollWidth - innerWidth;
+    // точки доводки: начало каждой сцены и конец ленты («Ещё проекты ниже»)
+    const stops = () => [...scenes.map((sc) => Math.min(1, sc.offsetLeft / dist())), 1];
+    const cur = $('.work-count b'), bar = $('.wc-bar i');
     const tween = gsap.to(track, {
       x: () => -dist(), ease: 'none',
-      scrollTrigger: { trigger: pin, pin: true, scrub: 0.8, end: () => '+=' + dist(), invalidateOnRefresh: true, anticipatePin: 1 },
+      scrollTrigger: {
+        trigger: pin, pin: true, scrub: 0.8, end: () => '+=' + dist(), invalidateOnRefresh: true, anticipatePin: 1,
+        onUpdate(self) {
+          const pts = stops(), p = self.progress;
+          let n = 0;
+          pts.forEach((v, k) => { if (p >= v - 0.02) n = k; });
+          if (cur) cur.textContent = String(Math.min(n, scenes.length - 1) + 1).padStart(2, '0');
+          if (bar) bar.style.transform = `scaleX(${p})`;
+        },
+      },
     });
-    work01 = { st: tween.scrollTrigger, dist };
+    const st = tween.scrollTrigger;
+    work01 = { st, dist };
+    // Доводка до целой сцены через Lenis: штатный snap ScrollTrigger спорил бы с плавной прокруткой.
+    let snapT = 0;
+    const snap = () => {
+      if (!st.isActive) return;
+      const p = st.progress;
+      const near = stops().reduce((a, b) => (Math.abs(b - p) < Math.abs(a - p) ? b : a));
+      if (Math.abs(near - p) < 0.003) return;
+      const y = st.start + (st.end - st.start) * near;
+      if (lenis) lenis.scrollTo(y, { duration: 0.9 }); else scrollTo({ top: y, behavior: 'smooth' });
+    };
+    const onScroll = () => { clearTimeout(snapT); snapT = setTimeout(snap, 180); };
+    const off = lenis ? lenis.on('scroll', onScroll) : (addEventListener('scroll', onScroll, { passive: true }), () => removeEventListener('scroll', onScroll));
     scenes.forEach((sc) => {
-      const st = { trigger: sc, containerAnimation: tween, start: 'left 78%', once: true };
-      gsap.from($$('.shot', sc), { clipPath: 'inset(100% 0% 0% 0% round 18px)', duration: 1.3, ease: 'expo.out', stagger: 0.12, scrollTrigger: st });
-      gsap.from($$('.shot img', sc), { scale: 1.18, duration: 1.8, ease: 'expo.out', scrollTrigger: st });
-      gsap.from($$('.scene-text > *', sc), { x: 60, opacity: 0, duration: 1.1, ease: 'expo.out', stagger: 0.06, scrollTrigger: st });
+      const stIn = { trigger: sc, containerAnimation: tween, start: 'left 78%', once: true };
+      gsap.from($$('.shot', sc), { clipPath: 'inset(100% 0% 0% 0% round 18px)', duration: 1.3, ease: 'expo.out', stagger: 0.12, scrollTrigger: stIn });
+      gsap.from($$('.shot img', sc), { scale: 1.18, duration: 1.8, ease: 'expo.out', scrollTrigger: stIn });
+      gsap.from($$('.scene-text > *', sc), { x: 60, opacity: 0, duration: 1.1, ease: 'expo.out', stagger: 0.06, scrollTrigger: stIn });
+      // огромный номер сцены плывёт медленнее ленты — глубина без 3D
+      gsap.fromTo($('.scene-big', sc), { xPercent: 40 }, {
+        xPercent: -40, ease: 'none',
+        scrollTrigger: { trigger: sc, containerAnimation: tween, start: 'left right', end: 'right left', scrub: true },
+      });
     });
-    return () => { root.classList.remove('has-pin'); work01 = null; };
+    return () => { root.classList.remove('has-pin'); work01 = null; clearTimeout(snapT); if (typeof off === 'function') off(); };
   });
 
   mm.add('(max-width: 1023px) and (prefers-reduced-motion: no-preference)', () => {
@@ -111,45 +142,57 @@ function processLine() {
   gsap.to(line, { scaleX: 1, ease: 'none', scrollTrigger: { trigger: '.proc', start: 'top 75%', end: 'bottom 60%', scrub: 0.6 } });
 }
 
-/* ── принципы: слайдер со стрелками, точками, клавишами и свайпом ── */
-function principles() {
-  const track = $('#ttrack');
-  if (!track) return;
-  const slides = [...track.children], dotsBox = $('#tdots'), car = $('#tcar');
-  let i = 0, timer = 0;
-  const dots = slides.map((_, n) => {
-    const d = document.createElement('button');
-    d.type = 'button'; d.className = 'tdot' + (n ? '' : ' on');
-    d.setAttribute('aria-label', 'Принцип ' + (n + 1));
-    d.addEventListener('click', () => go(n, true));
-    dotsBox.appendChild(d);
-    return d;
+/* ── услуги: при наведении у курсора всплывает кадр живой работы (только мышь, без reduced-motion) ── */
+function servicePreview() {
+  const rows = $$('.svc[data-preview]');
+  if (!rows.length || reduce || !matchMedia('(pointer: fine) and (min-width: 1024px)').matches) return;
+  const box = document.createElement('figure');
+  box.className = 'svc-pv';
+  box.setAttribute('aria-hidden', 'true');
+  const img = new Image();
+  img.alt = ''; img.decoding = 'async';
+  box.appendChild(img);
+  document.body.appendChild(box);
+  // по горизонтали кадр идёт за курсором, по вертикали встаёт над строкой: наведённая строка читается целиком
+  gsap.set(box, { xPercent: -50, yPercent: -100, rotation: -3, scale: 0.86, transformOrigin: '50% 100%' });
+  const x = gsap.quickTo(box, 'x', { duration: 0.55, ease: 'power3' });
+  const y = gsap.quickTo(box, 'y', { duration: 0.55, ease: 'power3' });
+  let on = false;
+  const show = (src) => {
+    if (img.getAttribute('src') !== src) img.src = src;
+    if (on) return;
+    on = true;
+    gsap.to(box, { autoAlpha: 1, scale: 1, rotation: 0, duration: 0.5, ease: 'expo.out', overwrite: 'auto' });
+  };
+  const hide = () => {
+    on = false;
+    gsap.to(box, { autoAlpha: 0, scale: 0.86, rotation: -3, duration: 0.35, ease: 'power2.out', overwrite: 'auto' });
+  };
+  // кадры подгружаются, когда список услуг на подходе, а не при первом наведении
+  ScrollTrigger.create({
+    trigger: '.svc-list', start: 'top bottom', once: true,
+    onEnter: () => rows.forEach((r) => { new Image().src = r.dataset.preview; }),
   });
-  slides.forEach((s, n) => s.setAttribute('aria-hidden', n ? 'true' : 'false'));
-  function go(n, user) {
-    i = (n + slides.length) % slides.length;
-    track.style.transform = `translateX(${-i * 100}%)`;
-    dots.forEach((d, k) => d.classList.toggle('on', k === i));
-    slides.forEach((s, k) => s.setAttribute('aria-hidden', k === i ? 'false' : 'true'));
-    if (user) restart();
-  }
-  const start = () => { if (!reduce) timer = setInterval(() => go(i + 1), 7000); };
-  const restart = () => { clearInterval(timer); start(); };
-  $('#tprev').addEventListener('click', () => go(i - 1, true));
-  $('#tnext').addEventListener('click', () => go(i + 1, true));
-  car.addEventListener('pointerenter', () => clearInterval(timer));
-  car.addEventListener('pointerleave', start);
-  car.addEventListener('focusin', () => clearInterval(timer));
-  car.addEventListener('keydown', (e) => { if (e.key === 'ArrowLeft') go(i - 1, true); if (e.key === 'ArrowRight') go(i + 1, true); });
-  let x0 = null;
-  car.addEventListener('touchstart', (e) => { x0 = e.touches[0].clientX; }, { passive: true });
-  car.addEventListener('touchend', (e) => {
-    if (x0 === null) return;
-    const dx = e.changedTouches[0].clientX - x0;
-    if (Math.abs(dx) > 40) go(i + (dx < 0 ? 1 : -1), true);
-    x0 = null;
-  }, { passive: true });
-  start();
+  rows.forEach((r) => {
+    r.addEventListener('pointerenter', (e) => {
+      const top = r.getBoundingClientRect().top + 18;
+      if (!on) gsap.set(box, { x: e.clientX, y: top }); else y(top);
+      show(r.dataset.preview);
+    });
+    r.addEventListener('pointerleave', hide);
+  });
+  addEventListener('pointermove', (e) => { if (on) x(e.clientX); }, { passive: true });
+  addEventListener('scroll', () => { if (on) hide(); }, { passive: true });
+}
+
+/* ── финал: акцентная сцена раскрывается из скруглённой карточки по мере подхода ── */
+function finale() {
+  const el = $('#contact');
+  if (!el || reduce) return;
+  gsap.fromTo(el, { clipPath: 'inset(0% 5% 0% 5% round 48px)' }, {
+    clipPath: 'inset(0% 0% 0% 0% round 0px)', ease: 'none',
+    scrollTrigger: { trigger: el, start: 'top 95%', end: 'top 25%', scrub: 0.6 },
+  });
 }
 
 /* ══ облако частиц ══════════════════════════════════════════════════════════
