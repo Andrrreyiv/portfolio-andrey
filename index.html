@@ -53,7 +53,7 @@ setTimeout(function(){if(!window.__siteOk)d.classList.remove('js');},4000);})();
 <header class="nav" id="nav">
   <div class="wrap nav-in">
     <a href="./#top" class="logo" aria-label="Андрей Брыкун — на главную"><span class="logo-mark" aria-hidden="true">АБ</span><span class="logo-name">Андрей Брыкун</span></a>
-    <nav class="nav-links" aria-label="Разделы">
+    <nav class="nav-links" id="nav-links" aria-label="Разделы">
       <a href="./#work">Работы</a>
       <a href="./#services">Услуги</a>
       <a href="./#solutions">Решения</a>
@@ -66,6 +66,7 @@ setTimeout(function(){if(!window.__siteOk)d.classList.remove('js');},4000);})();
         <svg class="moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 14.6A8.6 8.6 0 0 1 9.4 3.5a8.6 8.6 0 1 0 11.1 11.1Z"/></svg>
       </button>
       <a href="./#contact" class="btn btn-accent" data-magnet>Обсудить задачу</a>
+      <button class="menu-btn" id="menu-btn" type="button" aria-expanded="false" aria-controls="nav-links" aria-label="Меню разделов"><span></span><span></span></button>
     </div>
   </div>
 </header>

@@ -128,14 +128,34 @@ section{position:relative;padding-block:clamp(88px,11vw,150px)}
 /* Заголовок с выездом слов ждёт скрипта, иначе он мелькнёт целиком и тут же спрячется под маску. */
 .js .hero-title,.js .c-title{visibility:hidden}
 
+/* ── меню разделов на узких экранах: кнопка-гамбургер и выпадающая панель ── */
+.menu-btn{display:none;position:relative;width:44px;height:44px;border-radius:50%;border:1px solid var(--line-2)}
+.menu-btn span{position:absolute;left:13px;right:13px;height:1.5px;background:currentColor;border-radius:2px;
+  transition:transform 300ms var(--e-out)}
+.menu-btn span:first-child{top:17px}
+.menu-btn span:last-child{top:25px}
+.nav.open .menu-btn span:first-child{transform:translateY(4px) rotate(45deg)}
+.nav.open .menu-btn span:last-child{transform:translateY(-4px) rotate(-45deg)}
+
 @media (max-width:900px){
-  .nav-links a:not(.btn){display:none}
-  .nav-links{gap:10px}
+  .menu-btn{display:block}
   .nav-in{height:64px}
+  .nav.scrolled .nav-in{height:64px}
+  .logo-mark{width:44px;height:44px}
+  .nav-links{position:fixed;inset:64px 0 auto;flex-direction:column;align-items:stretch;gap:0;
+    padding:8px var(--gut) 28px;background:var(--bg);border-bottom:1px solid var(--line);
+    opacity:0;visibility:hidden;transform:translateY(-8px);
+    transition:opacity 250ms var(--e-out),transform 250ms var(--e-out),visibility 0s linear 250ms}
+  .nav.open .nav-links{opacity:1;visibility:visible;transform:none;transition-delay:0s}
+  .nav-links a:not(.btn){font-family:var(--f-display);font-size:30px;font-stretch:87.5%;color:var(--fg);
+    padding-block:14px;border-bottom:1px solid var(--line)}
+  .nav-links a:not(.btn)::after{display:none}
+  .nav.open{background:var(--bg)}
 }
 @media (max-width:420px){
   .logo-name{display:none}
   .nav .btn{padding:10px 16px}
+  .nav-tools{gap:8px}
 }
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;

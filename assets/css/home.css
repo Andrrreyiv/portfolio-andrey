@@ -74,7 +74,10 @@ main{position:relative;z-index:1}
 
 /* Горизонтальная лента — только когда JS включил закрепление (десктоп, без reduced-motion). */
 @media (min-width:1024px){
-  .has-pin .work-pin{height:100svh;overflow:hidden}
+  /* края ленты гаснут: текст сцены, остановленной на полпути, не режется по живому (ревью UI 10.10) */
+  .has-pin .work-pin{height:100svh;overflow:hidden;
+    -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 72px,#000 calc(100% - 72px),transparent 100%);
+    mask-image:linear-gradient(90deg,transparent 0,#000 72px,#000 calc(100% - 72px),transparent 100%)}
   .has-pin .work-track{display:flex;flex-wrap:nowrap;width:max-content;max-width:none;height:100%;margin:0;padding:0;gap:0}
   .has-pin .scene{flex:none;width:min(94vw,1480px);height:100%;padding:100px clamp(40px,5vw,96px) 56px}
   .has-pin .scene-end{display:flex;flex:none;width:40vw;height:100%;align-items:center;padding-left:4vw}
@@ -222,8 +225,8 @@ main{position:relative;z-index:1}
 .tarrow:active{transform:scale(.94)}
 .tarrow svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .tdots{display:flex;gap:6px}
-.tdot{position:relative;width:34px;height:44px}
-.tdot::before{content:"";position:absolute;left:4px;right:4px;top:50%;height:2px;background:var(--line-2);transition:background-color var(--t-ui) var(--e-out)}
+.tdot{position:relative;width:44px;height:44px}
+.tdot::before{content:"";position:absolute;left:9px;right:9px;top:50%;height:2px;background:var(--line-2);transition:background-color var(--t-ui) var(--e-out)}
 .tdot.on::before{background:var(--accent)}
 
 /* ════════ 06 / вопросы ════════ */

@@ -46,10 +46,26 @@ if (nav) {
     onUpdate(self) {
       const y = self.scroll();
       nav.classList.toggle('scrolled', y > 40);
-      nav.classList.toggle('hide', y > 480 && y > last && !nav.contains(document.activeElement));
+      nav.classList.toggle('hide', y > 480 && y > last && !nav.contains(document.activeElement) && !nav.classList.contains('open'));
       last = y;
     },
   });
+
+  /* меню разделов на узких экранах: Esc, клик по пункту или поворот экрана закрывают его */
+  const btn = document.getElementById('menu-btn');
+  const setOpen = (open) => {
+    nav.classList.toggle('open', open);
+    btn.setAttribute('aria-expanded', String(open));
+    if (lenis) open ? lenis.stop() : lenis.start();
+  };
+  if (btn) {
+    btn.addEventListener('click', () => setOpen(!nav.classList.contains('open')));
+    nav.querySelectorAll('.nav-links a').forEach((a) => a.addEventListener('click', () => setOpen(false)));
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && nav.classList.contains('open')) { setOpen(false); btn.focus(); }
+    });
+    matchMedia('(min-width: 901px)').addEventListener('change', (e) => { if (e.matches) setOpen(false); });
+  }
 }
 
 /* ── прогресс прокрутки: одна линия scaleX, компоновщику — только transform ── */
