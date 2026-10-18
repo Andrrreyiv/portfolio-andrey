@@ -3,20 +3,21 @@
 // соседними формами по фазе прокрутки. Библиотек нет: Three.js стоил бы 195 КБ gzip ради
 // одного вызова drawArrays(POINTS).
 
-// Порядок форм в атрибутах: 0 «АБ», 1 пыль, 2 форма с номером, 3 облака чата, 4 стеновые панели.
-export const SHAPES = 5;
+// Порядок форм в атрибутах: 0 «АБ», 1 пыль, 2 форма с номером, 3 облака чата, 4 стеновые панели,
+// 5 окно браузера (сайт andrianov-agency.ru).
+export const SHAPES = 6;
 
 const VERT = `#version 300 es
-in vec2 aP0; in vec2 aP1; in vec2 aP2; in vec2 aP3; in vec2 aP4; in vec4 aR;
+in vec2 aP0; in vec2 aP1; in vec2 aP2; in vec2 aP3; in vec2 aP4; in vec2 aP5; in vec4 aR;
 uniform float uFrom, uTo, uMix, uTime, uAspect, uSize, uDpr, uMouseOn;
-uniform vec3 uAnchor[5];
-uniform float uAlpha[5];
+uniform vec3 uAnchor[6];
+uniform float uAlpha[6];
 uniform vec2 uMouse;
 uniform vec3 uPulse;
 uniform vec3 uColA, uColB;
 out float vA; out vec3 vC;
 vec2 shape(float i){
-  vec2 p = i < .5 ? aP0 : i < 1.5 ? aP1 : i < 2.5 ? aP2 : i < 3.5 ? aP3 : aP4;
+  vec2 p = i < .5 ? aP0 : i < 1.5 ? aP1 : i < 2.5 ? aP2 : i < 3.5 ? aP3 : i < 4.5 ? aP4 : aP5;
   vec3 a = uAnchor[int(i + .5)];
   return a.xy + p * a.z;
 }
@@ -99,6 +100,21 @@ function drawWall(ctx) {
   slats(97, 69, 4, 22, 96, 78, 9, .75);
 }
 
+function drawBrowser(ctx) {
+  // окно сайта: рамка, строка адреса, крупный заголовок, кнопка и три карточки услуг
+  const frame = () => { ctx.beginPath(); ctx.roundRect(4, 12, 92, 76, 6); };
+  frame(); ctx.fill();
+  ctx.globalCompositeOperation = 'destination-out';
+  ctx.beginPath(); ctx.roundRect(7, 21, 86, 64, 3); ctx.fill();
+  for (const x of [10, 15, 20]) { ctx.beginPath(); ctx.arc(x, 16.5, 1.6, 0, Math.PI * 2); ctx.fill(); }
+  ctx.globalCompositeOperation = 'source-over';
+  ctx.fillRect(12, 28, 46, 6); ctx.fillRect(12, 37, 34, 6);           // заголовок в две строки
+  ctx.fillRect(12, 47, 30, 1.6); ctx.fillRect(12, 50.5, 26, 1.6);     // подзаголовок
+  ctx.beginPath(); ctx.roundRect(12, 56, 18, 6, 3); ctx.fill();        // кнопка
+  ctx.beginPath(); ctx.roundRect(64, 26, 24, 38, 3); ctx.fill();       // портрет
+  for (const x of [12, 38, 64]) { ctx.beginPath(); ctx.roundRect(x, 69, 24, 13, 2); ctx.fill(); }
+}
+
 function sample(draw, n, edgeShare) {
   const S = 360, k = S / 100;
   const c = document.createElement('canvas');
@@ -175,6 +191,7 @@ export function createGL(canvas, { count, layout }) {
   buf('aP2', sample(drawJersey, count, .4), 2);
   buf('aP3', sample(drawChat, count, .4), 2);
   buf('aP4', sample(drawWall, count, .25), 2);
+  buf('aP5', sample(drawBrowser, count, .35), 2);
   const r = new Float32Array(count * 4);
   for (let i = 0; i < r.length; i++) r[i] = Math.random();
   buf('aR', r, 4);

@@ -51,6 +51,22 @@ if (nav) {
     },
   });
 
+  /* меню перенимает тон главы под собой (tokens.css, «Тона секций»): над бумагой — бумажное, над петролем —
+     петроль. Наблюдатель смотрит на настоящую вёрстку, поэтому отступ закреплённой ленты ему не мешает. */
+  // Глав одного тона несколько, поэтому тон считаем по всему набору под меню: иначе запоздалое «ушла»
+  // от одной бумажной главы снимало класс, который поставила другая.
+  const tones = document.querySelectorAll('.tone-paper, .tone-ink');
+  if (tones.length) {
+    const under = new Set();
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(({ target, isIntersecting }) => (isIntersecting ? under.add(target) : under.delete(target)));
+      const ink = [...under].some((s) => s.classList.contains('tone-ink'));
+      nav.classList.toggle('tone-ink', ink);
+      nav.classList.toggle('tone-paper', !ink && under.size > 0);
+    }, { rootMargin: '0px 0px -95% 0px' });
+    tones.forEach((sec) => io.observe(sec));
+  }
+
   /* меню разделов на узких экранах: Esc, клик по пункту или поворот экрана закрывают его */
   const btn = document.getElementById('menu-btn');
   const setOpen = (open) => {
@@ -138,6 +154,22 @@ export function batchReveal(selector) {
 }
 
 /* ── счётчики: в разметке уже стоит итоговое число, анимация только поверх ── */
+/* ── видео работ: играют только пока видны (экономия батареи и трафика), грузятся при первом показе.
+   reduced-motion и saveData — только постер: видео не стартует вовсе. ── */
+export function loopVideos(scope = document) {
+  const vids = [...scope.querySelectorAll('video.loop')];
+  if (!vids.length || reduce || navigator.connection?.saveData) return;
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(({ target: v, isIntersecting }) => {
+      if (isIntersecting) {
+        if (v.preload === 'none') { v.preload = 'auto'; v.load(); }
+        v.play().catch(() => { /* автозапуск запрещён — остаётся постер */ });
+      } else if (!v.paused) v.pause();
+    });
+  }, { threshold: 0.25 });
+  vids.forEach((v) => io.observe(v));
+}
+
 export function countUp(scope = document) {
   if (reduce) return;
   scope.querySelectorAll('[data-count]').forEach((el) => {

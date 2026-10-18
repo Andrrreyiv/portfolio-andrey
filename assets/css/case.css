@@ -23,6 +23,8 @@
 .c-body p{font-size:clamp(17px,1.35vw,20px);line-height:1.6;color:var(--fg-2);max-width:62ch}
 .c-body p+p{margin-top:20px}
 .c-block--wide{grid-template-columns:minmax(0,1fr)}
+/* цветная полоса во всю ширину: своя линия сверху блоку не нужна, край цвета и есть граница */
+.c-band>.c-block{border-top:0}
 .c-block--wide .c-h{position:static;margin-bottom:clamp(16px,3vw,40px)}
 
 .c-prods{display:grid;gap:clamp(56px,7vw,112px)}
@@ -48,6 +50,14 @@
 .c-list .mono{color:var(--accent);padding-top:4px}
 
 .c-gallery{display:grid;grid-template-columns:minmax(0,3fr) minmax(0,1fr);gap:clamp(16px,2.4vw,32px);align-items:start;padding-block:clamp(40px,5vw,72px)}
+.c-gallery .shot:nth-child(3){grid-column:1/-1}
+
+/* видео работ: квадратные и широкие — в ряд, высокое (панель ассистента) — узкой колонкой */
+.c-videos{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(16px,2.4vw,32px);align-items:start}
+.c-videos--1{grid-template-columns:minmax(0,1fr)}
+.c-videos--1 .c-video--tall{width:min(420px,100%)}
+.c-video .shot video{display:block;width:100%;height:auto}
+.c-video figcaption{margin-top:12px}
 
 .c-next{border-top:1px solid var(--line);margin-top:clamp(40px,6vw,80px)}
 .c-next-in{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px 32px;align-items:end;padding-block:clamp(56px,8vw,120px)}
@@ -59,7 +69,7 @@
 .c-next-in:hover .c-next-arr{transform:translateX(16px)}
 
 @media (max-width:900px){
-  .c-intro,.c-block,.c-prod,.c-split,.c-gallery{grid-template-columns:minmax(0,1fr)}
+  .c-intro,.c-block,.c-prod,.c-split,.c-gallery,.c-videos{grid-template-columns:minmax(0,1fr)}
   .c-metrics,.c-metrics:has(>div:nth-child(3):last-child){grid-template-columns:minmax(0,1fr)}
   .c-h{position:static}
   .c-prod:nth-child(even) .shot{order:0}

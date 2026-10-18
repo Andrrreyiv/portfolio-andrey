@@ -1,5 +1,5 @@
 // Сценарий главной страницы.
-import { gsap, ScrollTrigger, SplitText, lenis, reduce, ready, splitHeading, batchReveal, countUp } from './core.js';
+import { gsap, ScrollTrigger, SplitText, lenis, reduce, ready, splitHeading, batchReveal, countUp, loopVideos } from './core.js';
 
 const root = document.documentElement;
 const $ = (s, el = document) => el.querySelector(s);
@@ -10,6 +10,7 @@ ready(() => {
   $$('main [data-split]').forEach((h) => { if (!h.closest('.hero')) splitHeading(h); });
   batchReveal('main [data-reveal]:not(.hero [data-reveal])');
   countUp($('.hero'));
+  loopVideos();
   ticker('.ticker-track', 34);
   ticker('.contact-track', 26);
   manifesto();
@@ -106,7 +107,7 @@ function work() {
     scenes.forEach((sc) => {
       const stIn = { trigger: sc, containerAnimation: tween, start: 'left 78%', once: true };
       gsap.from($$('.shot', sc), { clipPath: 'inset(100% 0% 0% 0% round 18px)', duration: 1.3, ease: 'expo.out', stagger: 0.12, scrollTrigger: stIn });
-      gsap.from($$('.shot img', sc), { scale: 1.18, duration: 1.8, ease: 'expo.out', scrollTrigger: stIn });
+      gsap.from($$('.shot img, .shot video', sc), { scale: 1.18, duration: 1.8, ease: 'expo.out', scrollTrigger: stIn });
       gsap.from($$('.scene-text > *', sc), { x: 60, opacity: 0, duration: 1.1, ease: 'expo.out', stagger: 0.06, scrollTrigger: stIn });
       // огромный номер сцены плывёт медленнее ленты — глубина без 3D
       gsap.fromTo($('.scene-big', sc), { xPercent: 40 }, {
@@ -197,9 +198,9 @@ function finale() {
 
 /* ══ облако частиц ══════════════════════════════════════════════════════════
    Порядок по странице: «АБ» → пыль → форма (Jetron) → чат (Спаркс) → панели (Стенариум)
-   → пыль → снова «АБ» у финального призыва. Фаза — кусочно-линейная функция прокрутки
-   по опорным точкам, которые пересчитываются при каждом refresh ScrollTrigger. */
-const SEQ = [0, 1, 2, 3, 4, 1, 0];
+   → окно сайта (andrianov-agency.ru) → пыль → снова «АБ» у финального призыва. Фаза — кусочно-линейная
+   функция прокрутки по опорным точкам, которые пересчитываются при каждом refresh ScrollTrigger. */
+const SEQ = [0, 1, 2, 3, 4, 5, 1, 0];
 
 function canGL() {
   if (reduce || navigator.connection?.saveData) return false;
@@ -209,11 +210,13 @@ function canGL() {
 
 function layout(aspect) {
   const wide = aspect >= 1.2;
+  // формы сцен (2–5) стоят призраком за текстом: слева на десктопе, по центру на телефоне
+  const scene = wide ? [-aspect * 0.44, -0.04, 0.82] : [0, 0.18, aspect * 0.9];
   return wide
-    ? { anchors: [[aspect * 0.6, 0.1, 0.74], [0, 0, 1], [-aspect * 0.44, -0.04, 0.82], [-aspect * 0.44, -0.04, 0.82], [-aspect * 0.44, -0.04, 0.82]],
-        alphas: [0.82, 0.3, 0.34, 0.34, 0.34], size: 2.2 }
-    : { anchors: [[aspect * 0.2, 0.56, aspect * 0.78], [0, 0, 1], [0, 0.18, aspect * 0.9], [0, 0.18, aspect * 0.9], [0, 0.18, aspect * 0.9]],
-        alphas: [0.3, 0.26, 0.24, 0.24, 0.24], size: 1.8 };
+    ? { anchors: [[aspect * 0.6, 0.1, 0.74], [0, 0, 1], scene, scene, scene, scene],
+        alphas: [0.82, 0.3, 0.34, 0.34, 0.34, 0.34], size: 2.2 }
+    : { anchors: [[aspect * 0.2, 0.56, aspect * 0.78], [0, 0, 1], scene, scene, scene, scene],
+        alphas: [0.3, 0.26, 0.24, 0.24, 0.24, 0.24], size: 1.8 };
 }
 
 function startGL() {
@@ -246,10 +249,11 @@ function driveGL(api) {
     });
     const last = centers[centers.length - 1];
     const ct = docTop(contact) - vh * 0.35;
+    // сцена k ленты ↔ позиция k+2 в SEQ (форма, чат, панели, окно сайта)
     keys = [
-      [0, 0], [hero.offsetHeight * 0.8, 1],
-      [centers[0] - vh * 0.7, 1], [centers[0], 2], [centers[1], 3], [last, 4],
-      [last + vh * 0.9, 5], [ct - vh * 0.5, 5], [ct, 6],
+      [0, 0], [hero.offsetHeight * 0.8, 1], [centers[0] - vh * 0.7, 1],
+      ...centers.map((c, k) => [c, k + 2]),
+      [last + vh * 0.9, SEQ.length - 2], [ct - vh * 0.5, SEQ.length - 2], [ct, SEQ.length - 1],
     ];
     // опоры строго по возрастанию: на коротких экранах соседние точки могут налезть друг на друга
     for (let k = 1; k < keys.length; k++) keys[k][0] = Math.max(keys[k][0], keys[k - 1][0] + 1);

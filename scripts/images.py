@@ -27,6 +27,11 @@ SOURCES = {
 }
 if SCRATCH:
     SOURCES['sparks-site'] = (os.path.join(SCRATCH, 'sparks-viewport.png'), None)
+    # живой andrianov-agency.ru 17.10, полоса согласия скрыта стилем (не принята)
+    SOURCES['andr-home'] = (os.path.join(SCRATCH, 'andr-home-1440.png'), None)
+    SOURCES['andr-advokat'] = (os.path.join(SCRATCH, 'andr-advokat-1440.png'), None)
+    SOURCES['andr-haip'] = (os.path.join(SCRATCH, 'andr-haip-1440.png'), None)
+    SOURCES['andr-mobile'] = (os.path.join(SCRATCH, 'andr-home-390.png'), (0, 0, 780, 1688))
 
 WIDTHS = (800, 1600)
 

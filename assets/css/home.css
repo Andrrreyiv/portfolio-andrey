@@ -75,6 +75,9 @@ main{position:relative;z-index:1}
 .scene-media--portrait{min-height:clamp(420px,46vw,640px);display:flex;align-items:center;justify-content:flex-end}
 .shot-tall{width:min(360px,62%);margin-right:4%}
 .shot-back{position:absolute;left:0;top:50%;transform:translateY(-50%);width:80%;z-index:1;opacity:.5}
+/* квадратное видео (форма) по высоте экрана, футболка — вторым квадратом внахлёст справа снизу */
+.scene-media--square .shot-main{width:min(100%,64vh)}
+.scene-media--square .shot-sub{width:min(44%,34vh);right:0;bottom:-7%;border-radius:var(--r)}
 
 /* Горизонтальная лента — только когда JS включил закрепление (десктоп, без reduced-motion). */
 @media (min-width:1024px){

@@ -1,7 +1,7 @@
 // Сборка, ссылки и честность цифр. Запуск: node --test tests/*.test.mjs
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { build, loadCases, inject, ROOT } from '../scripts/build.mjs';
 
@@ -67,10 +67,43 @@ test('честность: цифры первого экрана взяты из
   const cases = loadCases();
   const sourced = new Set(cases.flatMap((c) => c.blocks.filter((b) => b.type === 'metrics')
     .flatMap((b) => b.items.filter((m) => m.source).map((m) => m.v))));
-  sourced.add(String(cases.length)); // «N сайтов клиентов» = число кейсов с боевыми ссылками
+  // Число сайтов и кейсов не показываем вовсе (владелец 17.10), поэтому «N = число кейсов» больше не источник.
   const stats = out['index.html'].match(/<dl class="hero-stats"[\s\S]*?<\/dl>/)[0];
   for (const [, v] of stats.matchAll(/<dt[^>]*>([^<]+)<\/dt>/g)) {
     assert.ok(sourced.has(v.replace(/&nbsp;/g, ' ').trim()), `первый экран: у «${v}» нет источника в content/cases.json`);
+  }
+});
+
+test('видео работ: постер, оба формата и вес до 1 МБ', () => {
+  const vids = pages.flatMap(([p, html]) => [...html.matchAll(/<video\b[^>]*>[\s\S]*?<\/video>/g)].map(([tag]) => [p, tag]));
+  assert.ok(vids.length >= 5, 'видео пропали со страниц');
+  for (const [p, tag] of vids) {
+    assert.match(tag, /^<video class="loop" muted loop playsinline preload="none" poster="[^"]+\.webp"/, `${p}: видео без постера или автозагрузка`);
+    assert.match(tag, /aria-label="[^"]{12,}"/, `${p}: у видео нет описания`);
+    const dir = join(ROOT, p, '..');
+    const files = [...tag.matchAll(/(?:poster|src)="([^"]+)"/g)].map((m) => m[1]);
+    assert.ok(files.some((f) => f.endsWith('.webm')) && files.some((f) => f.endsWith('.mp4')), `${p}: нужны webm и mp4`);
+    for (const f of files) {
+      const file = join(dir, f);
+      assert.ok(existsSync(file), `${p}: нет файла ${f}`);
+      assert.ok(statSync(file).size <= 1024 * 1024, `${p}: ${f} тяжелее 1 МБ`);
+    }
+  }
+});
+
+test('andrianov: только о новом сайте, без закрытых тем клиента', () => {
+  // Темы, которые клиент просил не публиковать, открытым текстом не пишем: репозиторий публичный.
+  // Список и причины — andrianov-site/CLAUDE.md; здесь только корни слов в base64.
+  const banned = ['0YLRjtC80LXQvQ==', '0LDQtNC80LjQvdC40YHRgtGA0LDRhg=='].map((b) => Buffer.from(b, 'base64').toString('utf8'));
+  for (const [p, html] of pages) {
+    const low = html.toLowerCase();
+    for (const w of banned) assert.ok(!low.includes(w), `${p}: закрытая тема клиента`);
+  }
+  const andr = [out['cases/andrianov/index.html'], out['index.html'].match(/<article class="scene"[^>]*aria-labelledby="s4-h"[\s\S]*?<\/article>/)[0]];
+  for (const html of andr) {
+    assert.doesNotMatch(html, /стар(ый|ого|ом) сайт|было\s*\/\s*стало|5,5\s*МБ/i, 'andrianov: речь о старом сайте');
+    // владелец 18.10: «с использованием макета в Figma», без «макета клиента»
+    assert.doesNotMatch(html, /макет[а-яё]*(&nbsp;|\s)+клиента/i, 'andrianov: «макет клиента»');
   }
 });
 

@@ -27,6 +27,14 @@ function img({ img: name, widths, w, h, alt }, root, sizes, eager = false) {
   return `<img src="${src(widths[0])}"${srcset} width="${w}" height="${h}" alt="${esc(alt)}"${load} decoding="async">`;
 }
 
+/* ── видео работы: без звука по кругу, грузится только когда видно (core.js → loopVideos),
+   при reduced-motion и saveData остаётся постер ── */
+export function video({ name, w, h, alt }, root, cls = '') {
+  const base = `${root}assets/video/${name}`;
+  return `<video class="loop${cls ? ' ' + cls : ''}" muted loop playsinline preload="none" poster="${base}.webp" width="${w}" height="${h}" aria-label="${esc(alt)}">`
+    + `<source src="${base}.webm" type="video/webm"><source src="${base}.mp4" type="video/mp4"></video>`;
+}
+
 const ext = (href, label, cls) =>
   `<a class="${cls}" href="${esc(href)}" target="_blank" rel="noopener">${esc(label)} <span aria-hidden="true">↗</span></a>`;
 
@@ -62,16 +70,28 @@ const blocks = {
   </div>
 </section>`,
 
+  // цифры и «как устроено» — на цветных полосах во всю ширину, чтобы кейс не тонул в чёрном (tokens.css, «Тона секций»)
   metrics: (b) => `
-<section class="c-block wrap">
+<div class="c-band tone-paper"><section class="c-block wrap">
   <h2 class="c-h">${esc(b.title)}</h2>
   <dl class="c-metrics">${b.items.map((m) => `<div data-reveal><dt>${figure(m.v)}</dt><dd>${esc(m.k)}</dd></div>`).join('')}</dl>
-</section>`,
+</section></div>`,
 
   list: (b) => `
-<section class="c-block wrap">
+<div class="c-band tone-ink"><section class="c-block wrap">
   <h2 class="c-h">${esc(b.title)}</h2>
   <ol class="c-list">${b.items.map((t, i) => `<li data-reveal><span class="mono">${String(i + 1).padStart(2, '0')}</span><p>${esc(t)}</p></li>`).join('')}</ol>
+</section></div>`,
+
+  video: (b, root) => `
+<section class="c-block c-block--wide wrap">
+  <h2 class="c-h">${esc(b.title)}</h2>
+  <div class="c-videos c-videos--${b.items.length}">${b.items.map((v) => `
+    <figure class="c-video${v.h > v.w ? ' c-video--tall' : ''}" data-reveal>
+      <div class="shot">${video(v, root)}</div>
+      <figcaption class="mono">${esc(v.caption)}</figcaption>
+    </figure>`).join('')}
+  </div>
 </section>`,
 
   gallery: (b, root) => `
