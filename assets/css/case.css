@@ -24,7 +24,7 @@
 .c-body p+p{margin-top:20px}
 .c-block--wide{grid-template-columns:minmax(0,1fr)}
 /* цветная полоса во всю ширину: своя линия сверху блоку не нужна, край цвета и есть граница */
-.c-band>.c-block{border-top:0}
+.c-band>.c-block,.c-band+.c-block{border-top:0}
 .c-block--wide .c-h{position:static;margin-bottom:clamp(16px,3vw,40px)}
 
 .c-prods{display:grid;gap:clamp(56px,7vw,112px)}
@@ -55,13 +55,20 @@
 /* видео работ: квадратные и широкие — в ряд, высокое (панель ассистента) — узкой колонкой */
 .c-videos{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(16px,2.4vw,32px);align-items:start}
 .c-videos--1{grid-template-columns:minmax(0,1fr)}
-.c-videos--1 .c-video--tall{width:min(420px,100%)}
+.c-videos--1 .c-video--tall{width:min(412px,100%)}   /* родная ширина видео — без размытия */
+/* одиночное высокое видео (окно Спаркса) — по центру на плите, а не у левого края с пустыми двумя третями справа */
+.c-videos--1:has(.c-video--tall){place-items:center;padding:clamp(32px,6vw,96px) clamp(16px,4vw,64px);background:var(--bg-2);border-radius:var(--r-lg)}
+.c-videos--1:has(.c-video--tall) figcaption{text-align:center}
 .c-video .shot video{display:block;width:100%;height:auto}
 .c-video figcaption{margin-top:12px}
 
 .c-next{border-top:1px solid var(--line);margin-top:clamp(40px,6vw,80px)}
 .c-next-in{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px 32px;align-items:end;padding-block:clamp(56px,8vw,120px)}
 .c-next .mono{grid-column:1/-1}
+/* обложка следующей работы: кейс ведёт картинка; на компьютере раскрывается прокруткой из карточки (case.js) */
+.c-next-shot{display:block;grid-column:1/-1;margin-top:clamp(16px,2vw,28px);aspect-ratio:21/9}
+.c-next-shot img{width:100%;height:100%;object-fit:cover;object-position:top;transition:transform 1.2s var(--e-out)}
+.c-next-in:hover .c-next-shot img{transform:scale(1.03)}
 .c-next-title{font-family:var(--f-display);font-size:clamp(36px,5.6vw,96px);line-height:.98;letter-spacing:-.03em;font-stretch:87.5%;
   transition:color var(--t-ui) var(--e-out)}
 .c-next-arr{font-size:clamp(40px,5.6vw,92px);line-height:1;color:var(--accent);transition:transform .6s var(--e-out)}

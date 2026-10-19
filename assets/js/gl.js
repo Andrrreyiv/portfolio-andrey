@@ -4,22 +4,37 @@
 // одного вызова drawArrays(POINTS).
 
 // Порядок форм в атрибутах: 0 «АБ», 1 пыль, 2 форма с номером, 3 облака чата, 4 стеновые панели,
-// 5 окно браузера (сайт andrianov-agency.ru).
-export const SHAPES = 6;
+// 5 окно браузера (сайт andrianov-agency.ru), 6 лупа, 7 сеть, 8 вопрос — последние три живут на бежевых главах.
+export const SHAPES = 9;
+const ZONES = 6;   // бежевых глав на странице меньше: шейдер смотрит не дальше uZoneN
 
 const VERT = `#version 300 es
-in vec2 aP0; in vec2 aP1; in vec2 aP2; in vec2 aP3; in vec2 aP4; in vec2 aP5; in vec4 aR;
+in vec2 aP0; in vec2 aP1; in vec2 aP2; in vec2 aP3; in vec2 aP4; in vec2 aP5; in vec2 aP6; in vec2 aP7; in vec2 aP8; in vec4 aR;
 uniform float uFrom, uTo, uMix, uTime, uAspect, uSize, uDpr, uMouseOn;
-uniform vec3 uAnchor[6];
-uniform float uAlpha[6];
+uniform vec3 uAnchor[${SHAPES}];
+uniform float uAlpha[${SHAPES}];
 uniform vec2 uMouse;
 uniform vec3 uPulse;
 uniform vec3 uColA, uColB;
-out float vA; out vec3 vC;
+// бежевые главы: верх, низ и полуширина листа в координатах экрана (-1…1), свои чернила и акцент
+uniform vec3 uZone[${ZONES}];
+uniform int uZoneN;
+uniform vec3 uPaperA, uPaperB;
+uniform float uPaperK, uEdge;
+// фигуры бежевых глав (6–8) едут вместе с главой медленнее текста — глубина без 3D; «АБ» (0) — свой сдвиг
+uniform float uShift, uShiftAB;
+out float vA; out vec3 vC; out float vP;
 vec2 shape(float i){
-  vec2 p = i < .5 ? aP0 : i < 1.5 ? aP1 : i < 2.5 ? aP2 : i < 3.5 ? aP3 : i < 4.5 ? aP4 : aP5;
+  vec2 p = i < .5 ? aP0 : i < 1.5 ? aP1 : i < 2.5 ? aP2 : i < 3.5 ? aP3 : i < 4.5 ? aP4
+         : i < 5.5 ? aP5 : i < 6.5 ? aP6 : i < 7.5 ? aP7 : aP8;
   vec3 a = uAnchor[int(i + .5)];
-  return a.xy + p * a.z;
+  return a.xy + p * a.z + vec2(0., i > 5.5 ? uShift : i < .5 ? uShiftAB : 0.);
+}
+// точка над листом бумаги: z = (верх, низ, полуширина); край по высоте мягкий на uEdge — на тач-экранах
+// прокрутка нативная, и граница, посчитанная в главном потоке, на кадр-другой отстаёт от листа
+float onPaper(vec3 z, vec2 p){
+  return smoothstep(z.y - uEdge, z.y + uEdge, p.y) * (1. - smoothstep(z.x - uEdge, z.x + uEdge, p.y))
+       * step(abs(p.x / uAspect), z.z);
 }
 void main(){
   float d = aR.w * .35;
@@ -28,8 +43,9 @@ void main(){
   vec2 a = shape(uFrom), b = shape(uTo);
   vec2 p = mix(a, b, t);
   // перелёт по дуге: каждая точка уходит вбок на свою величину и возвращается к цели
+  // (только при смене формы: «АБ → АБ» над «Обо мне» — это удержание, без разлёта)
   vec2 dir = normalize(b - a + 1e-5);
-  p += vec2(-dir.y, dir.x) * sin(t * 3.14159) * (aR.x - .5) * .55;
+  p += vec2(-dir.y, dir.x) * sin(t * 3.14159) * (aR.x - .5) * .55 * step(.5, abs(uFrom - uTo));
   // дыхание на месте; пыль дрейфует заметнее
   float dust = (uFrom == 1. ? 1. - t : 0.) + (uTo == 1. ? t : 0.);
   float tt = uTime * .35;
@@ -43,19 +59,33 @@ void main(){
   vec2 q = p - uPulse.xy;
   float w = uPulse.z * smoothstep(.9, 0., length(q));
   p += normalize(q + 1e-5) * w * .22;
+  // над бумагой та же точка печатается в две краски — чернилами и терракотой (её 20 %, а не 10 %) — и чуть
+  // крупнее: тёмная точка на светлом читается мельче светлой на тёмном. Граница цвета идёт по краю листа.
+  float paper = 0.;
+  for (int k = 0; k < ${ZONES}; k++) {
+    if (k >= uZoneN) break;
+    paper = max(paper, onPaper(uZone[k], p));
+  }
   gl_Position = vec4(p.x / uAspect, p.y, 0., 1.);
-  gl_PointSize = uSize * uDpr * (.55 + aR.y * .9) * (1. + f * .5);
-  vA = mix(uAlpha[int(uFrom + .5)], uAlpha[int(uTo + .5)], t) * (.45 + .55 * aR.z) * (1. + f * .9 + w);
-  vC = mix(mix(uColA, uColB, step(.9, aR.x)), uColB, min(1., f * 1.4 + w));
+  gl_PointSize = uSize * uDpr * (.55 + aR.y * .9) * (1. + f * .5) * mix(1., 1.15, paper);
+  vA = mix(uAlpha[int(uFrom + .5)], uAlpha[int(uTo + .5)], t) * (.45 + .55 * aR.z) * (1. + f * .9 + w)
+     * mix(1., uPaperK, paper);
+  vec3 ca = mix(uColA, uPaperA, paper), cb = mix(uColB, uPaperB, paper);
+  // угли акцента: на чёрном 14 % точек, на бумаге 20 % — печать в две краски
+  vC = mix(mix(ca, cb, step(mix(.86, .8, paper), aR.x)), cb, min(1., f * 1.4 + w));
+  vP = paper;
 }`;
 
+// На чёрном точки светятся: альфа ниже цвета, и плотные штрихи знака складываются как свет, а не сыплются
+// серым песком. На бумаге и в светлой теме (uGlow = 1) — обычная печать: тёмное на светлом светом не сложится.
 const FRAG = `#version 300 es
 precision mediump float;
-in float vA; in vec3 vC; out vec4 o;
+in float vA; in vec3 vC; in float vP; out vec4 o;
+uniform float uGlow;
 void main(){
   float a = smoothstep(.5, .12, length(gl_PointCoord - .5)) * vA;
   if (a < .01) discard;
-  o = vec4(vC * a, a);
+  o = vec4(vC * a, a * mix(uGlow, 1., vP));
 }`;
 
 /* ── формы: рисуем белым на чёрном в квадрате 100×100 условных единиц ── */
@@ -115,8 +145,37 @@ function drawBrowser(ctx) {
   for (const x of [12, 38, 64]) { ctx.beginPath(); ctx.roundRect(x, 69, 24, 13, 2); ctx.fill(); }
 }
 
+/* фигуры бежевых глав: лупа над строками страницы («Ещё проекты»: лендинги и аудит),
+   сеть с узлом-ядром («Примеры решений»: автоматизация), курсивный вопрос («Вопросы») */
+function drawLoupe(ctx) {
+  ctx.beginPath(); ctx.arc(40, 40, 31, 0, Math.PI * 2); ctx.arc(40, 40, 24, 0, Math.PI * 2, true); ctx.fill();
+  ctx.save(); ctx.translate(40, 40); ctx.rotate(Math.PI / 4);
+  ctx.beginPath(); ctx.roundRect(31, -6.5, 37, 13, 6.5); ctx.fill();
+  ctx.restore();
+  ctx.fillRect(25, 31, 30, 3.6); ctx.fillRect(25, 39, 22, 3.6); ctx.fillRect(25, 47, 26, 3.6);
+  ctx.lineWidth = 3; ctx.strokeStyle = '#fff';
+  ctx.beginPath(); ctx.arc(40, 40, 17, Math.PI * 1.08, Math.PI * 1.42); ctx.stroke();
+}
+function drawNet(ctx) {
+  const N = [[12, 22], [44, 10], [82, 20], [28, 50], [60, 44], [90, 58], [14, 84], [50, 80], [80, 90]];
+  const E = [[0, 1], [1, 2], [0, 3], [1, 4], [2, 4], [3, 4], [4, 5], [3, 6], [4, 7], [6, 7], [7, 8], [5, 8], [2, 5]];
+  ctx.lineWidth = 2.2; ctx.strokeStyle = '#fff';
+  E.forEach(([a, b]) => { ctx.beginPath(); ctx.moveTo(...N[a]); ctx.lineTo(...N[b]); ctx.stroke(); });
+  N.forEach(([x, y], i) => { ctx.beginPath(); ctx.arc(x, y, i === 4 ? 10 : 5.5, 0, Math.PI * 2); ctx.fill(); });
+  ctx.globalCompositeOperation = 'destination-out';
+  ctx.beginPath(); ctx.arc(60, 44, 5.5, 0, Math.PI * 2); ctx.fill();
+}
+function drawAsk(ctx) {
+  ctx.font = 'italic 500 104px Playfair, Georgia, serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('?', 50, 56);
+}
+
 function sample(draw, n, edgeShare) {
-  const S = 360, k = S / 100;
+  // 200 px хватает: точка всё равно разбрасывается внутри пикселя, а обход в 3,2 раза короче (на телефоне ×4
+  // одна выборка 360 px стоила 65 мс и попадала на вступление первого экрана)
+  const S = 200, k = S / 100;
   const c = document.createElement('canvas');
   c.width = c.height = S;
   const ctx = c.getContext('2d', { willReadFrequently: true });
@@ -159,8 +218,9 @@ const hex = (v) => { const n = parseInt(v.replace('#', ''), 16); return [(n >> 1
 /**
  * @param {HTMLCanvasElement} canvas
  * @param {{count:number, layout:(aspect:number)=>{anchors:number[][], alphas:number[], size:number}}} opts
+ * @returns {Promise<null | {set:Function, zones:Function, resize:Function}>}
  */
-export function createGL(canvas, { count, layout }) {
+export async function createGL(canvas, { count, layout }) {
   const gl = canvas.getContext('webgl2', { alpha: true, premultipliedAlpha: true, antialias: false, powerPreference: 'low-power' });
   if (!gl) return null;
   const prog = gl.createProgram();
@@ -171,7 +231,8 @@ export function createGL(canvas, { count, layout }) {
   gl.useProgram(prog);
 
   const U = {};
-  ['uFrom', 'uTo', 'uMix', 'uTime', 'uAspect', 'uSize', 'uDpr', 'uMouseOn', 'uAnchor', 'uAlpha', 'uMouse', 'uPulse', 'uColA', 'uColB']
+  ['uFrom', 'uTo', 'uMix', 'uTime', 'uAspect', 'uSize', 'uDpr', 'uMouseOn', 'uAnchor', 'uAlpha', 'uMouse', 'uPulse', 'uColA', 'uColB',
+    'uZone', 'uZoneN', 'uPaperA', 'uPaperB', 'uPaperK', 'uEdge', 'uShift', 'uShiftAB', 'uGlow']
     .forEach((n) => { U[n] = gl.getUniformLocation(prog, n); });
 
   const vao = gl.createVertexArray();
@@ -185,13 +246,16 @@ export function createGL(canvas, { count, layout }) {
     gl.vertexAttribPointer(loc, size, gl.FLOAT, false, 0, 0);
     return b;
   };
-  let aspect = innerWidth / innerHeight;
-  buf('aP0', sample(drawAB, count, .45), 2);
+  let aspect = innerWidth / (canvas.clientHeight || innerHeight);
   const dustBuf = buf('aP1', dust(count, aspect), 2);
-  buf('aP2', sample(drawJersey, count, .4), 2);
-  buf('aP3', sample(drawChat, count, .4), 2);
-  buf('aP4', sample(drawWall, count, .25), 2);
-  buf('aP5', sample(drawBrowser, count, .35), 2);
+  // Формы выбираются по одной в свободное время между кадрами: девять выборок 360×360 подряд —
+  // заметная заминка, если человек в этот миг листает страницу.
+  const idle = () => new Promise((r) => ('requestIdleCallback' in window ? requestIdleCallback(() => r(), { timeout: 150 }) : setTimeout(r, 16)));
+  for (const [name, draw, edge] of [['aP0', drawAB, .45], ['aP2', drawJersey, .4], ['aP3', drawChat, .4], ['aP4', drawWall, .25],
+    ['aP5', drawBrowser, .35], ['aP6', drawLoupe, .35], ['aP7', drawNet, .3], ['aP8', drawAsk, .45]]) {
+    buf(name, sample(draw, count, edge), 2);
+    await idle();
+  }
   const r = new Float32Array(count * 4);
   for (let i = 0; i < r.length; i++) r[i] = Math.random();
   buf('aR', r, 4);
@@ -200,12 +264,16 @@ export function createGL(canvas, { count, layout }) {
   gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
   gl.clearColor(0, 0, 0, 0);
 
-  const state = { from: 0, to: 0, mix: 0, mx: 9, my: 9, tx: 9, ty: 9, px: 9, py: 9, pulse: 0, running: false, raf: 0, t0: performance.now() };
-  let dpr = 1;
+  const state = { from: 0, to: 0, mix: 0, mx: 9, my: 9, tx: 9, ty: 9, px: 9, py: 9, pulse: 0, running: false, raf: 0, t0: performance.now(), shift: 0, shiftAB: 0, sy: scrollY };
+  let dpr = 1, vw = 0, vh = innerHeight;
 
   function resize() {
-    dpr = Math.min(devicePixelRatio || 1, 1.5);
-    const w = innerWidth, h = innerHeight;
+    // Холст стоит на 100lvh (home.css): на телефоне адресная строка меняет innerHeight при каждой прокрутке,
+    // а холст — нет. Пересоздавать буфер и сдвигать фигуры незачем: это и давало рывки.
+    const w = innerWidth, h = canvas.clientHeight || innerHeight;
+    const d = Math.min(devicePixelRatio || 1, 1.5);
+    if (w === vw && h === vh && d === dpr) return;
+    vw = w; vh = h; dpr = d;
     canvas.width = Math.round(w * dpr); canvas.height = Math.round(h * dpr);
     gl.viewport(0, 0, canvas.width, canvas.height);
     const a = w / h;
@@ -223,20 +291,49 @@ export function createGL(canvas, { count, layout }) {
   }
   function theme() {
     const cs = getComputedStyle(document.documentElement);
+    gl.uniform1f(U.uGlow, document.documentElement.dataset.theme === 'light' ? 1 : 0.3);
     gl.uniform3fv(U.uColA, hex(cs.getPropertyValue('--fg').trim() || '#EFE8DD'));
     gl.uniform3fv(U.uColB, hex(cs.getPropertyValue('--accent').trim() || '#FF5B2E'));
+    // цвета бумаги — с настоящей бежевой главы: светлая тема переопределяет их в tokens.css
+    const paper = document.querySelector('.tone-paper');
+    const ps = paper ? getComputedStyle(paper) : cs;
+    gl.uniform3fv(U.uPaperA, hex(ps.getPropertyValue('--fg').trim() || '#18130E'));
+    gl.uniform3fv(U.uPaperB, hex(ps.getPropertyValue('--accent').trim() || '#BF401C'));
+    gl.uniform1f(U.uPaperK, parseFloat(ps.getPropertyValue('--gl-paper-k')) || 1);
+  }
+  // бежевые главы в координатах документа: [верх, высота, ширина листа 0…1]; в кадре переводим их в координаты экрана.
+  // Ширина нужна на входе и уходе главы: лист тогда сужен до карточки, и в боковых зазорах — чёрный фон.
+  let zones = [];
+  const zbuf = new Float32Array(ZONES * 3);
+  function putZones() {
+    const n = Math.min(zones.length, ZONES);
+    for (let k = 0; k < n; k++) {
+      const top = zones[k][0] - state.sy;   // прокрутку передаёт home.js: чтение scrollY в кадре пересчитывало бы стили
+      zbuf[k * 3] = 1 - top / vh * 2;
+      zbuf[k * 3 + 1] = 1 - (top + zones[k][1]) / vh * 2;
+      zbuf[k * 3 + 2] = zones[k][2] ?? 1;
+    }
+    gl.uniform3fv(U.uZone, zbuf);
+    gl.uniform1i(U.uZoneN, n);
   }
   function frame(now) {
     state.raf = requestAnimationFrame(frame);
-    state.mx += (state.tx - state.mx) * .08;
-    state.my += (state.ty - state.my) * .08;
+    // затухания — по времени, а не по кадрам: на экране 144 Гц они иначе шли в 2,4 раза быстрее, чем на 60 Гц
+    const k = Math.min(4, (now - (state.last || now)) / 16.667) || 1;
+    state.last = now;
+    const ease = 1 - (1 - .08) ** k;
+    state.mx += (state.tx - state.mx) * ease;
+    state.my += (state.ty - state.my) * ease;
     gl.uniform1f(U.uTime, (now - state.t0) / 1000);
     gl.uniform1f(U.uFrom, state.from);
     gl.uniform1f(U.uTo, state.to);
     gl.uniform1f(U.uMix, state.mix);
     gl.uniform2f(U.uMouse, state.mx, state.my);
-    state.pulse *= .94;
+    state.pulse *= .94 ** k;
     gl.uniform3f(U.uPulse, state.px, state.py, state.pulse);
+    putZones();
+    gl.uniform1f(U.uShift, state.shift);
+    gl.uniform1f(U.uShiftAB, state.shiftAB);
     gl.clear(gl.COLOR_BUFFER_BIT);
     gl.drawArrays(gl.POINTS, 0, count);
   }
@@ -244,24 +341,36 @@ export function createGL(canvas, { count, layout }) {
   const stop = () => { state.running = false; cancelAnimationFrame(state.raf); };
 
   resize(); theme();
-  gl.uniform1f(U.uMouseOn, matchMedia('(pointer: fine)').matches ? 1 : 0);
+  const fine = matchMedia('(pointer: fine)').matches;
+  gl.uniform1f(U.uMouseOn, fine ? 1 : 0);
+  gl.uniform1f(U.uEdge, fine ? 0.004 : 0.03);
   addEventListener('resize', resize, { passive: true });
   addEventListener('themechange', theme);
   addEventListener('pointermove', (e) => {
     state.tx = (e.clientX / innerWidth * 2 - 1) * aspect;
-    state.ty = 1 - e.clientY / innerHeight * 2;
+    state.ty = 1 - e.clientY / vh * 2;
   }, { passive: true });
-  addEventListener('pointerdown', (e) => {
+  const pulse = (e) => {
     state.px = (e.clientX / innerWidth * 2 - 1) * aspect;
-    state.py = 1 - e.clientY / innerHeight * 2;
+    state.py = 1 - e.clientY / vh * 2;
     state.pulse = 1;
-  }, { passive: true });
+  };
+  // волна — от нажатия мыши; на тач-экране pointerdown приходит в начале каждого жеста прокрутки,
+  // и облако вздрагивало от любого касания, поэтому там волна только от тапа (click)
+  addEventListener('pointerdown', (e) => { if (e.pointerType === 'mouse') pulse(e); }, { passive: true });
+  if (!fine) addEventListener('click', pulse, { passive: true });
   document.addEventListener('visibilitychange', () => (document.hidden ? stop() : start()));
   start();
 
   return {
     /** Фаза между двумя формами: from/to — номера форм, mix — 0…1. */
     set(from, to, mix) { state.from = from; state.to = to; state.mix = mix; },
+    /** Бежевые главы: [[верх в документе, высота, ширина листа 0…1], …] — частицы над ними печатаются чернилами.
+        Массив читается в каждом кадре, поэтому вызывающий код меняет ширину прямо в нём. */
+    zones(list) { zones = list; },
+    /** Текущая прокрутка (из обработчика ScrollTrigger) и сдвиг фигур бежевых глав в координатах экрана. */
+    scroll(y) { state.sy = y; },
+    shift(v, ab = 0) { state.shift = v; state.shiftAB = ab; },
     resize,
   };
 }

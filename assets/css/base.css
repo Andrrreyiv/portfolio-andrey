@@ -32,7 +32,7 @@ section{position:relative;padding-block:clamp(88px,11vw,150px)}
 .sec-head{display:grid;grid-template-columns:minmax(0,1fr);gap:22px;margin-bottom:clamp(48px,7vw,96px);max-width:1100px}
 .sec-head .mono{display:flex;align-items:center;gap:14px}
 .sec-head .mono::after{content:"";height:1px;flex:0 0 64px;background:var(--line-2)}
-.sec-head h2{font-size:clamp(44px,7.4vw,120px)}
+.sec-head h2{font-size:clamp(44px,6.2vw,96px)}   /* тише заголовка первого экрана */
 .sec-head p{max-width:620px;color:var(--fg-2);font-size:clamp(17px,1.4vw,19px)}
 
 /* ── кнопки. Магнит пишет --tx/--ty, нажатие — --press: три движения в одном transform
@@ -59,6 +59,16 @@ section{position:relative;padding-block:clamp(88px,11vw,150px)}
 .chip:hover{color:var(--fg);border-color:var(--fg)}
 .shot{position:relative;border-radius:var(--r);overflow:hidden;background:var(--bg-3);border:1px solid var(--line);box-shadow:var(--shadow)}
 .shot img,.shot video{display:block;width:100%;height:auto}
+/* маска слова SplitText (core.js splitHeading, home.js hero) режет по коробке слова: курсив Playfair выступает
+   вправо (на 390 px «главное» читалось «главнос»), хвосты «у», «д», «р» уходят ниже строки с line-height 1.
+   Запас внутри маски, отрицательные поля возвращают раскладку как была; слова выезжают с 125 %, чтобы
+   не выглядывать из нижнего запаса до старта. */
+.w-mask{padding:.04em .12em .16em .04em;margin:-.04em -.12em -.16em -.04em}
+/* пока снимок в пути — блик вместо пустой рамки; core.js снимает его по load */
+.shot:has(>img)::before{content:"";position:absolute;inset:0;background:linear-gradient(100deg,transparent 25%,rgba(var(--fg-rgb),.08) 50%,transparent 75%);transform:translateX(-100%);animation:shot-wait 1.5s var(--e-io) infinite}
+.shot>img{position:relative}
+.shot.is-ready::before{content:none}
+@keyframes shot-wait{to{transform:translateX(100%)}}
 .did{display:grid;gap:10px}
 .did li{display:flex;gap:12px;color:var(--fg-2);font-size:15.5px}
 .did li::before{content:"→";color:var(--accent);font-weight:700;flex:none}
@@ -76,7 +86,7 @@ section{position:relative;padding-block:clamp(88px,11vw,150px)}
 .nav.scrolled{background:rgba(var(--bg-rgb),.86);box-shadow:0 1px 0 var(--line);
   -webkit-backdrop-filter:blur(14px) saturate(1.2);backdrop-filter:blur(14px) saturate(1.2)}
 .nav.hide{transform:translateY(-100%)}
-.nav-in{display:flex;align-items:center;justify-content:space-between;gap:20px;height:76px}
+.nav-in{display:flex;align-items:center;justify-content:space-between;gap:20px;height:76px;transition:height .35s var(--e-out)}
 .nav.scrolled .nav-in{height:64px}
 .logo{display:flex;align-items:center;gap:12px;font-weight:600;font-size:15px;letter-spacing:-.01em}
 .logo-mark{width:38px;height:38px;border-radius:50%;border:1px solid var(--line-2);display:grid;place-items:center;
@@ -172,3 +182,9 @@ section{position:relative;padding-block:clamp(88px,11vw,150px)}
   ::view-transition-new(root){animation:vt-fade 160ms linear both}
   @keyframes vt-fade{from{opacity:0}to{opacity:1}}
 }
+/* смена темы: переходы цвета внутри снимка View Transition играли на полпути — круг открывал смешанные цвета */
+:root:active-view-transition *,:root:active-view-transition *::before,:root:active-view-transition *::after{transition:none!important}
+/* телефон: полноэкранное зерно с mix-blend и размытие меню поверх холста, меняющегося каждый кадр, — лишняя работа
+   видеокарты; меню там просто плотнее */
+@media (max-width:767px){.grain{display:none}}
+@media (pointer:coarse){.nav.scrolled{-webkit-backdrop-filter:none;backdrop-filter:none;background:rgba(var(--bg-rgb),.96)}}

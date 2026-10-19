@@ -9,6 +9,12 @@ export const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 export const fine = matchMedia('(pointer: fine)').matches;
 const root = document.documentElement;
 
+// Снимок пришёл (или не придёт) — гасим блик ожидания в рамке .shot (base.css).
+document.querySelectorAll('.shot > img').forEach((img) => {
+  const done = () => img.parentElement.classList.add('is-ready');
+  if (img.complete) done(); else { img.addEventListener('load', done, { once: true }); img.addEventListener('error', done, { once: true }); }
+});
+
 /* ── плавная прокрутка. Lenis крутит тот же тик, что и GSAP: один кадр — одно обновление.
    На тач-экранах Lenis сам отдаёт прокрутку системе (syncTouch выключен по умолчанию). ── */
 export const lenis = reduce ? null : new Lenis({ lerp: 0.1 });
@@ -19,8 +25,11 @@ if (lenis) {
 }
 
 export function scrollToTarget(target) {
-  const offset = -(document.getElementById('nav')?.offsetHeight || 0) + 1;
-  if (lenis) lenis.scrollTo(target, { offset, duration: 1.4 });
+  // высота меню при прокрутке — 64 px; сверху страницы она 76, и цель уходила на 12 px
+  const offset = -63;
+  // плавный разгон и торможение (quart in-out): у Lenis по умолчанию expo-out, он срывается с места рывком
+  const ease = (t) => (t < 0.5 ? 8 * t ** 4 : 1 - (-2 * t + 2) ** 4 / 2);
+  if (lenis) lenis.scrollTo(target, { offset, duration: 1.5, easing: ease });
   else target.scrollIntoView({ block: 'start' });
 }
 
@@ -51,18 +60,16 @@ if (nav) {
     },
   });
 
-  /* меню перенимает тон главы под собой (tokens.css, «Тона секций»): над бумагой — бумажное, над петролем —
-     петроль. Наблюдатель смотрит на настоящую вёрстку, поэтому отступ закреплённой ленты ему не мешает. */
-  // Глав одного тона несколько, поэтому тон считаем по всему набору под меню: иначе запоздалое «ушла»
-  // от одной бумажной главы снимало класс, который поставила другая.
-  const tones = document.querySelectorAll('.tone-paper, .tone-ink');
+  /* меню перенимает тон главы под собой (tokens.css, «Тона секций»): над бумагой — бумажное.
+     Наблюдатель смотрит на настоящую вёрстку, поэтому отступ закреплённой ленты ему не мешает. */
+  // Бежевых глав несколько, поэтому тон считаем по всему набору под меню: иначе запоздалое «ушла»
+  // от одной главы снимало класс, который поставила другая. Слой .tone-bands лежит вне main и не считается.
+  const tones = document.querySelectorAll('main .tone-paper');
   if (tones.length) {
     const under = new Set();
     const io = new IntersectionObserver((entries) => {
       entries.forEach(({ target, isIntersecting }) => (isIntersecting ? under.add(target) : under.delete(target)));
-      const ink = [...under].some((s) => s.classList.contains('tone-ink'));
-      nav.classList.toggle('tone-ink', ink);
-      nav.classList.toggle('tone-paper', !ink && under.size > 0);
+      nav.classList.toggle('tone-paper', under.size > 0);
     }, { rootMargin: '0px 0px -95% 0px' });
     tones.forEach((sec) => io.observe(sec));
   }
@@ -86,7 +93,7 @@ if (nav) {
 
 /* ── прогресс прокрутки: одна линия scaleX, компоновщику — только transform ── */
 const bar = document.querySelector('.progress');
-if (bar) gsap.to(bar, { scaleX: 1, ease: 'none', scrollTrigger: { start: 0, end: 'max', scrub: 0.3 } });
+if (bar) gsap.to(bar, { scaleX: 1, ease: 'none', scrollTrigger: { start: 0, end: 'max', scrub: true } });   // без своего сглаживания: его даёт Lenis
 
 /* ── тема: новая вырастает кругом из кнопки. Радиус — до дальнего угла экрана,
    чтобы круг всегда закрывал страницу, где бы кнопка ни стояла. ── */
@@ -98,8 +105,8 @@ if (themeBtn) {
     const light = root.dataset.theme === 'light';
     if (light) delete root.dataset.theme; else root.dataset.theme = 'light';
     try { localStorage.setItem('theme', light ? 'dark' : 'light'); } catch (e) { /* хранилище закрыто — тема живёт до перезагрузки */ }
-    paintMeta();
-    window.dispatchEvent(new Event('themechange'));
+    // чтение стилей для meta и частиц — следующим кадром: в колбэке перехода оно стоило 16–22 мс
+    requestAnimationFrame(() => { paintMeta(); window.dispatchEvent(new Event('themechange')); });
   };
   themeBtn.addEventListener('click', () => {
     if (!document.startViewTransition || reduce) { flip(); return; }
@@ -135,10 +142,10 @@ if (fine && !reduce) {
    иначе переносы посчитаются по запасному шрифту и строки поедут. ── */
 export function splitHeading(el, { delay = 0, trigger = true } = {}) {
   if (reduce) return null;
-  const split = SplitText.create(el, { type: 'words', mask: 'words', wordsClass: 'w' });
+  const split = SplitText.create(el, { type: 'words', mask: 'words', wordsClass: 'w', reduceWhiteSpace: false });
   gsap.set(el, { visibility: 'visible' });
   const tween = gsap.from(split.words, {
-    yPercent: 110, duration: 1.15, ease: 'expo.out', stagger: 0.05, delay,
+    yPercent: 125, duration: 1.15, ease: 'expo.out', stagger: 0.05, delay,
     scrollTrigger: trigger ? { trigger: el, start: 'top 86%', once: true } : undefined,
   });
   return { split, tween };
@@ -159,29 +166,76 @@ export function batchReveal(selector) {
 export function loopVideos(scope = document) {
   const vids = [...scope.querySelectorAll('video.loop')];
   if (!vids.length || reduce || navigator.connection?.saveData) return;
+  // Играет одно видео за раз — самое крупное из видимых: два ролика разом вдвое резали частоту кадров
+  // (замер 18.10, сцена Jetron: 15,4 → 7,8 мс на кадр). Где видимых два, они сменяют друг друга по кругу:
+  // доиграл круг — пауза, играет соседний, так что и форма, и футболки остаются живыми.
+  const area = new Map();
+  let playing = null;
+  const visible = () => [...area].filter(([, a]) => a > 0).sort((x, y) => y[1] - x[1]).map(([v]) => v);
+  const start = (v) => {
+    if (playing && playing !== v) playing.pause();
+    playing = v;
+    if (!v) return;
+    if (v.preload === 'none') { v.preload = 'auto'; v.load(); }
+    v.play().catch(() => { /* автозапуск запрещён — остаётся постер */ });
+  };
   const io = new IntersectionObserver((entries) => {
-    entries.forEach(({ target: v, isIntersecting }) => {
-      if (isIntersecting) {
-        if (v.preload === 'none') { v.preload = 'auto'; v.load(); }
-        v.play().catch(() => { /* автозапуск запрещён — остаётся постер */ });
-      } else if (!v.paused) v.pause();
+    entries.forEach(({ target, isIntersecting, intersectionRatio, intersectionRect: r }) =>
+      area.set(target, isIntersecting && intersectionRatio >= 0.25 ? r.width * r.height : 0));
+    const vis = visible();
+    if (!vis.includes(playing)) start(vis[0] || null);
+  }, { threshold: [0, 0.25, 0.5, 0.75, 1] });
+  vids.forEach((v) => {
+    io.observe(v);
+    let last = 0;
+    v.addEventListener('timeupdate', () => {
+      const wrapped = v.currentTime < last - 0.5;   // loop не шлёт ended: круг узнаём по откату времени
+      last = v.currentTime;
+      if (!wrapped || v !== playing) return;
+      const vis = visible();
+      if (vis.length > 1) start(vis[(vis.indexOf(v) + 1) % vis.length]);
     });
-  }, { threshold: 0.25 });
-  vids.forEach((v) => io.observe(v));
+  });
 }
 
-export function countUp(scope = document) {
-  if (reduce) return;
-  scope.querySelectorAll('[data-count]').forEach((el) => {
-    const end = +el.dataset.count, o = { v: 0 };
-    let shown = null;
-    ScrollTrigger.create({
-      trigger: el, start: 'top 92%', once: true,
-      onEnter: () => gsap.to(o, {
-        v: end, duration: 1.1, ease: 'power3.out',
-        onUpdate: () => { const n = Math.round(o.v); if (n !== shown) el.textContent = shown = n; },
-      }),
+// Число ищем в тексте сами (разметку не трогаем, цифры по-прежнему из cases.json): «228 724», «700+», «−50%»,
+// «0,13 → 0». Приставки и хвосты остаются как есть; у «было → стало» правое число считается от левого.
+// В конце — ровно исходный текст. Ширину держим заранее, иначе соседние цифры ездили бы при счёте.
+const NUM = /\d{1,3}(?:[\s  ]\d{3})+(?:,\d+)?|\d+(?:,\d+)?/;
+const num = (s) => parseFloat(s.replace(/[\s  ]/g, '').replace(',', '.'));
+/** Готовит счёт в элементе и возвращает запуск (повторный вызов — пустой), либо null, если считать нечего. */
+export function counter(el) {
+  if (reduce) return null;
+  if (el._count) return el._count;   // уже подготовлен (смена раскладки десктоп ↔ телефон): второй раз от «0» не считать
+  const nodes = [];
+  const w = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+  while (w.nextNode()) if (/\d/.test(w.currentNode.data)) nodes.push(w.currentNode);
+  if (!nodes.length) return null;
+  const node = nodes[nodes.length - 1], orig = node.data, m = orig.match(NUM);
+  const arrow = el.textContent.includes('→') && nodes.length > 1;
+  const m0 = arrow ? nodes[0].data.match(NUM) : null;
+  const to = num(m[0]), from = m0 ? num(m0[0]) : 0;
+  const dec = Math.max((m[0].split(',')[1] || '').length, m0 ? (m0[0].split(',')[1] || '').length : 0);
+  const fmt = (v) => v.toLocaleString('ru-RU', { minimumFractionDigits: dec, maximumFractionDigits: dec }).replace(/\s/g, ' ');
+  const head = orig.slice(0, m.index), tail = orig.slice(m.index + m[0].length), o = { v: from };
+  el.style.minWidth = `${Math.ceil(el.getBoundingClientRect().width)}px`;
+  node.data = head + fmt(from) + tail;
+  let started = false;
+  return (el._count = () => {
+    if (started) return;
+    started = true;
+    gsap.to(o, {
+      v: to, duration: arrow ? 1.6 : 1.4, ease: 'expo.out', delay: 0.15,
+      onUpdate: () => { node.data = head + fmt(o.v) + tail; },
+      onComplete: () => { node.data = orig; },
     });
+  });
+}
+/** Счёт при появлении на экране (по вертикальной прокрутке). */
+export function countUp(selector) {
+  document.querySelectorAll(selector).forEach((el) => {
+    const play = counter(el);
+    if (play) ScrollTrigger.create({ trigger: el, start: 'top 92%', once: true, onEnter: play });
   });
 }
 

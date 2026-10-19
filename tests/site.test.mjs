@@ -107,6 +107,31 @@ test('andrianov: только о новом сайте, без закрытых 
   }
 });
 
+test('главы главной идут вперемежку — чёрная, бежевая, чёрная… — и петроля нет (владелец 18.10)', () => {
+  const secs = [...out['index.html'].matchAll(/<section class="([^"]*)" id="([^"]+)"/g)].map(([, cls, id]) => [id, /\btone-paper\b/.test(cls)]);
+  assert.ok(secs.length >= 8, 'главы главной не нашлись');
+  for (let i = 1; i < secs.length; i++) assert.notEqual(secs[i][1], secs[i - 1][1], `«${secs[i - 1][0]}» и «${secs[i][0]}» одного цвета`);
+  for (const [p, html] of pages) assert.doesNotMatch(html, /tone-ink/, `${p}: петроль снят`);
+});
+
+test('тире не открывает строку: в видимом тексте перед ним неразрывный пробел (владелец 18.10)', () => {
+  for (const [p, html] of pages) {
+    const text = html.replace(/<head>[\s\S]*?<\/head>/, '').replace(/<script\b[\s\S]*?<\/script>/g, '')
+      .replace(/<!--[\s\S]*?-->/g, '').replace(/<[^>]+>/g, '');
+    const bad = text.match(/.{0,30} — .{0,20}/);
+    assert.equal(bad, null, `${p}: обычный пробел перед тире — «${bad && bad[0].trim()}»`);
+  }
+});
+
+test('разбиваемые заголовки в одну строку и без двойных пробелов (SplitText с reduceWhiteSpace: false)', () => {
+  // reduceWhiteSpace: false держит «задачу&nbsp;—» одним словом, но перенос строки в разметке дал бы слово «\n»
+  for (const [p, html] of pages) {
+    for (const [, , body] of html.matchAll(/<(h[12])\b[^>]*(?:data-split|hero-title|c-title)[^>]*>([\s\S]*?)<\/\1>/g)) {
+      assert.doesNotMatch(body, /\n| {2}/, `${p}: заголовок «${body.slice(0, 40)}» с переносом строки или двойным пробелом`);
+    }
+  }
+});
+
 test('у картинок есть размеры и alt', () => {
   for (const [p, html] of pages) {
     for (const [tag] of html.matchAll(/<img\b[^>]*>/g)) {

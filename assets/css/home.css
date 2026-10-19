@@ -1,7 +1,19 @@
 /* ── WebGL-слой: один fixed-холст на всю страницу, частицы живут под контентом ── */
-.gl{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;opacity:0;transition:opacity 1.2s var(--e-out)}
+.gl{position:fixed;inset:0;width:100%;height:100%;height:100lvh;z-index:0;pointer-events:none;opacity:0;transition:opacity 1.2s var(--e-out)}
 .gl-on .gl{opacity:1}
 main{position:relative;z-index:1}
+/* фон бежевых глав — слоем ПОД холстом, чтобы частицы летали и по бумаге (home.js, paperBands).
+   Слой стоит в body раньше холста: одинаковый z-index, порядок в разметке кладёт холст сверху. */
+.tone-bands{position:absolute;top:0;left:0;right:0;z-index:0;pointer-events:none;--page:var(--bg)}
+.tone-band{position:absolute;left:0;right:0;will-change:transform;--cap:56px}
+.has-bands main>.tone-paper{background:transparent}
+/* углы листа: четверть круга цвета страницы (--page посчитан в .tone-bands, до бумажных токенов), растёт scale() */
+.tone-band .cap{position:absolute;width:var(--cap);height:var(--cap);will-change:transform;transform:scale(0)}
+.cap.tl{top:-1px;left:-1px;transform-origin:0 0;background:radial-gradient(circle at 100% 100%,transparent calc(var(--cap) - 1px),var(--page) var(--cap))}
+.cap.tr{top:-1px;right:-1px;transform-origin:100% 0;background:radial-gradient(circle at 0 100%,transparent calc(var(--cap) - 1px),var(--page) var(--cap))}
+.cap.bl{bottom:-1px;left:-1px;transform-origin:0 100%;background:radial-gradient(circle at 100% 0,transparent calc(var(--cap) - 1px),var(--page) var(--cap))}
+.cap.br{bottom:-1px;right:-1px;transform-origin:100% 100%;background:radial-gradient(circle at 0 0,transparent calc(var(--cap) - 1px),var(--page) var(--cap))}
+@media (max-width:767px){.tone-band{--cap:28px}}
 
 /* пульс точки «свободен» — кольцом на псевдоэлементе через transform/opacity, без перерисовки тени */
 .dot{position:relative;display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--ok);flex:none}
@@ -13,7 +25,8 @@ main{position:relative;z-index:1}
 .hero-in{position:relative;z-index:2;width:100%;display:grid;grid-template-columns:minmax(0,1fr) auto;
   grid-template-areas:"kick kick" "title title" "foot stats";gap:clamp(24px,3.4vw,44px) 48px;align-items:end}
 .hero-kicker{grid-area:kick;display:flex;align-items:center;gap:12px}
-.hero-title{grid-area:title;font-size:clamp(42px,min(5.8vw,9.6vh),118px);line-height:.95;letter-spacing:-.03em;max-width:17ch}
+/* первый экран — самый громкий на странице: заголовок крупнее заголовков секций (было 83 против 107 px на 1440) */
+.hero-title{grid-area:title;font-size:clamp(44px,min(6.8vw,11vh),132px);line-height:.95;letter-spacing:-.03em;max-width:17ch}
 .hero-foot{grid-area:foot;display:grid;gap:28px;max-width:600px}
 .hero-lead{color:var(--fg-2);font-size:clamp(17px,1.3vw,19px)}
 .hero-lead strong{color:var(--fg);font-weight:600}
@@ -81,10 +94,19 @@ main{position:relative;z-index:1}
 
 /* Горизонтальная лента — только когда JS включил закрепление (десктоп, без reduced-motion). */
 @media (min-width:1024px){
-  /* огромный контурный номер сцены за текстом; JS сдвигает его медленнее ленты */
+  /* огромный номер сцены за текстом, JS сдвигает его медленнее ленты. Заливкой 4,5 %, а не контуром 1 px:
+     тонкий контур при DPR 1 читался как грязь, заливка — как глубина */
   .has-pin .scene-big{display:block;position:absolute;left:clamp(16px,3vw,56px);bottom:4%;z-index:0;pointer-events:none;user-select:none;
     font-family:var(--f-display);font-style:italic;font-size:clamp(220px,min(30vw,58vh),520px);line-height:.8;letter-spacing:-.05em;
-    color:transparent;-webkit-text-stroke:1px var(--line-2)}
+    color:rgba(var(--fg-rgb),.045)}
+  /* работа — главная в кадре: медиа шире, портретное окно Спаркса в родную ширину видео (412 px), снимок сайта под ним
+     затемнён, а не полупрозрачен (мутно), у тёмного сайта Андрианова — кромка, иначе он сливается со сценой */
+  .has-pin .scene{grid-template-columns:minmax(0,4.5fr) minmax(0,6.5fr)}
+  .has-pin .shot-tall{width:min(412px,70%)}
+  .has-pin .scene-media--portrait{min-height:min(72vh,680px)}
+  .has-pin .shot-back{opacity:1}
+  .has-pin .shot-back img{filter:brightness(.55) saturate(.85)}
+  .has-pin .vt-andrianov{box-shadow:0 0 0 1px rgba(var(--fg-rgb),.14),0 40px 100px -40px rgba(0,0,0,.9)}
   .has-pin .work-pin{position:relative}
   .has-pin .work-count{display:flex;position:absolute;left:clamp(96px,8vw,140px);bottom:26px;z-index:3;align-items:center;gap:14px;
     font-size:12px;letter-spacing:.12em;color:var(--fg-3)}
@@ -277,6 +299,17 @@ main{position:relative;z-index:1}
 .contact :focus-visible{outline-color:var(--ink)}
 .contact + .foot,.home .foot{border-top:0}
 .btn-xl{min-height:64px;padding:18px 34px;font-size:17px}
+/* главная кнопка финала — по размеру сцены (было ~150 px на огромной заливке): крупнее, надпись при наведении
+   прокручивается на свой дубль, стрелка уходит вверх-вправо */
+.ct-main{min-height:clamp(64px,6vw,84px);padding:18px clamp(30px,3vw,44px);font-size:clamp(17px,1.5vw,21px);gap:14px}
+.ct-main svg{width:22px;height:22px}
+.roll{display:inline-grid;overflow:hidden;line-height:1.25}
+.roll span{grid-area:1/1;transition:transform 520ms var(--e-out)}
+.roll span+span{transform:translateY(105%)}
+@media (hover:hover) and (pointer:fine){
+  .btn:hover .roll span:first-child{transform:translateY(-105%)}
+  .btn:hover .roll span+span{transform:none}
+}
 
 /* ════════ узкие экраны ════════ */
 @media (max-width:1023px){
@@ -306,4 +339,9 @@ main{position:relative;z-index:1}
   .proc-steps{grid-template-columns:1fr}
   .tbl th,.tbl td{padding-inline:12px}
   .scene-metrics{gap:20px 28px}
+}
+/* телефон: три цифры первого экрана в один ряд — «−50%» больше не висит одна */
+@media (max-width:480px){
+  .hero-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+  .hero-stats dt{font-size:30px}
 }

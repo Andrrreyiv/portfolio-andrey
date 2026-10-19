@@ -9,7 +9,9 @@ export const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 export const SITE = 'https://andrrreyiv.github.io/portfolio-andrey/';
 const read = (p) => readFileSync(join(ROOT, p), 'utf8');
 
-const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+// тире не открывает строку: пробел перед ним неразрывный (владелец 18.10, «— предложу» в начале строки)
+const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')
+  .replace(/ — /g, '&nbsp;— ');
 const fill = (tpl, vars) => tpl.replace(/\{\{(\w+)\}\}/g, (m, k) => (k in vars ? vars[k] : m));
 // Цифра в Playfair: пробелы внутри чисел неразрывные, а стрелку рисует текстовый шрифт —
 // своя стрелка Playfair похожа на «»» и читается как кавычка (замер 10.10).
@@ -70,7 +72,7 @@ const blocks = {
   </div>
 </section>`,
 
-  // цифры и «как устроено» — на цветных полосах во всю ширину, чтобы кейс не тонул в чёрном (tokens.css, «Тона секций»)
+  // цифры — на бежевой полосе во всю ширину, «как устроено» — снова на чёрном: главы идут вперемежку (tokens.css, «Тона секций»)
   metrics: (b) => `
 <div class="c-band tone-paper"><section class="c-block wrap">
   <h2 class="c-h">${esc(b.title)}</h2>
@@ -78,10 +80,10 @@ const blocks = {
 </section></div>`,
 
   list: (b) => `
-<div class="c-band tone-ink"><section class="c-block wrap">
+<section class="c-block wrap">
   <h2 class="c-h">${esc(b.title)}</h2>
   <ol class="c-list">${b.items.map((t, i) => `<li data-reveal><span class="mono">${String(i + 1).padStart(2, '0')}</span><p>${esc(t)}</p></li>`).join('')}</ol>
-</section></div>`,
+</section>`,
 
   video: (b, root) => `
 <section class="c-block c-block--wide wrap">
@@ -109,7 +111,7 @@ export function renderMain(c, all, root) {
 <header class="c-hero wrap">
   <a class="c-back mono" href="${root}#work"><span aria-hidden="true">←</span> Все работы</a>
   <p class="c-kicker mono"><span>${esc(c.index)}</span>${esc(c.kicker)}</p>
-  <h1 class="c-title" data-split>${c.titleHtml}</h1>
+  <h1 class="c-title" data-split>${c.titleHtml.replace(/ — /g, '&nbsp;— ')}</h1>
   <div class="c-acts" data-reveal>
       ${links}
   </div>
@@ -125,6 +127,7 @@ ${c.blocks.map((b) => blocks[b.type](b, root)).join('\n')}
     <span class="mono">Следующий кейс · ${esc(next.index)}</span>
     <span class="c-next-title">${esc(next.title)}</span>
     <span class="c-next-arr" aria-hidden="true">→</span>
+    <span class="shot c-next-shot">${img({ ...next.cover, alt: '' }, root, '(min-width:1320px) 1224px, 92vw')}</span>
   </a>
 </nav>
 </main>`;
