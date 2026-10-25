@@ -4,6 +4,7 @@
 Исходники лежат вне репо (в соседних проектах) — список ниже и есть их реестр.
 """
 import os
+import sys
 from PIL import Image
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -24,6 +25,10 @@ SOURCES = {
     'gglass': (f'{ROOT}/assets/gglass-academy.png', None),
     'sheymarket': (f'{ROOT}/assets/sheymarket.png', None),
     'ux-audit': (f'{ROOT}/assets/ux-audit.png', None),
+    # englishgamematters: экраны сервера комнат с локального стенда (без адресов и QR), 24.10
+    'egm-gallery': (f'{P}/gamematters-access/docs/stand/rooms-3-gallery.png', (90, 18, 1190, 738)),
+    'egm-draw': (f'{P}/gamematters-access/docs/stand/rooms-2-student-draw.png', None),
+    'egm-speaker': (f'{P}/gamematters-access/docs/stand/rooms-6-library-speaker.png', None),
 }
 if SCRATCH:
     SOURCES['sparks-site'] = (os.path.join(SCRATCH, 'sparks-viewport.png'), None)
@@ -32,11 +37,20 @@ if SCRATCH:
     SOURCES['andr-advokat'] = (os.path.join(SCRATCH, 'andr-advokat-1440.png'), None)
     SOURCES['andr-haip'] = (os.path.join(SCRATCH, 'andr-haip-1440.png'), None)
     SOURCES['andr-mobile'] = (os.path.join(SCRATCH, 'andr-home-390.png'), (0, 0, 780, 1688))
+    # обложки кейсов без скриншотов: снимок живого фрагмента собственной страницы кейса (1440×900), 24.10
+    for slug in ('assistant', 'bot', 'ml'):
+        # снимок самого фрагмента на ровном угле (covers.py, ревью 25.10): 21:9 — «Следующий кейс» и OG, 4:3 — индекс
+        SOURCES[f'{slug}-cover'] = (os.path.join(SCRATCH, f'{slug}-cover.png'), None)
+        SOURCES[f'{slug}-thumb'] = (os.path.join(SCRATCH, f'{slug}-thumb.png'), None)
 
 WIDTHS = (800, 1600)
 
+# python scripts/images.py egm-gallery egm-draw — только названные (остальные не пережимать заново)
+ONLY = set(sys.argv[1:])
 os.makedirs(OUT, exist_ok=True)
 for name, (src, crop) in SOURCES.items():
+    if ONLY and name not in ONLY:
+        continue
     if not os.path.exists(src):
         print('нет исходника:', name, src)
         continue

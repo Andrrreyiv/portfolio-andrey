@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Машинное обучение: прогноз механических свойств металла&nbsp;— кейс Андрея Брыкуна</title>
+<meta name="description" content="Кейс под NDA: модель прогноза механических свойств металла для крупной нефтяной компании. Вход&nbsp;— химсостав, металлография и микротвёрдость; данные делятся по плавкам, модель выбирается правилом 1-SE до открытия теста, итог переносится в Excel, отчёт&nbsp;— по ГОСТ 7.32.">
+<link rel="canonical" href="https://andrrreyiv.github.io/portfolio-andrey/cases/metal-ml/">
+<meta property="og:type" content="article">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://andrrreyiv.github.io/portfolio-andrey/cases/metal-ml/">
+<meta property="og:title" content="Машинное обучение: прогноз механических свойств металла&nbsp;— кейс Андрея Брыкуна">
+<meta property="og:description" content="Кейс под NDA: модель прогноза механических свойств металла для крупной нефтяной компании. Вход&nbsp;— химсостав, металлография и микротвёрдость; данные делятся по плавкам, модель выбирается правилом 1-SE до открытия теста, итог переносится в Excel, отчёт&nbsp;— по ГОСТ 7.32.">
+<meta property="og:image" content="https://andrrreyiv.github.io/portfolio-andrey/assets/og/metal-ml.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#100E0C">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml">
+<link rel="icon" href="../../favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="../../apple-touch-icon.png">
+<link rel="preload" href="../../assets/fonts/playfair.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../../assets/fonts/onest.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="../../assets/css/tokens.css">
+<link rel="stylesheet" href="../../assets/css/base.css">
+<link rel="stylesheet" href="../../assets/css/case.css">
+<script>
+(function(){var d=document.documentElement;d.classList.add('js');
+try{if(localStorage.getItem('theme')==='light')d.dataset.theme='light';}catch(e){}
+setTimeout(function(){if(!window.__siteOk)d.classList.remove('js');},4000);})();
+</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"CreativeWork","name":"Машинное обучение: прогноз механических свойств металла","description":"Кейс под NDA: модель прогноза механических свойств металла для крупной нефтяной компании. Вход — химсостав, металлография и микротвёрдость; данные делятся по плавкам, модель выбирается правилом 1-SE до открытия теста, итог переносится в Excel, отчёт — по ГОСТ 7.32.","url":"https://andrrreyiv.github.io/portfolio-andrey/cases/metal-ml/","image":"https://andrrreyiv.github.io/portfolio-andrey/assets/og/metal-ml.png","inLanguage":"ru","dateModified":"2026-10-24","creator":{"@type":"Person","@id":"https://andrrreyiv.github.io/portfolio-andrey/#person","name":"Андрей Брыкун"}}</script>
+</head>
+<body class="case-body">
+<a class="skip" href="#main">К содержанию</a>
+<div class="grain" aria-hidden="true"></div>
+<div class="progress" aria-hidden="true"></div>
+<header class="nav" id="nav">
+  <div class="wrap nav-in">
+    <a href="../../#top" class="logo"><span class="logo-mark" aria-hidden="true">АБ</span><span class="logo-name">Андрей Брыкун</span></a>
+    <nav class="nav-links" id="nav-links" aria-label="Разделы">
+      <a href="../../#work">Работы</a>
+      <a href="../../#services">Услуги</a>
+      <a href="../../#solutions">Решения</a>
+      <a href="../../#process">Как работаю</a>
+      <a href="../../#faq">Вопросы</a>
+    </nav>
+    <div class="nav-tools">
+      <button class="theme-btn" id="theme" type="button" aria-label="Переключить светлую или тёмную тему">
+        <svg class="sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.6v2.2M12 19.2v2.2M2.6 12h2.2M19.2 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M18.7 5.3l-1.6 1.6M6.9 17.1l-1.6 1.6"/></svg>
+        <svg class="moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 14.6A8.6 8.6 0 0 1 9.4 3.5a8.6 8.6 0 1 0 11.1 11.1Z"/></svg>
+      </button>
+      <a href="../../#contact" class="btn btn-accent" data-magnet>Обсудить задачу</a>
+      <button class="menu-btn" id="menu-btn" type="button" aria-expanded="false" aria-controls="nav-links" aria-label="Меню разделов"><span></span><span></span></button>
+    </div>
+  </div>
+</header>
+
+<main id="main" class="case-main">
+<header class="c-hero wrap">
+  <div class="c-hero-txt">
+    <a class="c-back mono" href="../../#more"><span aria-hidden="true">←</span> Все работы</a>
+    <p class="c-kicker mono">Машинное обучение · NDA · 2026</p>
+    <h1 class="c-title" data-split>Прогноз свойств <em>по шлифу</em></h1>
+    <p class="c-task" data-reveal>Крупная нефтяная компания хочет оценивать механические свойства металла по химсоставу, металлографии и микротвёрдости. На мне модель и проверка, которой можно верить.</p>
+    <p class="c-num" data-reveal><span class="c-num-v" data-odo>1-SE</span><span class="c-num-k">правило выбора модели: семейство выбирается до того, как открыт тест</span></p>
+    <div class="c-acts" data-reveal>
+      <a class="btn btn-accent" data-magnet href="https://t.me/Guru_Blockchain" target="_blank" rel="noopener">Обсудить похожую задачу <span class="arr ne" aria-hidden="true">↗</span></a>
+    </div>
+  </div>
+  <div class="c-frag vt-metal-ml"><figure class="frag frag--grains" data-frag="grains">
+    <div class="gr">
+      <svg class="gr-svg" viewBox="0 0 600 760" role="img" aria-label="Иллюстрация: зёрна металлического шлифа под микроскопом; химсостав, металлография и микротвёрдость сходятся в модель прогноза свойств">
+        <defs><clipPath id="gr-field"><circle cx="300" cy="300" r="282"/></clipPath>
+          <radialGradient id="gr-vig"><stop offset=".72" stop-color="#1A1512" stop-opacity="0"/><stop offset="1" stop-color="#1A1512" stop-opacity=".34"/></radialGradient></defs>
+        <g clip-path="url(#gr-field)"><rect class="gr-bg" width="600" height="600"/><g class="gr-cells"><path class="gr-c t4" d="M138.5 486.2L135.1 470.9L154.7 434.3L203.5 439.9L207.3 445.1L177.4 485Z" data-o="171.5 458.3"/><path class="gr-c t1" d="M366.6 449L380.3 472.7L377.5 493.8L336 501.8L314.6 469.6L319.8 448.6Z" data-o="348.9 475.4"/><path class="gr-c t1" d="M509.5 271.7L531.3 260L571.8 292.4L528.4 320.9Z" data-o="539.6 286.3"/><path class="gr-c t4" d="M600 519.2L600 582.4L561.8 555.6L566.7 530.9Z" data-o="586.1 546.3"/><path class="gr-c t3" d="M600 146.8L600 159.9L559.4 188.6L548 182.3L544.9 145.7L564.6 134.6Z" data-o="567.7 163.3"/><path class="gr-c t4" d="M437.3 369.8L407.2 357.7L404.6 349.7L431.8 325.6L449 329.5L454.9 356.5Z" data-o="432.3 348.8"/><path class="gr-c t1" d="M571.8 292.4L531.3 260L542.9 238.1L555.3 234.3L570.1 242.8L574.9 292.1Z" data-o="558.8 262.3"/><path class="gr-c t2" d="M50.8 94.8L37.2 141.6L28 140.5L14.7 101.4L42.7 90.1Z" data-o="31.2 114.3"/><path class="gr-c t2" d="M433 405.1L438.3 400.6L472 402L483.6 438.2L434.1 452.3L427.1 436.4Z" data-o="454.3 422.2"/><path class="gr-c t4" d="M108.3 600L95.6 600L85.8 563.2L102.4 513.8L131.7 500.3L161.9 544.2Z" data-o="127.9 543.2"/><path class="gr-c t1" d="M98.2 249.3L90.3 284.7L69.5 301.3L36.2 289.2L25.9 274.9L63.3 241.8Z" data-o="65.1 276.9"/><path class="gr-c t3" d="M497.9 445.7L483.6 438.2L472 402L488 377.6L531.4 394.2L511.4 439.8Z" data-o="498.1 408.1"/><path class="gr-c t0" d="M263.9 300.3L280.3 320.3L270.1 347.7L233.2 333.3L221.5 308.2Z" data-o="258.1 324.8"/><path class="gr-c t4" d="M430.4 600L357.4 600L361.3 574.2L414.2 554.6L420 557.8Z" data-o="396.6 582.1"/><path class="gr-c t1" d="M600 159.9L600 208.4L566.4 203.7L559.4 188.6Z" data-o="586 189.1"/><path class="gr-c t4" d="M469.6 302.8L436.3 276.8L459.8 253.8L498.2 268.6L498.3 268.7Z" data-o="465.1 275.9"/><path class="gr-c t0" d="M404.6 349.7L407.2 357.7L393.4 389.9L375.3 399.4L366.7 394.5L357.8 350.5L370.3 340.7L385.4 337.6Z" data-o="381.7 365.4"/><path class="gr-c t2" d="M365.4 265L372.5 258.3L409.5 294.9L392.2 308L359.9 292.9Z" data-o="383 288.2"/><path class="gr-c t4" d="M0 414.1L0 343.4L24.7 344.1L36.9 405.7L32.1 410.3Z" data-o="13.4 374.9"/><path class="gr-c t4" d="M144.6 303.3L147.7 292.4L172.6 273L215.7 300.2L217.8 306.1L182.4 335.6L166.7 335.4Z" data-o="176.4 305.8"/><path class="gr-c t0" d="M29.5 341.3L36.2 289.2L69.5 301.3L75.1 338.7L67 344.1Z" data-o="50.6 317.2"/><path class="gr-c t2" d="M393.4 389.9L407.2 357.7L437.3 369.8L438.3 400.6L433 405.1Z" data-o="419.2 381.5"/><path class="gr-c t0" d="M67 344.1L75.1 338.7L101.1 341.7L106.7 381L65.8 397.1L65.2 396.9Z" data-o="85.4 369.6"/><path class="gr-c t0" d="M135.1 470.9L138.5 486.2L131.7 500.3L102.4 513.8L53.3 479.6L56.7 470.2L95.4 443.6Z" data-o="96.7 475.3"/><path class="gr-c t2" d="M90.3 284.7L98.2 249.3L100.4 248.2L147.7 292.4L144.6 303.3L118.1 314.5Z" data-o="116.3 288.4"/><path class="gr-c t2" d="M509.2 535.9L541.8 507.2L566.7 530.9L561.8 555.6L532.6 567.8L508.6 538Z" data-o="542.8 537.6"/><path class="gr-c t1" d="M308.5 166.4L274.6 196.7L261.9 191.9L247.1 163.3L262.3 129.3L296.4 116.7Z" data-o="278.8 162.4"/><path class="gr-c t3" d="M319.8 448.6L314.6 469.6L276.2 491.1L246.9 447.2L257.7 434.6L318.5 446.3Z" data-o="281.5 458.7"/><path class="gr-c t1" d="M0 270.4L0 202.6L42.7 200.5L63.3 241.8L25.9 274.9Z" data-o="28.6 235.8"/><path class="gr-c t1" d="M315.5 340.8L332.8 346.2L333.4 346.9L317.9 388.1L283.5 362.3Z" data-o="309.8 361.6"/><path class="gr-c t3" d="M447.4 0L485.7 0L509.6 59.6L500 79.8L455.6 80.9L437.2 32.4Z" data-o="477 47.5"/><path class="gr-c t0" d="M459.8 253.8L436.3 276.8L431.1 277.2L415.5 250.1L434.4 219.3L442.6 217.1L454.7 224.6Z" data-o="438 248.1"/><path class="gr-c t3" d="M122.2 409.9L117.9 387.9L149.6 370.4L167.1 390.2L150 421.6Z" data-o="141.4 395.6"/><path class="gr-c t1" d="M220.5 73L218.5 103.7L194.9 123.2L165.7 116L149 85.9L193.9 50.2Z" data-o="185.3 89"/><path class="gr-c t1" d="M498.2 268.6L459.8 253.8L454.7 224.6L494.5 215Z" data-o="478.5 241"/><path class="gr-c t2" d="M152.3 181.8L143.4 143.6L165.7 116L194.9 123.2L202.3 164.5L197.7 171.2L153.9 182.7Z" data-o="170.6 149.1"/><path class="gr-c t4" d="M380.3 472.7L366.6 449L379.1 424L427.1 436.4L434.1 452.3L433.1 455.9Z" data-o="398.3 446.8"/><path class="gr-c t0" d="M108.2 192L99.2 184.5L100.1 132.5L100.2 132.5L143.4 143.6L152.3 181.8Z" data-o="121.4 160.6"/><path class="gr-c t3" d="M261.2 403.2L255.2 390.1L275.3 361.7L283.5 362.3L317.9 388.1L321.7 401.7L319.3 405.8Z" data-o="290.2 387.8"/><path class="gr-c t2" d="M190 600L108.3 600L161.9 544.2L186.7 547.5L194.6 575.6Z" data-o="164.3 578.1"/><path class="gr-c t0" d="M95.8 433.3L65.8 397.1L106.7 381L117.9 387.9L122.2 409.9Z" data-o="99 403.9"/><path class="gr-c t1" d="M276.2 491.1L314.6 469.6L336 501.8L324.2 535.1L308.3 539.5L270.5 509Z" data-o="306.6 503.5"/><path class="gr-c t4" d="M251 565.4L245.5 548.5L258.3 514.6L270.5 509L308.3 539.5L295.4 565.6Z" data-o="272.7 545.4"/><path class="gr-c t4" d="M375.3 399.4L393.4 389.9L433 405.1L427.1 436.4L379.1 424Z" data-o="407 413.4"/><path class="gr-c t4" d="M262.3 129.3L247.1 163.3L202.3 164.5L194.9 123.2L218.5 103.7Z" data-o="226.7 139.1"/><path class="gr-c t3" d="M203.5 439.9L154.7 434.3L150 421.6L167.1 390.2L203.5 389.5Z" data-o="176.5 414.7"/><path class="gr-c t0" d="M288.8 223.1L274.6 196.7L308.5 166.4L335.4 180L312.3 227.3Z" data-o="309.1 196.4"/><path class="gr-c t0" d="M202.4 512.4L224.3 501.5L258.3 514.6L245.5 548.5L194.1 540.3Z" data-o="227.1 528.2"/><path class="gr-c t3" d="M248 600L190 600L194.6 575.6L246.4 575.3Z" data-o="221.9 588.8"/><path class="gr-c t4" d="M541.8 507.2L509.2 535.9L484.9 490.6L496 476.5L542.6 497.3Z" data-o="511.8 502.3"/><path class="gr-c t4" d="M197.7 171.2L202.3 164.5L247.1 163.3L261.9 191.9L216.8 225.4Z" data-o="228 188.6"/><path class="gr-c t4" d="M509 133.4L509.7 134.2L504.5 196.5L459.9 170.7L470.7 141.2Z" data-o="488.9 163.9"/><path class="gr-c t2" d="M177.4 485L207.3 445.1L224.8 451.7L224.3 501.5L202.4 512.4Z" data-o="204.7 483.1"/><path class="gr-c t1" d="M194.6 575.6L186.7 547.5L194.1 540.3L245.5 548.5L251 565.4L246.4 575.3Z" data-o="221.8 562"/><path class="gr-c t3" d="M502.7 333.3L485.2 368.6L454.9 356.5L449 329.5L470 311.7Z" data-o="472.2 340"/><path class="gr-c t1" d="M207.3 445.1L203.5 439.9L203.5 389.5L208 384.5L220.3 380.9L255.2 390.1L261.2 403.2L257.7 434.6L246.9 447.2L224.8 451.7Z" data-o="230.4 414.7"/><path class="gr-c t0" d="M544.9 145.7L548 182.3L506.2 199.4L504.5 196.5L509.7 134.2Z" data-o="525.3 166.9"/><path class="gr-c t0" d="M70.9 0L148.5 0L117.5 66.3L93.7 61.7L71.9 35.4L68.4 14.8Z" data-o="106.6 27.7"/><path class="gr-c t2" d="M149 85.9L165.7 116L143.4 143.6L100.2 132.5L127.5 79Z" data-o="132.4 118.2"/><path class="gr-c t0" d="M600 70.6L600 146.8L564.6 134.6L561.8 96L580.8 72.6Z" data-o="584.8 113.9"/><path class="gr-c t1" d="M442.6 217.1L434.4 219.3L400.6 204.7L393.5 187.3L417 163.2L448.6 176.4Z" data-o="423 192.6"/><path class="gr-c t2" d="M75.1 338.7L69.5 301.3L90.3 284.7L118.1 314.5L105 339.4L101.1 341.7Z" data-o="92.2 311"/><path class="gr-c t4" d="M449 329.5L431.8 325.6L415.7 294.2L431.1 277.2L436.3 276.8L469.6 302.8L470 311.7Z" data-o="442.4 304.9"/><path class="gr-c t2" d="M0 0L70.9 0L68.4 14.8L0 38Z" data-o="28.1 14.4"/><path class="gr-c t0" d="M434.4 219.3L415.5 250.1L377.7 245.6L400.6 204.7Z" data-o="407.2 229.2"/><path class="gr-c t4" d="M420 557.8L414.2 554.6L396.4 514.3L443.6 493.5L451.5 498.7L455.8 538.3Z" data-o="428.3 525.2"/><path class="gr-c t1" d="M370.3 340.7L357.8 350.5L333.4 346.9L332.8 346.2L338.2 303.1L351.6 300.4Z" data-o="349 323.8"/><path class="gr-c t3" d="M182.4 335.6L217.8 306.1L221.5 308.2L233.2 333.3L220.3 380.9L208 384.5Z" data-o="210.7 346.9"/><path class="gr-c t2" d="M0 510.5L0 414.1L32.1 410.3L56.7 470.2L53.3 479.6Z" data-o="22.3 449"/><path class="gr-c t4" d="M375.1 60.2L379.1 83.3L361.5 118.6L298.7 113.3L294 72.1L347.1 34.1Z" data-o="338.5 83.8"/><path class="gr-c t0" d="M294 72.1L298.7 113.3L296.4 116.7L262.3 129.3L218.5 103.7L220.5 73L267.5 54.8Z" data-o="253.3 93.5"/><path class="gr-c t3" d="M246.9 447.2L276.2 491.1L270.5 509L258.3 514.6L224.3 501.5L224.8 451.7Z" data-o="244.3 483.6"/><path class="gr-c t2" d="M542.9 238.1L531.3 260L509.5 271.7L498.3 268.7L498.2 268.6L494.5 215L505.8 202Z" data-o="514 238.5"/><path class="gr-c t0" d="M0 343.4L0 270.4L25.9 274.9L36.2 289.2L29.5 341.3L24.7 344.1Z" data-o="15.2 312.6"/><path class="gr-c t4" d="M100.2 132.5L100.1 132.5L87.9 129.5L65.1 95.1L93.7 61.7L117.5 66.3L127.5 79Z" data-o="92.9 98"/><path class="gr-c t2" d="M280.3 320.3L263.9 300.3L277.2 273.7L311.4 281.1L316.2 293.6L301.1 317.6Z" data-o="289.1 299.4"/><path class="gr-c t1" d="M324.2 535.1L336 501.8L377.5 493.8L390.6 511.7L351.8 553.1Z" data-o="357.8 521.5"/><path class="gr-c t1" d="M580.8 72.6L561.8 96L511.1 98.8L500 79.8L509.6 59.6L549.6 47.6Z" data-o="539.5 77.3"/><path class="gr-c t0" d="M437.2 32.4L455.6 80.9L440.4 102.4L379.1 83.3L375.1 60.2Z" data-o="417.5 70.1"/><path class="gr-c t3" d="M95.6 600L0 600L0 515.5L85.8 563.2Z" data-o="39.3 566.9"/><path class="gr-c t0" d="M552.3 0L600 0L600 70.6L580.8 72.6L549.6 47.6Z" data-o="576.3 31.3"/><path class="gr-c t0" d="M357 226.1L358.4 180L393.5 187.3L400.6 204.7L377.7 245.6L377.3 245.8Z" data-o="376.2 211.9"/><path class="gr-c t1" d="M437.3 369.8L454.9 356.5L485.2 368.6L488 377.6L472 402L438.3 400.6Z" data-o="456.1 380.4"/><path class="gr-c t0" d="M600 208.4L600 239.7L570.1 242.8L555.3 234.3L566.4 203.7Z" data-o="581.2 223.1"/><path class="gr-c t0" d="M600 582.4L600 600L527.1 600L532.6 567.8L561.8 555.6Z" data-o="561.3 581.7"/><path class="gr-c t4" d="M396.4 514.3L414.2 554.6L361.3 574.2L351.8 553.1L390.6 511.7Z" data-o="382.9 545.2"/><path class="gr-c t3" d="M263.9 300.3L221.5 308.2L217.8 306.1L215.7 300.2L234.4 250.5L267.4 254L277.2 273.7Z" data-o="249.6 279.5"/><path class="gr-c t3" d="M105 339.4L118.1 314.5L144.6 303.3L166.7 335.4L150 356.8Z" data-o="135.6 334"/><path class="gr-c t1" d="M600 239.7L600 300.1L574.9 292.1L570.1 242.8Z" data-o="585 259.8"/><path class="gr-c t3" d="M600 349.4L600 424.6L583.8 425L539.1 390.9L552 358.4Z" data-o="576.1 385.5"/><path class="gr-c t2" d="M184.7 0L259.7 0L267.5 54.8L220.5 73L193.9 50.2Z" data-o="230.9 35.8"/><path class="gr-c t3" d="M600 300.1L600 349.4L552 358.4L526.9 325.6L528.4 320.9L571.8 292.4L574.9 292.1Z" data-o="564.6 324.4"/><path class="gr-c t2" d="M304.7 600L248 600L246.4 575.3L251 565.4L295.4 565.6Z" data-o="272.5 585.6"/><path class="gr-c t3" d="M385.4 337.6L370.3 340.7L351.6 300.4L359.9 292.9L392.2 308Z" data-o="371.2 313.6"/><path class="gr-c t2" d="M364.7 125.4L413 143.5L417 163.2L393.5 187.3L358.4 180L356.3 178.1Z" data-o="387.4 157.8"/><path class="gr-c t0" d="M494.5 215L454.7 224.6L442.6 217.1L448.6 176.4L459.9 170.7L504.5 196.5L506.2 199.4L505.8 202Z" data-o="468.4 199.3"/><path class="gr-c t4" d="M564.6 134.6L544.9 145.7L509.7 134.2L509 133.4L511.1 98.8L561.8 96Z" data-o="541.7 117.1"/><path class="gr-c t2" d="M455.8 538.3L451.5 498.7L484.9 490.6L509.2 535.9L508.6 538L477.6 550.7Z" data-o="479.8 519.5"/><path class="gr-c t4" d="M259.7 0L345.7 0L347.1 34.1L294 72.1L267.5 54.8Z" data-o="297.4 26.2"/><path class="gr-c t4" d="M49.7 150.4L37.2 141.6L50.8 94.8L65.1 95.1L87.9 129.5Z" data-o="56.9 121.8"/><path class="gr-c t4" d="M100.4 248.2L98.2 249.3L63.3 241.8L42.7 200.5L54.4 185.9L99.2 184.5L108.2 192L104.4 243.4Z" data-o="79.4 210.4"/><path class="gr-c t0" d="M0 150.2L0 98.4L14.7 101.4L28 140.5Z" data-o="9.5 121.7"/><path class="gr-c t4" d="M0 202.6L0 150.2L28 140.5L37.2 141.6L49.7 150.4L54.4 185.9L42.7 200.5Z" data-o="25.1 166.8"/><path class="gr-c t1" d="M95.4 443.6L56.7 470.2L32.1 410.3L36.9 405.7L65.2 396.9L65.8 397.1L95.8 433.3Z" data-o="66.3 431"/><path class="gr-c t2" d="M531.4 394.2L488 377.6L485.2 368.6L502.7 333.3L526.9 325.6L552 358.4L539.1 390.9Z" data-o="515.8 361.6"/><path class="gr-c t0" d="M409.5 294.9L372.5 258.3L377.3 245.8L377.7 245.6L415.5 250.1L431.1 277.2L415.7 294.2Z" data-o="402.5 268.5"/><path class="gr-c t2" d="M600 424.6L600 489.3L553.7 482.8L550.6 456.1L583.8 425Z" data-o="578.1 464.9"/><path class="gr-c t0" d="M233.2 333.3L270.1 347.7L275.3 361.7L255.2 390.1L220.3 380.9Z" data-o="245.7 356.4"/><path class="gr-c t4" d="M216.8 225.4L261.9 191.9L274.6 196.7L288.8 223.1L267.4 254L234.4 250.5L216.7 225.9Z" data-o="255.3 225.3"/><path class="gr-c t1" d="M413 143.5L364.7 125.4L361.5 118.6L379.1 83.3L440.4 102.4L440.6 108.6Z" data-o="403.1 115.9"/><path class="gr-c t0" d="M148.5 0L184.7 0L193.9 50.2L149 85.9L127.5 79L117.5 66.3Z" data-o="154.1 49.8"/><path class="gr-c t0" d="M332.8 346.2L315.5 340.8L301.1 317.6L316.2 293.6L338.2 303.1Z" data-o="322.7 320.5"/><path class="gr-c t0" d="M509.5 271.7L528.4 320.9L526.9 325.6L502.7 333.3L470 311.7L469.6 302.8L498.3 268.7Z" data-o="497 302.6"/><path class="gr-c t0" d="M474.7 600L430.4 600L420 557.8L455.8 538.3L477.6 550.7Z" data-o="452 568.5"/><path class="gr-c t1" d="M106.7 381L101.1 341.7L105 339.4L150 356.8L149.6 370.4L117.9 387.9Z" data-o="123.9 364"/><path class="gr-c t2" d="M321.7 401.7L317.9 388.1L333.4 346.9L357.8 350.5L366.7 394.5Z" data-o="341.5 373.5"/><path class="gr-c t1" d="M600 489.3L600 519.2L566.7 530.9L541.8 507.2L542.6 497.3L553.7 482.8Z" data-o="572.3 506.7"/><path class="gr-c t0" d="M71.9 35.4L93.7 61.7L65.1 95.1L50.8 94.8L42.7 90.1L34.4 63.5Z" data-o="57.9 68.1"/><path class="gr-c t4" d="M49.7 150.4L87.9 129.5L100.1 132.5L99.2 184.5L54.4 185.9Z" data-o="77.8 159.8"/><path class="gr-c t3" d="M366.6 449L319.8 448.6L318.5 446.3L319.3 405.8L321.7 401.7L366.7 394.5L375.3 399.4L379.1 424Z" data-o="349.3 422.3"/><path class="gr-c t0" d="M317 231.5L312.3 227.3L335.4 180L356.3 178.1L358.4 180L357 226.1Z" data-o="338.7 210.8"/><path class="gr-c t2" d="M215.7 300.2L172.6 273L173.1 239.9L216.7 225.9L234.4 250.5Z" data-o="203.9 262.3"/><path class="gr-c t1" d="M311.4 281.1L277.2 273.7L267.4 254L288.8 223.1L312.3 227.3L317 231.5L323.2 261.1Z" data-o="298.5 255.2"/><path class="gr-c t2" d="M470.7 141.2L459.9 170.7L448.6 176.4L417 163.2L413 143.5L440.6 108.6Z" data-o="442.1 146.8"/><path class="gr-c t1" d="M36.9 405.7L24.7 344.1L29.5 341.3L67 344.1L65.2 396.9Z" data-o="46.8 368.3"/><path class="gr-c t1" d="M434.1 452.3L483.6 438.2L497.9 445.7L496 476.5L484.9 490.6L451.5 498.7L443.6 493.5L433.1 455.9Z" data-o="467.1 467.3"/><path class="gr-c t4" d="M509 133.4L470.7 141.2L440.6 108.6L440.4 102.4L455.6 80.9L500 79.8L511.1 98.8Z" data-o="478.6 113.2"/><path class="gr-c t2" d="M42.7 90.1L14.7 101.4L0 98.4L0 47.6L34.4 63.5Z" data-o="17.7 80.6"/><path class="gr-c t0" d="M345.7 0L447.4 0L437.2 32.4L375.1 60.2L347.1 34.1Z" data-o="396 22.1"/><path class="gr-c t2" d="M372.5 258.3L365.4 265L323.2 261.1L317 231.5L357 226.1L377.3 245.8Z" data-o="343.4 245.8"/><path class="gr-c t1" d="M357.4 600L304.7 600L295.4 565.6L308.3 539.5L324.2 535.1L351.8 553.1L361.3 574.2Z" data-o="325.3 571.3"/><path class="gr-c t2" d="M270.1 347.7L280.3 320.3L301.1 317.6L315.5 340.8L283.5 362.3L275.3 361.7Z" data-o="294.1 338.2"/><path class="gr-c t3" d="M153.9 182.7L197.7 171.2L216.8 225.4L216.7 225.9L173.1 239.9L164.6 233.5Z" data-o="185 203.8"/><path class="gr-c t0" d="M335.4 180L308.5 166.4L296.4 116.7L298.7 113.3L361.5 118.6L364.7 125.4L356.3 178.1Z" data-o="333 149.2"/><path class="gr-c t4" d="M104.4 243.4L108.2 192L152.3 181.8L153.9 182.7L164.6 233.5Z" data-o="133.9 214.5"/><path class="gr-c t2" d="M511.4 439.8L531.4 394.2L539.1 390.9L583.8 425L550.6 456.1Z" data-o="543.7 428.1"/><path class="gr-c t4" d="M161.9 544.2L131.7 500.3L138.5 486.2L177.4 485L202.4 512.4L194.1 540.3L186.7 547.5Z" data-o="173.1 512"/><path class="gr-c t2" d="M542.6 497.3L496 476.5L497.9 445.7L511.4 439.8L550.6 456.1L553.7 482.8Z" data-o="525.8 471"/><path class="gr-c t0" d="M0 515.5L0 510.5L53.3 479.6L102.4 513.8L85.8 563.2Z" data-o="64.3 521.8"/><path class="gr-c t0" d="M154.7 434.3L135.1 470.9L95.4 443.6L95.8 433.3L122.2 409.9L150 421.6Z" data-o="125.4 433.6"/><path class="gr-c t2" d="M527.1 600L474.7 600L477.6 550.7L508.6 538L532.6 567.8Z" data-o="501 571.4"/><path class="gr-c t1" d="M548 182.3L559.4 188.6L566.4 203.7L555.3 234.3L542.9 238.1L505.8 202L506.2 199.4Z" data-o="542.6 209.1"/><path class="gr-c t4" d="M167.1 390.2L149.6 370.4L150 356.8L166.7 335.4L182.4 335.6L208 384.5L203.5 389.5Z" data-o="175.6 365.3"/><path class="gr-c t1" d="M318.5 446.3L257.7 434.6L261.2 403.2L319.3 405.8Z" data-o="288.7 421.1"/><path class="gr-c t1" d="M485.7 0L552.3 0L549.6 47.6L509.6 59.6Z" data-o="524.8 28.3"/><path class="gr-c t2" d="M365.4 265L359.9 292.9L351.6 300.4L338.2 303.1L316.2 293.6L311.4 281.1L323.2 261.1Z" data-o="340.3 279.8"/><path class="gr-c t0" d="M431.8 325.6L404.6 349.7L385.4 337.6L392.2 308L409.5 294.9L415.7 294.2Z" data-o="408.8 322.2"/><path class="gr-c t4" d="M172.6 273L147.7 292.4L100.4 248.2L104.4 243.4L164.6 233.5L173.1 239.9Z" data-o="141.7 261.3"/><path class="gr-c t2" d="M68.4 14.8L71.9 35.4L34.4 63.5L0 47.6L0 38Z" data-o="36.6 39.6"/><path class="gr-c t1" d="M377.5 493.8L380.3 472.7L433.1 455.9L443.6 493.5L396.4 514.3L390.6 511.7Z" data-o="409.9 483.4"/></g><g class="gr-inc"><circle cx="393.8" cy="486.4" r="1.4"/><circle cx="115.4" cy="587.7" r="2.8"/><circle cx="492.6" cy="457" r="2.9"/><circle cx="167.8" cy="196.4" r="2.5"/><circle cx="98.4" cy="302.6" r="1.8"/><circle cx="582.9" cy="369.7" r="3.5"/><circle cx="434.5" cy="368.5" r="2.4"/><circle cx="171.3" cy="139.5" r="1.4"/><circle cx="499.7" cy="536.4" r="1.5"/><circle cx="35.5" cy="465.7" r="3.2"/><circle cx="185.1" cy="411.3" r="2.6"/><circle cx="368.4" cy="25.6" r="3.3"/><circle cx="212.6" cy="442.3" r="2"/><circle cx="484.6" cy="372" r="3"/></g>
+          <circle cx="300" cy="300" r="282" fill="url(#gr-vig)"/></g>
+        <circle class="gr-ring" cx="300" cy="300" r="282"/>
+        <path class="gr-ret" d="M300 30V70M300 530V570M30 300H70M530 300H570"/>
+        <path class="gr-bar" d="M412 528H500"/>
+        <g class="gr-flow">
+          <path class="gr-ln" pathLength="1" d="M300 582C300 612 110 604 110 636"/><path class="gr-ln" pathLength="1" d="M300 582V636"/><path class="gr-ln" pathLength="1" d="M300 582C300 612 490 604 490 636"/>
+          <g class="gr-in"><rect x="38" y="636" width="144" height="40" rx="20"/><text x="110" y="662">Химсостав</text></g>
+          <g class="gr-in"><rect x="218" y="636" width="164" height="40" rx="20"/><text x="300" y="662">Металлография</text></g>
+          <g class="gr-in"><rect x="408" y="636" width="164" height="40" rx="20"/><text x="490" y="662">Микротвёрдость</text></g>
+          <path class="gr-ln" pathLength="1" d="M110 676C110 704 300 696 300 718"/><path class="gr-ln" pathLength="1" d="M300 676V718"/><path class="gr-ln" pathLength="1" d="M490 676C490 704 300 696 300 718"/>
+          <g class="gr-model"><rect x="190" y="718" width="220" height="40" rx="20"/><text x="300" y="744">Модель → свойства</text></g>
+        </g>
+      </svg>
+    </div>
+    <figcaption class="frag-cap mono">Иллюстрация: шлиф нарисован кодом, это не данные заказчика</figcaption>
+  </figure></div>
+</header>
+<section class="c-intro wrap" aria-label="Коротко о проекте">
+  <p class="c-lead" data-reveal>Сведения и результаты закрыты NDA, поэтому показываю только логику. Её задача&nbsp;— не дать модели обмануть ни меня, ни заказчика: данные делятся по плавкам, модель выбирается до открытия теста, а итог сравнивается с простой планкой.</p>
+  <dl class="c-meta" data-reveal><div><dt>Клиент</dt><dd>крупная нефтяная компания (NDA)</dd></div><div><dt>Год</dt><dd>2026</dd></div><div><dt>Роль</dt><dd>данные, модели, схема проверки, перенос в Excel, отчёт</dd></div><div><dt>Итог</dt><dd>модель в Excel обычными формулами, отчёт по ГОСТ 7.32</dd></div></dl>
+</section>
+
+<section class="c-block wrap">
+  <h2 class="c-h">Задача</h2>
+  <div class="c-body"><p data-reveal>Заказчику нужна модель, которая по уже измеренным характеристикам&nbsp;— химсоставу, шлифу и микротвёрдости&nbsp;— оценивает механические свойства металла.</p><p data-reveal>Главный риск таких моделей&nbsp;— красивая оценка на проверке, которая не повторится на новых плавках. Поэтому основную работу я вложил в схему проверки.</p></div>
+</section>
+
+<section class="c-block c-block--wide wrap">
+  <h2 class="c-h">Логика проверки</h2>
+  <figure class="c-dg">
+    <div class="dg dg--wide"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 456" class="dg dg-wide" aria-labelledby="ml-title ml-desc" role="img" aria-label="Схема: входные данные&nbsp;— химсостав, металлография, микротвёрдость; разбиение по плавкам; вложенная кросс-проверка трёх семейств моделей; выбор семейства правилом 1-SE до открытия теста; тест открывается один раз; сравнение с прогнозом медианой; физическая проверка и устойчивость к пустым входам; модель в Excel и отчёт по ГОСТ 7.32.">
+<title id="ml-title">Логика проверки модели свойств металла</title>
+<desc id="ml-desc">Входные данные делятся по плавкам, три семейства моделей проходят вложенную кросс-проверку, семейство выбирается правилом 1-SE до открытия теста, тест открывается один раз, модель сравнивается с планкой и проходит физическую проверку, а результатом становятся модель в Excel на обычных формулах и отчёт по ГОСТ 7.32.</desc>
+<style>
+.dg-box{fill:var(--bg-2);stroke:var(--line-2);stroke-width:1.25}
+.dg-acc{stroke:var(--accent);stroke-width:1.5}
+.dg-off{fill:none;stroke-dasharray:4 5}
+.dg-edge{fill:none;stroke:var(--line-2);stroke-width:1.5}
+.dg-alt{stroke-dasharray:5 6}
+.dg-rule{fill:none;stroke:var(--line-2);stroke-width:1}
+.dg-tip{fill:none;stroke:var(--fg-3);stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.dg-dot{fill:var(--fg-3)}
+.dg-btn{fill:none;stroke:var(--accent);stroke-width:1.25}
+.dg-t{font-family:var(--f-text);font-size:18px;font-weight:500;fill:var(--fg)}
+.dg-t.dg-dim{fill:var(--fg-2)}
+.dg-s{font-family:var(--f-text);font-size:15px;fill:var(--fg-2)}
+.dg-m{font-family:var(--f-mono);font-size:13px;letter-spacing:.06em;fill:var(--fg-3)}
+.dg-h{font-family:var(--f-display);font-size:28px;fill:var(--fg)}
+.dg-tall .dg-t{font-size:22px}
+.dg-tall .dg-s{font-size:18px}
+.dg-tall .dg-m{font-size:16px}
+.dg-tall .dg-h{font-size:32px}
+</style>
+<defs>
+<marker id="ml-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path class="dg-tip" d="M2.5 1.5 9 5 2.5 8.5"/></marker>
+</defs>
+<g class="dg-node">
+<rect class="dg-box" x="24" y="24" width="208" height="142" rx="12"/>
+<text class="dg-t" x="42" y="62">Входные данные</text>
+<path class="dg-rule" d="M42 78H214"/>
+<text class="dg-s" x="42" y="102">химсостав</text>
+<text class="dg-s" x="42" y="123">металлография</text>
+<text class="dg-s" x="42" y="144">микротвёрдость</text>
+</g>
+<path class="dg-edge" pathLength="1" d="M232 56H288" marker-end="url(#ml-arrow)"/>
+<g class="dg-node">
+<rect class="dg-box" x="288" y="24" width="252" height="120" rx="12"/>
+<text class="dg-t" x="306" y="62">Разбиение по плавкам</text>
+<path class="dg-rule" d="M306 78H522"/>
+<text class="dg-s" x="306" y="102">одна плавка целиком</text>
+<text class="dg-s" x="306" y="123">в обучении или в проверке</text>
+</g>
+<path class="dg-edge" pathLength="1" d="M540 56H596" marker-end="url(#ml-arrow)"/>
+<g class="dg-node">
+<rect class="dg-box" x="596" y="24" width="284" height="88" rx="12"/>
+<text class="dg-t" x="614" y="62">Вложенная кросс-проверка</text>
+<text class="dg-t" x="614" y="86">трёх семейств моделей</text>
+</g>
+<path class="dg-edge" pathLength="1" d="M880 56H936" marker-end="url(#ml-arrow)"/>
+<g class="dg-node">
+<rect class="dg-box" x="936" y="24" width="240" height="124" rx="12"/>
+<text class="dg-t" x="954" y="62">Выбор семейства</text>
+<text class="dg-t" x="954" y="86">правилом 1-SE</text>
+<path class="dg-rule" d="M954 102H1158"/>
+<text class="dg-s" x="954" y="126">до открытия теста</text>
+</g>
+<path class="dg-edge" pathLength="1" d="M1056 148V196Q1056 204 1048 204H136Q128 204 128 212V260" marker-end="url(#ml-arrow)"/>
+<g class="dg-node">
+<rect class="dg-box dg-acc" x="24" y="260" width="208" height="88" rx="12"/>
+<text class="dg-t" x="42" y="298">Тест открывается</text>
+<text class="dg-t" x="42" y="322">один раз</text>
+</g>
+<path class="dg-edge" pathLength="1" d="M232 292H288" marker-end="url(#ml-arrow)"/>
+<g class="dg-node">
+<rect class="dg-box" x="288" y="260" width="252" height="88" rx="12"/>
+<text class="dg-t" x="306" y="298">Сравнение с планкой:</text>
+<text class="dg-t" x="306" y="322">прогноз медианой</text>
+</g>
+<path class="dg-edge" pathLength="1" d="M540 292H596" marker-end="url(#ml-arrow)"/>
+<g class="dg-node">
+<rect class="dg-box" x="596" y="260" width="284" height="112" rx="12"/>
+<text class="dg-t" x="614" y="298">Физическая проверка</text>
+<text class="dg-t" x="614" y="322">и устойчивость</text>
+<text class="dg-t" x="614" y="346">к пустым входам</text>
+</g>
+<path class="dg-edge" pathLength="1" d="M880 292H936" marker-end="url(#ml-arrow)"/>
+<g class="dg-node">
+<rect class="dg-box" x="936" y="260" width="240" height="88" rx="12"/>
+<text class="dg-t" x="954" y="298">Модель в Excel</text>
+<text class="dg-t" x="954" y="322">обычными формулами</text>
+</g>
+<path class="dg-edge" pathLength="1" d="M880 340H900Q908 340 908 348V392Q908 400 916 400H936" marker-end="url(#ml-arrow)"/>
+<g class="dg-node">
+<rect class="dg-box" x="936" y="368" width="240" height="64" rx="12"/>
+<text class="dg-t" x="954" y="406">Отчёт по ГОСТ 7.32</text>
+</g>
+</svg></div>
+    <div class="dg dg--tall"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 1202" class="dg dg-tall" aria-labelledby="ml-tall-title ml-tall-desc" role="img" aria-label="Схема: входные данные&nbsp;— химсостав, металлография, микротвёрдость; разбиение по плавкам; вложенная кросс-проверка трёх семейств моделей; выбор семейства правилом 1-SE до открытия теста; тест открывается один раз; сравнение с прогнозом медианой; физическая проверка и устойчивость к пустым входам; модель в Excel и отчёт по ГОСТ 7.32.">
+<title id="ml-tall-title">Логика проверки модели свойств металла</title>
+<desc id="ml-tall-desc">Входные данные делятся по плавкам, три семейства моделей проходят вложенную кросс-проверку, семейство выбирается правилом 1-SE до открытия теста, тест открывается один раз, модель сравнивается с планкой и проходит физическую проверку, а результатом становятся модель в Excel на обычных формулах и отчёт по ГОСТ 7.32.</desc>
+<style>
+.dg-box{fill:var(--bg-2);stroke:var(--line-2);stroke-width:1.25}
+.dg-acc{stroke:var(--accent);stroke-width:1.5}
+.dg-off{fill:none;stroke-dasharray:4 5}
+.dg-edge{fill:none;stroke:var(--line-2);stroke-width:1.5}
+.dg-alt{stroke-dasharray:5 6}
+.dg-rule{fill:none;stroke:var(--line-2);stroke-width:1}
+.dg-tip{fill:none;stroke:var(--fg-3);stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.dg-dot{fill:var(--fg-3)}
+.dg-btn{fill:none;stroke:var(--accent);stroke-width:1.25}
+.dg-t{font-family:var(--f-text);font-size:18px;font-weight:500;fill:var(--fg)}
+.dg-t.dg-dim{fill:var(--fg-2)}
+.dg-s{font-family:var(--f-text);font-size:15px;fill:var(--fg-2)}
+.dg-m{font-family:var(--f-mono);font-size:13px;letter-spacing:.06em;fill:var(--fg-3)}
+.dg-h{font-family:var(--f-display);font-size:28px;fill:var(--fg)}
+.dg-tall .dg-t{font-size:22px}
+.dg-tall .dg-s{font-size:18px}
+.dg-tall .dg-m{font-size:16px}
+.dg-tall .dg-h{font-size:32px}
+</style>
+<defs>
+<marker id="ml-tall-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="13" markerHeight="13" markerUnits="userSpaceOnUse" orient="auto"><path class="dg-tip" d="M2.5 1.5 9 5 2.5 8.5"/></marker>
+</defs>
+<g class="dg-node">
+<rect class="dg-box" x="24" y="24" width="512" height="116" rx="14"/>
+<text class="dg-t" x="46" y="66">Входные данные</text>
+<path class="dg-rule" d="M46 86H514"/>
+<text class="dg-s" x="46" y="116">химсостав · металлография · микротвёрдость</text>
+</g>
+<path class="dg-edge" pathLength="1" d="M280 140V184" marker-end="url(#ml-tall-arrow)"/>
+<g class="dg-node">
+<rect class="dg-box" x="24" y="184" width="512" height="142" rx="14"/>
+<text class="dg-t" x="46" y="226">Разбиение по плавкам</text>
+<path class="dg-rule" d="M46 246H514"/>
+<text class="dg-s" x="46" y="276">одна плавка целиком</text>
+<text class="dg-s" x="46" y="302">в обучении или в проверке</text>
+</g>
+<path class="dg-edge" pathLength="1" d="M280 326V370" marker-end="url(#ml-tall-arrow)"/>
+<g class="dg-node">
+<rect class="dg-box" x="24" y="370" width="512" height="96" rx="14"/>
+<text class="dg-t" x="46" y="412">Вложенная кросс-проверка</text>
+<text class="dg-t" x="46" y="440">трёх семейств моделей</text>
+</g>
+<path class="dg-edge" pathLength="1" d="M280 466V510" marker-end="url(#ml-tall-arrow)"/>
+<g class="dg-node">
+<rect class="dg-box" x="24" y="510" width="512" height="116" rx="14"/>
+<text class="dg-t" x="46" y="552">Выбор семейства правилом 1-SE</text>
+<path class="dg-rule" d="M46 572H514"/>
+<text class="dg-s" x="46" y="602">до открытия теста</text>
+</g>
+<path class="dg-edge" pathLength="1" d="M280 626V670" marker-end="url(#ml-tall-arrow)"/>
+<g class="dg-node">
+<rect class="dg-box dg-acc" x="24" y="670" width="512" height="68" rx="14"/>
+<text class="dg-t" x="46" y="712">Тест открывается один раз</text>
+</g>
+<path class="dg-edge" pathLength="1" d="M280 738V782" marker-end="url(#ml-tall-arrow)"/>
+<g class="dg-node">
+<rect class="dg-box" x="24" y="782" width="512" height="96" rx="14"/>
+<text class="dg-t" x="46" y="824">Сравнение с планкой:</text>
+<text class="dg-t" x="46" y="852">прогноз медианой</text>
+</g>
+<path class="dg-edge" pathLength="1" d="M280 878V922" marker-end="url(#ml-tall-arrow)"/>
+<g class="dg-node">
+<rect class="dg-box" x="24" y="922" width="512" height="96" rx="14"/>
+<text class="dg-t" x="46" y="964">Физическая проверка</text>
+<text class="dg-t" x="46" y="992">и устойчивость к пустым входам</text>
+</g>
+<path class="dg-edge" pathLength="1" d="M168 1018V1082" marker-end="url(#ml-tall-arrow)"/>
+<g class="dg-node">
+<rect class="dg-box" x="24" y="1082" width="288" height="96" rx="14"/>
+<text class="dg-t" x="46" y="1124">Модель в Excel</text>
+<text class="dg-t" x="46" y="1152">обычными формулами</text>
+</g>
+<path class="dg-edge" pathLength="1" d="M432 1018V1082" marker-end="url(#ml-tall-arrow)"/>
+<g class="dg-node">
+<rect class="dg-box" x="328" y="1082" width="208" height="96" rx="14"/>
+<text class="dg-t" x="350" y="1124">Отчёт по</text>
+<text class="dg-t" x="350" y="1152">ГОСТ 7.32</text>
+</g>
+</svg></div>
+    <figcaption class="mono">От входных данных до модели в Excel</figcaption>
+  </figure>
+</section>
+<div class="c-band tone-paper">
+<section class="c-block wrap">
+  <h2 class="c-h">Почему проверке можно верить</h2>
+  <ol class="c-steps"><li data-reveal><span class="c-step-n mono">01</span><h3>Разбиение по плавкам</h3><p>Одна плавка целиком попадает либо в обучение, либо в проверку: модель не узнаёт знакомый металл.</p></li><li data-reveal><span class="c-step-n mono">02</span><h3>Вложенная кросс-проверка</h3><p>Три семейства моделей сравниваются на внутренних разбиениях, а внешние разбиения оценивают сам выбор.</p></li><li data-reveal><span class="c-step-n mono">03</span><h3>Правило 1-SE</h3><p>Из близких по качеству берётся самая простая модель, и решение фиксируется до открытия теста.</p></li><li data-reveal><span class="c-step-n mono">04</span><h3>Тест открывается один раз</h3><p>Отложенные данные смотрятся в самом конце, подогнать под них уже нечего.</p></li><li data-reveal><span class="c-step-n mono">05</span><h3>Планка и физика</h3><p>Модель обязана обойти прогноз медианой, не спорить с физикой и не падать на пустых входах.</p></li><li data-reveal><span class="c-step-n mono">06</span><h3>Итог для инженеров</h3><p>Модель переносится в Excel обычными формулами, к ней&nbsp;— отчёт по ГОСТ 7.32.</p></li></ol>
+</section></div>
+<section class="c-cta wrap" aria-labelledby="cta-h">
+  <p class="mono">Нужно похожее?</p>
+  <h2 id="cta-h" class="c-cta-h">Расскажите задачу&nbsp;— <em>предложу решение</em></h2>
+  <a class="btn btn-accent" data-magnet href="https://t.me/Guru_Blockchain" target="_blank" rel="noopener">Обсудить в Telegram <span class="arr ne" aria-hidden="true">↗</span></a>
+</section>
+<nav class="c-next" aria-label="Следующий кейс">
+  <a class="wrap c-next-in" href="../jetron/">
+    <span class="mono">Следующий кейс · Конструкторы товаров</span>
+    <span class="c-next-title">Jetron&nbsp;— три онлайн-конструктора для магазина спортивной формы</span>
+    <span class="c-next-arr" aria-hidden="true">→</span>
+    <span class="shot c-next-shot"><img src="../../assets/img/jetron-form-800.webp" srcset="../../assets/img/jetron-form-800.webp 800w, ../../assets/img/jetron-form-1280.webp 1280w" sizes="(min-width:1320px) 1224px, 92vw" width="1280" height="820" alt="" loading="lazy" decoding="async"></span>
+  </a>
+</nav>
+</main>
+<footer class="foot">
+  <div class="wrap foot-in">
+    <a href="../../#top" class="logo"><span class="logo-mark" aria-hidden="true">АБ</span><span>Андрей Брыкун</span></a>
+    <nav class="foot-links" aria-label="Разделы внизу">
+      <a href="../../#work">Работы</a>
+      <a href="../../#services">Услуги</a>
+      <a href="../../#process">Как работаю</a>
+      <a href="https://t.me/Guru_Blockchain" target="_blank" rel="noopener">Telegram</a>
+      <a href="../../#contact">Контакты</a>
+    </nav>
+    <p class="copy">© 2026 · Решения, которые работают на бизнес</p>
+  </div>
+</footer>
+
+<script defer src="../../assets/vendor/gsap.min.js"></script>
+<script defer src="../../assets/vendor/ScrollTrigger.min.js"></script>
+<script defer src="../../assets/vendor/SplitText.min.js"></script>
+<script defer src="../../assets/vendor/lenis.min.js"></script>
+<script type="module" src="../../assets/js/case.js"></script>
+</body>
+</html>

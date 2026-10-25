@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 1202" class="dg dg-tall" role="img" aria-labelledby="ml-tall-title ml-tall-desc">
+<title id="ml-tall-title">Логика проверки модели свойств металла</title>
+<desc id="ml-tall-desc">Входные данные делятся по плавкам, три семейства моделей проходят вложенную кросс-проверку, семейство выбирается правилом 1-SE до открытия теста, тест открывается один раз, модель сравнивается с планкой и проходит физическую проверку, а результатом становятся модель в Excel на обычных формулах и отчёт по ГОСТ 7.32.</desc>
+<style>
+.dg-box{fill:var(--bg-2);stroke:var(--line-2);stroke-width:1.25}
+.dg-acc{stroke:var(--accent);stroke-width:1.5}
+.dg-off{fill:none;stroke-dasharray:4 5}
+.dg-edge{fill:none;stroke:var(--line-2);stroke-width:1.5}
+.dg-alt{stroke-dasharray:5 6}
+.dg-rule{fill:none;stroke:var(--line-2);stroke-width:1}
+.dg-tip{fill:none;stroke:var(--fg-3);stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.dg-dot{fill:var(--fg-3)}
+.dg-btn{fill:none;stroke:var(--accent);stroke-width:1.25}
+.dg-t{font-family:var(--f-text);font-size:18px;font-weight:500;fill:var(--fg)}
+.dg-t.dg-dim{fill:var(--fg-2)}
+.dg-s{font-family:var(--f-text);font-size:15px;fill:var(--fg-2)}
+.dg-m{font-family:var(--f-mono);font-size:13px;letter-spacing:.06em;fill:var(--fg-3)}
+.dg-h{font-family:var(--f-display);font-size:28px;fill:var(--fg)}
+.dg-tall .dg-t{font-size:22px}
+.dg-tall .dg-s{font-size:18px}
+.dg-tall .dg-m{font-size:16px}
+.dg-tall .dg-h{font-size:32px}
+</style>
+<defs>
+<marker id="ml-tall-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="13" markerHeight="13" markerUnits="userSpaceOnUse" orient="auto"><path class="dg-tip" d="M2.5 1.5 9 5 2.5 8.5"/></marker>
+</defs>
+<g class="dg-node">
+<rect class="dg-box" x="24" y="24" width="512" height="116" rx="14"/>
+<text class="dg-t" x="46" y="66">Входные данные</text>
+<path class="dg-rule" d="M46 86H514"/>
+<text class="dg-s" x="46" y="116">химсостав · металлография · микротвёрдость</text>
+</g>
+<path class="dg-edge" pathLength="1" d="M280 140V184" marker-end="url(#ml-tall-arrow)"/>
+<g class="dg-node">
+<rect class="dg-box" x="24" y="184" width="512" height="142" rx="14"/>
+<text class="dg-t" x="46" y="226">Разбиение по плавкам</text>
+<path class="dg-rule" d="M46 246H514"/>
+<text class="dg-s" x="46" y="276">одна плавка целиком</text>
+<text class="dg-s" x="46" y="302">в обучении или в проверке</text>
+</g>
+<path class="dg-edge" pathLength="1" d="M280 326V370" marker-end="url(#ml-tall-arrow)"/>
+<g class="dg-node">
+<rect class="dg-box" x="24" y="370" width="512" height="96" rx="14"/>
+<text class="dg-t" x="46" y="412">Вложенная кросс-проверка</text>
+<text class="dg-t" x="46" y="440">трёх семейств моделей</text>
+</g>
+<path class="dg-edge" pathLength="1" d="M280 466V510" marker-end="url(#ml-tall-arrow)"/>
+<g class="dg-node">
+<rect class="dg-box" x="24" y="510" width="512" height="116" rx="14"/>
+<text class="dg-t" x="46" y="552">Выбор семейства правилом 1-SE</text>
+<path class="dg-rule" d="M46 572H514"/>
+<text class="dg-s" x="46" y="602">до открытия теста</text>
+</g>
+<path class="dg-edge" pathLength="1" d="M280 626V670" marker-end="url(#ml-tall-arrow)"/>
+<g class="dg-node">
+<rect class="dg-box dg-acc" x="24" y="670" width="512" height="68" rx="14"/>
+<text class="dg-t" x="46" y="712">Тест открывается один раз</text>
+</g>
+<path class="dg-edge" pathLength="1" d="M280 738V782" marker-end="url(#ml-tall-arrow)"/>
+<g class="dg-node">
+<rect class="dg-box" x="24" y="782" width="512" height="96" rx="14"/>
+<text class="dg-t" x="46" y="824">Сравнение с планкой:</text>
+<text class="dg-t" x="46" y="852">прогноз медианой</text>
+</g>
+<path class="dg-edge" pathLength="1" d="M280 878V922" marker-end="url(#ml-tall-arrow)"/>
+<g class="dg-node">
+<rect class="dg-box" x="24" y="922" width="512" height="96" rx="14"/>
+<text class="dg-t" x="46" y="964">Физическая проверка</text>
+<text class="dg-t" x="46" y="992">и устойчивость к пустым входам</text>
+</g>
+<path class="dg-edge" pathLength="1" d="M168 1018V1082" marker-end="url(#ml-tall-arrow)"/>
+<g class="dg-node">
+<rect class="dg-box" x="24" y="1082" width="288" height="96" rx="14"/>
+<text class="dg-t" x="46" y="1124">Модель в Excel</text>
+<text class="dg-t" x="46" y="1152">обычными формулами</text>
+</g>
+<path class="dg-edge" pathLength="1" d="M432 1018V1082" marker-end="url(#ml-tall-arrow)"/>
+<g class="dg-node">
+<rect class="dg-box" x="328" y="1082" width="208" height="96" rx="14"/>
+<text class="dg-t" x="350" y="1124">Отчёт по</text>
+<text class="dg-t" x="350" y="1152">ГОСТ 7.32</text>
+</g>
+</svg>

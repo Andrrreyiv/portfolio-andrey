@@ -3,3 +3,7 @@
 __pycache__/
 .claude-flow/
 CLAUDE.md.bak-*
+# служебные результаты дизайн-проверок (design-gate, taste-skill, impeccable) — в публичный репозиторий не идут
+.design-gate/
+.taste-skill/
+.impeccable/

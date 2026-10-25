@@ -1,0 +1,93 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 608" class="dg dg-wide" role="img" aria-labelledby="egm-title egm-desc">
+<title id="egm-title">englishgamematters.ru: доступ к играм и игровые комнаты</title>
+<desc id="egm-desc">Две схемы: учитель открывает игру на сайте, ссылка передаёт его почту в зашифрованном виде сервису доступа, тот проверяет срок подписки и открывает игру из закрытого хранилища либо закрывает доступ; учитель создаёт комнату, получает пропуск на 10 минут, ученики входят по QR-коду, в комнате до 30 игроков.</desc>
+<style>
+.dg-box{fill:var(--bg-2);stroke:var(--line-2);stroke-width:1.25}
+.dg-acc{stroke:var(--accent);stroke-width:1.5}
+.dg-off{fill:none;stroke-dasharray:4 5}
+.dg-edge{fill:none;stroke:var(--line-2);stroke-width:1.5}
+.dg-alt{stroke-dasharray:5 6}
+.dg-rule{fill:none;stroke:var(--line-2);stroke-width:1}
+.dg-tip{fill:none;stroke:var(--fg-3);stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.dg-dot{fill:var(--fg-3)}
+.dg-btn{fill:none;stroke:var(--accent);stroke-width:1.25}
+.dg-t{font-family:var(--f-text);font-size:18px;font-weight:500;fill:var(--fg)}
+.dg-t.dg-dim{fill:var(--fg-2)}
+.dg-s{font-family:var(--f-text);font-size:15px;fill:var(--fg-2)}
+.dg-m{font-family:var(--f-mono);font-size:13px;letter-spacing:.06em;fill:var(--fg-3)}
+.dg-h{font-family:var(--f-display);font-size:28px;fill:var(--fg)}
+.dg-tall .dg-t{font-size:22px}
+.dg-tall .dg-s{font-size:18px}
+.dg-tall .dg-m{font-size:16px}
+.dg-tall .dg-h{font-size:32px}
+</style>
+<defs>
+<marker id="egm-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path class="dg-tip" d="M2.5 1.5 9 5 2.5 8.5"/></marker>
+</defs>
+<g class="dg-node dg-lane"><text class="dg-h" x="24" y="52">Доступ к игре</text></g>
+<g class="dg-node">
+<rect class="dg-box" x="24" y="80" width="224" height="112" rx="12"/>
+<text class="dg-t" x="42" y="118">Учитель открывает</text>
+<text class="dg-t" x="42" y="142">игру на сайте</text>
+<text class="dg-m" x="42" y="168">Тильда</text>
+</g>
+<path class="dg-edge" pathLength="1" d="M248 112H304" marker-end="url(#egm-arrow)"/>
+<g class="dg-node">
+<rect class="dg-box" x="304" y="80" width="264" height="112" rx="12"/>
+<text class="dg-t" x="322" y="118">Ссылка несёт</text>
+<text class="dg-t" x="322" y="142">почту учителя</text>
+<text class="dg-t" x="322" y="166">в зашифрованном виде</text>
+</g>
+<path class="dg-edge" pathLength="1" d="M568 112H624" marker-end="url(#egm-arrow)"/>
+<g class="dg-node">
+<rect class="dg-box" x="624" y="80" width="244" height="88" rx="12"/>
+<text class="dg-t" x="642" y="118">Сервис доступа</text>
+<text class="dg-m" x="642" y="144">Node 20 · nginx · TLS</text>
+</g>
+<path class="dg-edge" pathLength="1" d="M868 112H924" marker-end="url(#egm-arrow)"/>
+<g class="dg-node">
+<rect class="dg-box dg-acc" x="924" y="80" width="252" height="112" rx="12"/>
+<text class="dg-t" x="942" y="118">Проверка срока</text>
+<text class="dg-t" x="942" y="142">подписки</text>
+<text class="dg-m" x="942" y="168">NocoDB</text>
+</g>
+<path class="dg-edge" pathLength="1" d="M1092 192V264" marker-end="url(#egm-arrow)"/>
+<g class="dg-node dg-lbl"><text class="dg-m" x="1102" y="232">да</text></g>
+<g class="dg-node">
+<rect class="dg-box" x="924" y="264" width="252" height="88" rx="12"/>
+<text class="dg-t" x="942" y="302">Игра открывается</text>
+<text class="dg-t" x="942" y="326">из закрытого хранилища</text>
+</g>
+<path class="dg-edge dg-alt" d="M1008 192V220Q1008 228 1000 228H754Q746 228 746 236V264" marker-end="url(#egm-arrow)"/>
+<g class="dg-node dg-lbl"><text class="dg-m" x="877" y="216" text-anchor="middle">нет или сбой</text></g>
+<g class="dg-node">
+<rect class="dg-box dg-off" x="624" y="264" width="244" height="64" rx="12"/>
+<text class="dg-t dg-dim" x="642" y="302">Доступ закрыт</text>
+</g>
+<path class="dg-rule" d="M24 392H1176"/>
+<g class="dg-node dg-lane"><text class="dg-h" x="24" y="444">Игровая комната</text></g>
+<g class="dg-node">
+<rect class="dg-box" x="24" y="472" width="224" height="88" rx="12"/>
+<text class="dg-t" x="42" y="510">Учитель создаёт</text>
+<text class="dg-t" x="42" y="534">комнату</text>
+</g>
+<path class="dg-edge" pathLength="1" d="M248 504H304" marker-end="url(#egm-arrow)"/>
+<g class="dg-node">
+<rect class="dg-box" x="304" y="472" width="264" height="112" rx="12"/>
+<text class="dg-t" x="322" y="510">Пропуск учителя</text>
+<text class="dg-t" x="322" y="534">на 10 минут</text>
+<text class="dg-m" x="322" y="560">подпись Ed25519</text>
+</g>
+<path class="dg-edge" pathLength="1" d="M568 504H624" marker-end="url(#egm-arrow)"/>
+<g class="dg-node">
+<rect class="dg-box" x="624" y="472" width="244" height="88" rx="12"/>
+<text class="dg-t" x="642" y="510">Ученики входят</text>
+<text class="dg-t" x="642" y="534">по QR-коду</text>
+</g>
+<path class="dg-edge" pathLength="1" d="M868 504H924" marker-end="url(#egm-arrow)"/>
+<g class="dg-node">
+<rect class="dg-box" x="924" y="472" width="252" height="88" rx="12"/>
+<text class="dg-t" x="942" y="510">До 30 игроков</text>
+<text class="dg-t" x="942" y="534">в комнате</text>
+</g>
+</svg>

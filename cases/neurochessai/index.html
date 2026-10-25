@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NeurochessAI&nbsp;— Telegram-бот разбирает шахматную партию по фото бланка&nbsp;— кейс Андрея Брыкуна</title>
+<meta name="description" content="Кейс: Telegram-бот NeurochessAI читает рукописный бланк шахматной партии, переспрашивает спорные ходы кнопками, проверяет партию движками и пишет разбор. На 13 эталонных бланках верно прочитанное начало партии выросло с 352 до 652 полуходов.">
+<link rel="canonical" href="https://andrrreyiv.github.io/portfolio-andrey/cases/neurochessai/">
+<meta property="og:type" content="article">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://andrrreyiv.github.io/portfolio-andrey/cases/neurochessai/">
+<meta property="og:title" content="NeurochessAI&nbsp;— Telegram-бот разбирает шахматную партию по фото бланка&nbsp;— кейс Андрея Брыкуна">
+<meta property="og:description" content="Кейс: Telegram-бот NeurochessAI читает рукописный бланк шахматной партии, переспрашивает спорные ходы кнопками, проверяет партию движками и пишет разбор. На 13 эталонных бланках верно прочитанное начало партии выросло с 352 до 652 полуходов.">
+<meta property="og:image" content="https://andrrreyiv.github.io/portfolio-andrey/assets/og/neurochessai.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#100E0C">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml">
+<link rel="icon" href="../../favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="../../apple-touch-icon.png">
+<link rel="preload" href="../../assets/fonts/playfair.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../../assets/fonts/onest.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="../../assets/css/tokens.css">
+<link rel="stylesheet" href="../../assets/css/base.css">
+<link rel="stylesheet" href="../../assets/css/case.css">
+<script>
+(function(){var d=document.documentElement;d.classList.add('js');
+try{if(localStorage.getItem('theme')==='light')d.dataset.theme='light';}catch(e){}
+setTimeout(function(){if(!window.__siteOk)d.classList.remove('js');},4000);})();
+</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"CreativeWork","name":"NeurochessAI — Telegram-бот разбирает шахматную партию по фото бланка","description":"Кейс: Telegram-бот NeurochessAI читает рукописный бланк шахматной партии, переспрашивает спорные ходы кнопками, проверяет партию движками и пишет разбор. На 13 эталонных бланках верно прочитанное начало партии выросло с 352 до 652 полуходов.","url":"https://andrrreyiv.github.io/portfolio-andrey/cases/neurochessai/","image":"https://andrrreyiv.github.io/portfolio-andrey/assets/og/neurochessai.png","inLanguage":"ru","dateModified":"2026-10-24","creator":{"@type":"Person","@id":"https://andrrreyiv.github.io/portfolio-andrey/#person","name":"Андрей Брыкун"}}</script>
+</head>
+<body class="case-body">
+<a class="skip" href="#main">К содержанию</a>
+<div class="grain" aria-hidden="true"></div>
+<div class="progress" aria-hidden="true"></div>
+<header class="nav" id="nav">
+  <div class="wrap nav-in">
+    <a href="../../#top" class="logo"><span class="logo-mark" aria-hidden="true">АБ</span><span class="logo-name">Андрей Брыкун</span></a>
+    <nav class="nav-links" id="nav-links" aria-label="Разделы">
+      <a href="../../#work">Работы</a>
+      <a href="../../#services">Услуги</a>
+      <a href="../../#solutions">Решения</a>
+      <a href="../../#process">Как работаю</a>
+      <a href="../../#faq">Вопросы</a>
+    </nav>
+    <div class="nav-tools">
+      <button class="theme-btn" id="theme" type="button" aria-label="Переключить светлую или тёмную тему">
+        <svg class="sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.6v2.2M12 19.2v2.2M2.6 12h2.2M19.2 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M18.7 5.3l-1.6 1.6M6.9 17.1l-1.6 1.6"/></svg>
+        <svg class="moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 14.6A8.6 8.6 0 0 1 9.4 3.5a8.6 8.6 0 1 0 11.1 11.1Z"/></svg>
+      </button>
+      <a href="../../#contact" class="btn btn-accent" data-magnet>Обсудить задачу</a>
+      <button class="menu-btn" id="menu-btn" type="button" aria-expanded="false" aria-controls="nav-links" aria-label="Меню разделов"><span></span><span></span></button>
+    </div>
+  </div>
+</header>
+
+<main id="main" class="case-main">
+<header class="c-hero wrap">
+  <div class="c-hero-txt">
+    <a class="c-back mono" href="../../#more"><span aria-hidden="true">←</span> Все работы</a>
+    <p class="c-kicker mono">Telegram-бот · распознавание · 2026</p>
+    <h1 class="c-title" data-split>Разбор партии <em>по фото бланка</em></h1>
+    <p class="c-task" data-reveal>Шахматист фотографирует бланк партии и отправляет боту. Бот читает рукописные ходы, спорные переспрашивает кнопками и присылает разбор: где ошибка, что грозило и что делает сыгранный ход.</p>
+    <p class="c-num" data-reveal><span class="c-num-v" data-odo>352 <span class="ar">→</span> 652</span><span class="c-num-k">полухода из 1 328 бот читает верно подряд с начала партии&nbsp;— на 13 эталонных бланках</span></p>
+    <div class="c-acts" data-reveal>
+      <a class="btn btn-accent" data-magnet href="https://t.me/Guru_Blockchain" target="_blank" rel="noopener">Обсудить похожую задачу <span class="arr ne" aria-hidden="true">↗</span></a>
+    </div>
+  </div>
+  <div class="c-frag vt-neurochessai"><figure class="frag frag--chat" data-frag="chat">
+    <div class="ch">
+      <div class="ch-sheet"><svg class="ss" viewBox="0 0 270 530" aria-hidden="true"><rect class="ss-paper" width="270" height="530" rx="4"/><text class="ss-t" x="135" y="28">БЛАНК ЗАПИСИ ПАРТИИ</text><text class="ss-c" x="96" y="56">Белые</text><text class="ss-c" x="196" y="56">Чёрные</text><path class="ss-l" d="M14 62H256M14 84H256M14 109.5H256M14 135H256M14 160.5H256M14 186H256M14 211.5H256M14 237H256M14 262.5H256M14 288H256M14 313.5H256M14 339H256M14 364.5H256M14 390H256M14 415.5H256M14 441H256M14 466.5H256M14 492H256M50 62V492M150 62V492"/><text class="ss-n" x="22" y="78">1</text><text class="ss-h" x="70.6" y="76.7">e4</text><text class="ss-h" x="170.1" y="78.7">e5</text><text class="ss-n" x="22" y="103.5">2</text><text class="ss-h" x="68.9" y="102.4">Кf3</text><text class="ss-h" x="170.8" y="103.3">d6</text><text class="ss-n" x="22" y="129">3</text><text class="ss-h" x="70.9" y="128.6">d4</text><text class="ss-h" x="168.5" y="128.2">Сg4</text><text class="ss-n" x="22" y="154.5">4</text><text class="ss-h" x="71" y="153.9">d:e5</text><text class="ss-h" x="168.8" y="153.5">С:f3</text><text class="ss-n" x="22" y="180">5</text><text class="ss-h" x="71.5" y="181">Ф:f3</text><text class="ss-h" x="170.4" y="178.7">d:e5</text><text class="ss-n" x="22" y="205.5">6</text><text class="ss-h" x="69.1" y="205.7">Сc4</text><text class="ss-h" x="169.6" y="206.2">Кf6</text><text class="ss-n" x="22" y="231">7</text><text class="ss-h" x="70.8" y="230.4">Фb3</text><text class="ss-h" x="169.5" y="230.5">Фe7</text><text class="ss-n" x="22" y="256.5">8</text><text class="ss-h" x="71.1" y="257.1">Кc3</text><text class="ss-h" x="169.5" y="257.9">c6</text><text class="ss-n" x="22" y="282">9</text><text class="ss-h" x="70.8" y="283.2">Сg5</text><text class="ss-h" x="170.3" y="282.4">b5</text><text class="ss-n" x="22" y="307.5">10</text><text class="ss-h" x="68.5" y="307.1">К:b5</text><ellipse class="ss-blot" cx="92" cy="301.5" rx="13" ry="7"/><text class="ss-h" x="170.7" y="307.5">c:b5</text><text class="ss-n" x="22" y="333">11</text><text class="ss-h" x="70.3" y="334.3">С:b5+</text><text class="ss-h" x="171.1" y="332.9">Кbd7</text><text class="ss-n" x="22" y="358.5">12</text><text class="ss-h" x="69.7" y="357.8">0-0-0</text><text class="ss-h" x="170.3" y="357.2">Лd8</text><text class="ss-n" x="22" y="384">13</text><text class="ss-h" x="68.8" y="385.3">Л:d7</text><text class="ss-h" x="171.4" y="383.7">Л:d7</text><text class="ss-n" x="22" y="409.5">14</text><text class="ss-h" x="70.8" y="410.3">Лd1</text><text class="ss-h" x="169.5" y="410.5">Фe6</text><text class="ss-n" x="22" y="435">15</text><text class="ss-h" x="71.3" y="434.5">С:d7+</text><text class="ss-h" x="171.3" y="436.5">К:d7</text><text class="ss-n" x="22" y="460.5">16</text><text class="ss-h" x="70.4" y="461.1">Фb8+</text><text class="ss-h" x="170.2" y="461.5">К:b8</text><text class="ss-n" x="22" y="486">17</text><text class="ss-h" x="71.1" y="486.3">Лd8#</text></svg></div>
+      <div class="tg">
+        <div class="tg-head"><span class="tg-ava" aria-hidden="true"><svg viewBox="4 5 36 36"><path d="M22 10c10.5 1 16.5 8 16 29H15c0-9 10-6.5 8-21"/><path d="M24 18c.38 2.91-5.55 7.37-8 9-3 2-2.82 4.34-5 4-1.04-.94 1.41-3.04 0-3-1 0 .19 1.23-1 2-1 0-4 1-4-4 0-2 6-12 6-12s1.89-1.9 2-3.5c-.73-.99-.5-2-.5-3 1-1 3 2.5 3 2.5h2s.78-1.99 2.5-3c1 0 1 3 1 3"/></svg></span><p><b>NeurochessAI</b><span>бот</span></p></div>
+        <ol class="tg-feed">
+          <li class="tg-m tg-me"><span class="sr">Игрок:</span><span class="tg-photo" aria-hidden="true"><svg class="ss" viewBox="0 0 270 530" aria-hidden="true"><rect class="ss-paper" width="270" height="530" rx="4"/><text class="ss-t" x="135" y="28">БЛАНК ЗАПИСИ ПАРТИИ</text><text class="ss-c" x="96" y="56">Белые</text><text class="ss-c" x="196" y="56">Чёрные</text><path class="ss-l" d="M14 62H256M14 84H256M14 109.5H256M14 135H256M14 160.5H256M14 186H256M14 211.5H256M14 237H256M14 262.5H256M14 288H256M14 313.5H256M14 339H256M14 364.5H256M14 390H256M14 415.5H256M14 441H256M14 466.5H256M14 492H256M50 62V492M150 62V492"/><text class="ss-n" x="22" y="78">1</text><text class="ss-h" x="70.6" y="76.7">e4</text><text class="ss-h" x="170.1" y="78.7">e5</text><text class="ss-n" x="22" y="103.5">2</text><text class="ss-h" x="68.9" y="102.4">Кf3</text><text class="ss-h" x="170.8" y="103.3">d6</text><text class="ss-n" x="22" y="129">3</text><text class="ss-h" x="70.9" y="128.6">d4</text><text class="ss-h" x="168.5" y="128.2">Сg4</text><text class="ss-n" x="22" y="154.5">4</text><text class="ss-h" x="71" y="153.9">d:e5</text><text class="ss-h" x="168.8" y="153.5">С:f3</text><text class="ss-n" x="22" y="180">5</text><text class="ss-h" x="71.5" y="181">Ф:f3</text><text class="ss-h" x="170.4" y="178.7">d:e5</text><text class="ss-n" x="22" y="205.5">6</text><text class="ss-h" x="69.1" y="205.7">Сc4</text><text class="ss-h" x="169.6" y="206.2">Кf6</text><text class="ss-n" x="22" y="231">7</text><text class="ss-h" x="70.8" y="230.4">Фb3</text><text class="ss-h" x="169.5" y="230.5">Фe7</text><text class="ss-n" x="22" y="256.5">8</text><text class="ss-h" x="71.1" y="257.1">Кc3</text><text class="ss-h" x="169.5" y="257.9">c6</text><text class="ss-n" x="22" y="282">9</text><text class="ss-h" x="70.8" y="283.2">Сg5</text><text class="ss-h" x="170.3" y="282.4">b5</text><text class="ss-n" x="22" y="307.5">10</text><text class="ss-h" x="68.5" y="307.1">К:b5</text><ellipse class="ss-blot" cx="92" cy="301.5" rx="13" ry="7"/><text class="ss-h" x="170.7" y="307.5">c:b5</text><text class="ss-n" x="22" y="333">11</text><text class="ss-h" x="70.3" y="334.3">С:b5+</text><text class="ss-h" x="171.1" y="332.9">Кbd7</text><text class="ss-n" x="22" y="358.5">12</text><text class="ss-h" x="69.7" y="357.8">0-0-0</text><text class="ss-h" x="170.3" y="357.2">Лd8</text><text class="ss-n" x="22" y="384">13</text><text class="ss-h" x="68.8" y="385.3">Л:d7</text><text class="ss-h" x="171.4" y="383.7">Л:d7</text><text class="ss-n" x="22" y="409.5">14</text><text class="ss-h" x="70.8" y="410.3">Лd1</text><text class="ss-h" x="169.5" y="410.5">Фe6</text><text class="ss-n" x="22" y="435">15</text><text class="ss-h" x="71.3" y="434.5">С:d7+</text><text class="ss-h" x="171.3" y="436.5">К:d7</text><text class="ss-n" x="22" y="460.5">16</text><text class="ss-h" x="70.4" y="461.1">Фb8+</text><text class="ss-h" x="170.2" y="461.5">К:b8</text><text class="ss-n" x="22" y="486">17</text><text class="ss-h" x="71.1" y="486.3">Лd8#</text></svg></span><span class="tg-cap">Фото бланка</span></li>
+          <li class="tg-m"><span class="sr">Бот:</span><p>Прочитал партию: 17 ходов. Один ход записан неразборчиво.</p></li>
+          <li class="tg-m tg-ask"><span class="sr">Бот:</span><p>10-й ход белых: как было?</p><p class="tg-btns"><span class="tg-b is-on">10. К:b5</span><span class="tg-b">10. Кd5</span></p></li>
+          <li class="tg-m"><span class="sr">Бот:</span><p>Принято. Все ходы легальны, партия до мата. Разбор:</p></li>
+          <li class="tg-m tg-last"><span class="sr">Бот:</span><img class="tg-board" src="../../assets/img/morphy-16.svg" width="360" height="360" alt="Позиция перед 16-м ходом белых: стрелка ферзя с b3 на b8" loading="lazy" decoding="async"><p><b>16. Фb8+!!</b> Ферзь отдаётся, чтобы увести коня с d7: 16…К:b8 17. Лd8#.</p><p class="tg-sub">Угроза соперника: 14…Фe6 предлагал размен ферзей на b3.</p></li>
+        </ol>
+      </div>
+    </div>
+    <figcaption class="frag-cap mono">Реконструкция интерфейса на партии из открытого доступа: П. Морфи, Париж, 1858. Данные учеников не используются.</figcaption>
+  </figure></div>
+</header>
+<section class="c-intro wrap" aria-label="Коротко о проекте">
+  <p class="c-lead" data-reveal>Рукописный бланк&nbsp;— самое слабое место: «b» и «d», «С» и «Л» легко спутать, а одна ошибка в начале ломает всю партию. Поэтому бот читает бланк дважды, независимо, и где прочтения расходятся, не угадывает, а спрашивает игрока. Каждый ход проверяется на легальность, позиции оценивают движки, а разбор пишет языковая модель по их оценкам.</p>
+  <dl class="c-meta" data-reveal><div><dt>Клиент</dt><dd>частный заказ, без названия по договорённости</dd></div><div><dt>Год</dt><dd>2026</dd></div><div><dt>Роль</dt><dd>бот целиком: распознавание, проверка ходов, движки, текст разбора</dd></div><div><dt>Стек</dt><dd>Python 3.11, aiogram 3, PostgreSQL, Docker, python-chess, Stockfish, Maia-2</dd></div></dl>
+</section>
+
+<section class="c-block wrap">
+  <h2 class="c-h">Задача</h2>
+  <div class="c-body"><p data-reveal>Тренеру нужно разбирать много партий, а бланки пишутся от руки, в спешке и с сокращениями. Набирать ходы вручную долго, а готовые распознаватели путают похожие буквы и молча выдают партию, которой не было.</p><p data-reveal>Главное правило бота&nbsp;— не выдумывать. Лучше задать один вопрос, чем разобрать чужую партию.</p></div>
+</section>
+
+<section class="c-block c-block--wide wrap">
+  <h2 class="c-h">Как бот читает бланк</h2>
+  <figure class="c-dg">
+    <div class="dg dg--wide"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 424" class="dg dg-wide" aria-labelledby="bot-title bot-desc" role="img" aria-label="Схема: фото бланка, два независимых прочтения, сверка; при расхождении&nbsp;— вопрос игроку с двумя кнопками; затем проверка легальности каждого хода, оценка позиций движками Stockfish и Maia-2, разбор партии языковой моделью и ответ в Telegram.">
+<title id="bot-title">Конвейер бота разбора шахматной партии</title>
+<desc id="bot-desc">Фото бланка партии читается дважды независимо, прочтения сверяются, при расхождении бот задаёт игроку вопрос с двумя кнопками, затем каждый ход проверяется на легальность, позиции оцениваются, партия разбирается и ответ уходит в Telegram.</desc>
+<style>
+.dg-box{fill:var(--bg-2);stroke:var(--line-2);stroke-width:1.25}
+.dg-acc{stroke:var(--accent);stroke-width:1.5}
+.dg-off{fill:none;stroke-dasharray:4 5}
+.dg-edge{fill:none;stroke:var(--line-2);stroke-width:1.5}
+.dg-alt{stroke-dasharray:5 6}
+.dg-rule{fill:none;stroke:var(--line-2);stroke-width:1}
+.dg-tip{fill:none;stroke:var(--fg-3);stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.dg-dot{fill:var(--fg-3)}
+.dg-btn{fill:none;stroke:var(--accent);stroke-width:1.25}
+.dg-t{font-family:var(--f-text);font-size:18px;font-weight:500;fill:var(--fg)}
+.dg-t.dg-dim{fill:var(--fg-2)}
+.dg-s{font-family:var(--f-text);font-size:15px;fill:var(--fg-2)}
+.dg-m{font-family:var(--f-mono);font-size:13px;letter-spacing:.06em;fill:var(--fg-3)}
+.dg-h{font-family:var(--f-display);font-size:28px;fill:var(--fg)}
+.dg-tall .dg-t{font-size:22px}
+.dg-tall .dg-s{font-size:18px}
+.dg-tall .dg-m{font-size:16px}
+.dg-tall .dg-h{font-size:32px}
+</style>
+<defs>
+<marker id="bot-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path class="dg-tip" d="M2.5 1.5 9 5 2.5 8.5"/></marker>
+</defs>
+<g class="dg-node">
+<rect class="dg-box" x="24" y="24" width="200" height="88" rx="12"/>
+<text class="dg-t" x="42" y="62">Фото бланка</text>
+<text class="dg-t" x="42" y="86">партии</text>
+</g>
+<path class="dg-edge" pathLength="1" d="M224 56H268" marker-end="url(#bot-arrow)"/>
+<g class="dg-node">
+<rect class="dg-box" x="268" y="24" width="236" height="112" rx="12"/>
+<text class="dg-t" x="286" y="62">Два независимых</text>
+<text class="dg-t" x="286" y="86">прочтения</text>
+<text class="dg-m" x="286" y="112">Gemini 4</text>
+</g>
+<path class="dg-edge" pathLength="1" d="M504 56H548" marker-end="url(#bot-arrow)"/>
+<g class="dg-node">
+<rect class="dg-box" x="548" y="24" width="220" height="64" rx="12"/>
+<text class="dg-t" x="566" y="62">Сверка прочтений</text>
+</g>
+<path class="dg-edge" pathLength="1" d="M768 56H888" marker-end="url(#bot-arrow)"/>
+<g class="dg-node dg-lbl"><text class="dg-m" x="828" y="44" text-anchor="middle">расхождение</text></g>
+<g class="dg-node">
+<rect class="dg-box dg-acc" x="888" y="24" width="288" height="120" rx="12"/>
+<text class="dg-t" x="906" y="62">Вопрос игроку</text>
+<text class="dg-t" x="906" y="86">с двумя кнопками</text>
+<rect class="dg-btn" x="906" y="102" width="60" height="20" rx="6"/>
+<rect class="dg-btn" x="976" y="102" width="60" height="20" rx="6"/>
+</g>
+<path class="dg-edge" pathLength="1" d="M658 88V196"/>
+<g class="dg-node dg-lbl"><text class="dg-m" x="668" y="174">совпало</text></g>
+<path class="dg-edge" pathLength="1" d="M1032 144V188Q1032 196 1024 196H658"/>
+<g class="dg-node dg-lbl"><text class="dg-m" x="1042" y="174">ответ</text></g>
+<g class="dg-node dg-lbl"><circle class="dg-dot" cx="658" cy="196" r="4"/></g>
+<path class="dg-edge" pathLength="1" d="M658 196H156Q148 196 148 204V252" marker-end="url(#bot-arrow)"/>
+<g class="dg-node">
+<rect class="dg-box" x="24" y="252" width="248" height="112" rx="12"/>
+<text class="dg-t" x="42" y="290">Проверка легальности</text>
+<text class="dg-t" x="42" y="314">каждого хода</text>
+<text class="dg-m" x="42" y="340">python-chess</text>
+</g>
+<path class="dg-edge" pathLength="1" d="M272 284H316" marker-end="url(#bot-arrow)"/>
+<g class="dg-node">
+<rect class="dg-box" x="316" y="252" width="224" height="88" rx="12"/>
+<text class="dg-t" x="334" y="290">Оценка позиций</text>
+<text class="dg-m" x="334" y="316">Stockfish + Maia-2</text>
+</g>
+<path class="dg-edge" pathLength="1" d="M540 284H584" marker-end="url(#bot-arrow)"/>
+<g class="dg-node">
+<rect class="dg-box" x="584" y="252" width="296" height="148" rx="12"/>
+<text class="dg-t" x="602" y="290">Разбор партии</text>
+<text class="dg-m" x="602" y="316">Claude Sonnet 5.5</text>
+<path class="dg-rule" d="M602 332H862"/>
+<text class="dg-s" x="602" y="356">угроза соперника</text>
+<text class="dg-s" x="602" y="378">что делает сыгранный ход</text>
+</g>
+<path class="dg-edge" pathLength="1" d="M880 284H924" marker-end="url(#bot-arrow)"/>
+<g class="dg-node">
+<rect class="dg-box" x="924" y="252" width="252" height="64" rx="12"/>
+<text class="dg-t" x="942" y="290">Ответ в Telegram</text>
+</g>
+</svg></div>
+    <div class="dg dg--tall"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 1304" class="dg dg-tall" aria-labelledby="bot-tall-title bot-tall-desc" role="img" aria-label="Схема: фото бланка, два независимых прочтения, сверка; при расхождении&nbsp;— вопрос игроку с двумя кнопками; затем проверка легальности каждого хода, оценка позиций движками Stockfish и Maia-2, разбор партии языковой моделью и ответ в Telegram.">
+<title id="bot-tall-title">Конвейер бота разбора шахматной партии</title>
+<desc id="bot-tall-desc">Фото бланка партии читается дважды независимо, прочтения сверяются, при расхождении бот задаёт игроку вопрос с двумя кнопками, затем каждый ход проверяется на легальность, позиции оцениваются, партия разбирается и ответ уходит в Telegram.</desc>
+<style>
+.dg-box{fill:var(--bg-2);stroke:var(--line-2);stroke-width:1.25}
+.dg-acc{stroke:var(--accent);stroke-width:1.5}
+.dg-off{fill:none;stroke-dasharray:4 5}
+.dg-edge{fill:none;stroke:var(--line-2);stroke-width:1.5}
+.dg-alt{stroke-dasharray:5 6}
+.dg-rule{fill:none;stroke:var(--line-2);stroke-width:1}
+.dg-tip{fill:none;stroke:var(--fg-3);stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.dg-dot{fill:var(--fg-3)}
+.dg-btn{fill:none;stroke:var(--accent);stroke-width:1.25}
+.dg-t{font-family:var(--f-text);font-size:18px;font-weight:500;fill:var(--fg)}
+.dg-t.dg-dim{fill:var(--fg-2)}
+.dg-s{font-family:var(--f-text);font-size:15px;fill:var(--fg-2)}
+.dg-m{font-family:var(--f-mono);font-size:13px;letter-spacing:.06em;fill:var(--fg-3)}
+.dg-h{font-family:var(--f-display);font-size:28px;fill:var(--fg)}
+.dg-tall .dg-t{font-size:22px}
+.dg-tall .dg-s{font-size:18px}
+.dg-tall .dg-m{font-size:16px}
+.dg-tall .dg-h{font-size:32px}
+</style>
+<defs>
+<marker id="bot-tall-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="13" markerHeight="13" markerUnits="userSpaceOnUse" orient="auto"><path class="dg-tip" d="M2.5 1.5 9 5 2.5 8.5"/></marker>
+</defs>
+<g class="dg-node">
+<rect class="dg-box" x="24" y="24" width="372" height="68" rx="14"/>
+<text class="dg-t" x="46" y="66">Фото бланка партии</text>
+</g>
+<path class="dg-edge" pathLength="1" d="M210 92V148" marker-end="url(#bot-tall-arrow)"/>
+<g class="dg-node">
+<rect class="dg-box" x="24" y="148" width="372" height="100" rx="14"/>
+<text class="dg-t" x="46" y="190">Два независимых прочтения</text>
+<text class="dg-m" x="46" y="222">Gemini 4</text>
+</g>
+<path class="dg-edge" pathLength="1" d="M210 248V304" marker-end="url(#bot-tall-arrow)"/>
+<g class="dg-node">
+<rect class="dg-box" x="24" y="304" width="372" height="68" rx="14"/>
+<text class="dg-t" x="46" y="346">Сверка прочтений</text>
+</g>
+<path class="dg-edge" pathLength="1" d="M396 338H496Q504 338 504 346V696Q504 704 496 704H396" marker-end="url(#bot-tall-arrow)"/>
+<g class="dg-node dg-lbl"><text class="dg-m" x="450" y="326" text-anchor="middle">совпало</text></g>
+<path class="dg-edge" pathLength="1" d="M210 372V436" marker-end="url(#bot-tall-arrow)"/>
+<g class="dg-node dg-lbl"><text class="dg-m" x="222" y="410">расхождение</text></g>
+<g class="dg-node">
+<rect class="dg-box dg-acc" x="24" y="436" width="372" height="140" rx="14"/>
+<text class="dg-t" x="46" y="478">Вопрос игроку</text>
+<text class="dg-t" x="46" y="506">с двумя кнопками</text>
+<rect class="dg-btn" x="46" y="524" width="76" height="26" rx="8"/>
+<rect class="dg-btn" x="134" y="524" width="76" height="26" rx="8"/>
+</g>
+<path class="dg-edge" pathLength="1" d="M210 576V640" marker-end="url(#bot-tall-arrow)"/>
+<g class="dg-node dg-lbl"><text class="dg-m" x="222" y="614">ответ</text></g>
+<g class="dg-node">
+<rect class="dg-box" x="24" y="640" width="372" height="128" rx="14"/>
+<text class="dg-t" x="46" y="682">Проверка легальности</text>
+<text class="dg-t" x="46" y="710">каждого хода</text>
+<text class="dg-m" x="46" y="742">python-chess</text>
+</g>
+<path class="dg-edge" pathLength="1" d="M210 768V824" marker-end="url(#bot-tall-arrow)"/>
+<g class="dg-node">
+<rect class="dg-box" x="24" y="824" width="372" height="100" rx="14"/>
+<text class="dg-t" x="46" y="866">Оценка позиций</text>
+<text class="dg-m" x="46" y="898">Stockfish + Maia-2</text>
+</g>
+<path class="dg-edge" pathLength="1" d="M210 924V980" marker-end="url(#bot-tall-arrow)"/>
+<g class="dg-node">
+<rect class="dg-box" x="24" y="980" width="372" height="176" rx="14"/>
+<text class="dg-t" x="46" y="1022">Разбор партии</text>
+<text class="dg-m" x="46" y="1054">Claude Sonnet 5.5</text>
+<path class="dg-rule" d="M46 1074H374"/>
+<text class="dg-s" x="46" y="1104">угроза соперника</text>
+<text class="dg-s" x="46" y="1132">что делает сыгранный ход</text>
+</g>
+<path class="dg-edge" pathLength="1" d="M210 1156V1212" marker-end="url(#bot-tall-arrow)"/>
+<g class="dg-node">
+<rect class="dg-box" x="24" y="1212" width="372" height="68" rx="14"/>
+<text class="dg-t" x="46" y="1254">Ответ в Telegram</text>
+</g>
+</svg></div>
+    <figcaption class="mono">От фото до разбора: два прочтения, вопрос там, где они расходятся, проверка и движки</figcaption>
+  </figure>
+</section>
+<div class="c-band tone-paper">
+<section class="c-block wrap">
+  <h2 class="c-h">Цифры</h2>
+  <dl class="c-metrics"><div data-reveal><dt>454 <span class="ar">→</span> 264</dt><dd>вопросов игроку на тех же 13 бланках&nbsp;— на 42 % меньше</dd></div><div data-reveal><dt>59 <span class="ar">→</span> 48</dt><dd>ошибок, которые прошли бы без вопроса</dd></div><div data-reveal><dt>615</dt><dd>автотестов</dd></div></dl>
+</section></div>
+
+<section class="c-block wrap">
+  <h2 class="c-h">Как устроено</h2>
+  <ol class="c-list"><li data-reveal><span class="mono">01</span><p>Два независимых прочтения бланка моделью Gemini 4; где они расходятся, игрок получает вопрос с двумя кнопками.</p></li><li data-reveal><span class="mono">02</span><p>python-chess проверяет каждый ход на легальность: невозможный ход в разбор не попадёт.</p></li><li data-reveal><span class="mono">03</span><p>Stockfish оценивает позиции, Maia-2 показывает, какой ход сыграл бы человек этого уровня.</p></li><li data-reveal><span class="mono">04</span><p>Разбор пишет Claude Sonnet 5.5 по оценкам движков: угроза соперника, что делает сыгранный ход, где была ошибка.</p></li><li data-reveal><span class="mono">05</span><p>Python 3.11, aiogram 3, PostgreSQL, Docker; бот работает на компьютере заказчика.</p></li></ol>
+</section>
+<section class="c-cta wrap" aria-labelledby="cta-h">
+  <p class="mono">Нужно похожее?</p>
+  <h2 id="cta-h" class="c-cta-h">Расскажите задачу&nbsp;— <em>предложу решение</em></h2>
+  <a class="btn btn-accent" data-magnet href="https://t.me/Guru_Blockchain" target="_blank" rel="noopener">Обсудить в Telegram <span class="arr ne" aria-hidden="true">↗</span></a>
+</section>
+<nav class="c-next" aria-label="Следующий кейс">
+  <a class="wrap c-next-in" href="../metal-ml/">
+    <span class="mono">Следующий кейс · Машинное обучение · NDA</span>
+    <span class="c-next-title">Машинное обучение: прогноз механических свойств металла</span>
+    <span class="c-next-arr" aria-hidden="true">→</span>
+    <span class="shot c-next-shot is-center"><img src="../../assets/img/ml-cover-800.webp" srcset="../../assets/img/ml-cover-800.webp 800w, ../../assets/img/ml-cover-1600.webp 1600w" sizes="(min-width:1320px) 1224px, 92vw" width="1600" height="686" alt="" loading="lazy" decoding="async"></span>
+  </a>
+</nav>
+</main>
+<footer class="foot">
+  <div class="wrap foot-in">
+    <a href="../../#top" class="logo"><span class="logo-mark" aria-hidden="true">АБ</span><span>Андрей Брыкун</span></a>
+    <nav class="foot-links" aria-label="Разделы внизу">
+      <a href="../../#work">Работы</a>
+      <a href="../../#services">Услуги</a>
+      <a href="../../#process">Как работаю</a>
+      <a href="https://t.me/Guru_Blockchain" target="_blank" rel="noopener">Telegram</a>
+      <a href="../../#contact">Контакты</a>
+    </nav>
+    <p class="copy">© 2026 · Решения, которые работают на бизнес</p>
+  </div>
+</footer>
+
+<script defer src="../../assets/vendor/gsap.min.js"></script>
+<script defer src="../../assets/vendor/ScrollTrigger.min.js"></script>
+<script defer src="../../assets/vendor/SplitText.min.js"></script>
+<script defer src="../../assets/vendor/lenis.min.js"></script>
+<script type="module" src="../../assets/js/case.js"></script>
+</body>
+</html>

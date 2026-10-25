@@ -58,14 +58,21 @@ setTimeout(function(){if(!window.__siteOk)d.classList.remove('js');},4000);})();
 
 <main id="main" class="case-main">
 <header class="c-hero wrap">
-  <a class="c-back mono" href="../../#work"><span aria-hidden="true">←</span> Все работы</a>
-  <p class="c-kicker mono"><span>03</span>stenarium.ru · визуализатор</p>
-  <h1 class="c-title" data-split>Стенариум&nbsp;— примерка стеновых панелей <em>в интерьере</em></h1>
-  <div class="c-acts" data-reveal>
+  <div class="c-hero-txt">
+    <a class="c-back mono" href="../../#more"><span aria-hidden="true">←</span> Все работы</a>
+    <p class="c-kicker mono">Визуализатор · 2026</p>
+    <h1 class="c-title" data-split>Панели <em>прямо в комнате</em></h1>
+    <p class="c-task" data-reveal>Панели продаются по фото образца. Визуализатор примеряет отделку прямо в комнате, каждую из трёх стен отдельно, и сохраняет примерку картинкой.</p>
+    <p class="c-num" data-reveal><span class="c-num-v" data-odo>68</span><span class="c-num-k">позиций каталога в примерке</span></p>
+    <div class="c-acts" data-reveal>
       <a class="btn btn-accent" data-magnet href="https://stenarium.ru/visualizer" target="_blank" rel="noopener">Открыть визуализатор <span class="arr ne" aria-hidden="true">↗</span></a>
+    </div>
   </div>
+  <div class="c-frag vt-stenarium"><figure class="frag frag--video" data-frag="video" style="--ar:2.0601">
+    <div class="frag-stage has-below"><div class="frag-win shot"><div class="frag-bar" aria-hidden="true"><i></i><i></i><i></i><span>stenarium.ru</span></div><video class="loop" muted loop playsinline preload="none" poster="../../assets/video/viz.webp" width="960" height="466" aria-label="Визуализатор Стенариум: на трёх стенах по очереди меняется отделка&nbsp;— дерево, камень, мрамор"><source src="../../assets/video/viz.webm" type="video/webm"><source src="../../assets/video/viz.mp4" type="video/mp4"></video></div><div class="frag-sub frag-sub--below"><img src="../../assets/img/stenarium-800.webp" width="800" height="385" alt="Визуализатор Стенариум: примерка другой отделки" loading="lazy" decoding="async"></div></div>
+    <figcaption class="frag-cap mono">Три стены, отделка меняется по клику</figcaption>
+  </figure></div>
 </header>
-<figure class="c-cover wrap"><div class="shot vt-stenarium"><img src="../../assets/img/stenarium-800.webp" srcset="../../assets/img/stenarium-800.webp 800w, ../../assets/img/stenarium-1432.webp 1432w" sizes="(min-width:1320px) 1224px, 92vw" width="1432" height="690" alt="Визуализатор Стенариум: комната с тремя стенами, панели дерева и каталог справа" fetchpriority="high" decoding="async"></div></figure>
 <section class="c-intro wrap" aria-label="Коротко о проекте">
   <p class="c-lead" data-reveal>Панели продаются по фото образца: покупатель видит кусок текстуры и не понимает, как это будет выглядеть на его стене. Визуализатор примеряет отделку прямо в комнате&nbsp;— каждую из трёх стен отдельно.</p>
   <dl class="c-meta" data-reveal><div><dt>Клиент</dt><dd>Стенариум, стеновые панели</dd></div><div><dt>Год</dt><dd>2026</dd></div><div><dt>Роль</dt><dd>визуализатор, подготовка текстур, встройка в Тильду</dd></div><div><dt>Стек</dt><dd>Vanilla JS, Python для текстур, Tilda</dd></div></dl>
@@ -75,18 +82,8 @@ setTimeout(function(){if(!window.__siteOk)d.classList.remove('js');},4000);})();
   <h2 class="c-h">Задача</h2>
   <div class="c-body"><p data-reveal>Сайт магазина собран на Тильде, а примерку нужно было встроить так, чтобы она не зависела от ограничений конструктора.</p><p data-reveal>Покупатель должен выбрать материал для каждой стены, увидеть его в интерьере, сохранить картинку для менеджера и перейти в карточку товара.</p></div>
 </section>
-
-<section class="c-block c-block--wide wrap">
-  <h2 class="c-h">Примерка вживую</h2>
-  <div class="c-videos c-videos--1">
-    <figure class="c-video" data-reveal>
-      <div class="shot"><video class="loop" muted loop playsinline preload="none" poster="../../assets/video/viz.webp" width="960" height="466" aria-label="Визуализатор Стенариум: на трёх стенах по очереди меняется отделка&nbsp;— дерево, камень, мрамор"><source src="../../assets/video/viz.webm" type="video/webm"><source src="../../assets/video/viz.mp4" type="video/mp4"></video></div>
-      <figcaption class="mono">Три стены, отделка меняется по клику</figcaption>
-    </figure>
-  </div>
-</section>
-
-<div class="c-band tone-paper"><section class="c-block wrap">
+<div class="c-band tone-paper">
+<section class="c-block wrap">
   <h2 class="c-h">Цифры</h2>
   <dl class="c-metrics"><div data-reveal><dt>68</dt><dd>позиций каталога в примерке</dd></div><div data-reveal><dt>6</dt><dd>серий: дерево, камень, гибкий мрамор, моно, металл, ткань</dd></div><div data-reveal><dt>3</dt><dd>стены отделываются независимо</dd></div></dl>
 </section></div>
@@ -95,9 +92,14 @@ setTimeout(function(){if(!window.__siteOk)d.classList.remove('js');},4000);})();
   <h2 class="c-h">Как устроено</h2>
   <ol class="c-list"><li data-reveal><span class="mono">01</span><p>Визуализатор живёт отдельно и показывается на странице Тильды в рамке&nbsp;— сайт клиента не пришлось переделывать.</p></li><li data-reveal><span class="mono">02</span><p>Текстуры готовит скрипт: обрезает белые поля сканов по ровности линии, а не по яркости, чтобы не съесть светлый мрамор и дерево.</p></li><li data-reveal><span class="mono">03</span><p>Готовую примерку покупатель скачивает картинкой и отправляет менеджеру.</p></li><li data-reveal><span class="mono">04</span><p>Логика закрыта автотестами.</p></li></ol>
 </section>
+<section class="c-cta wrap" aria-labelledby="cta-h">
+  <p class="mono">Нужно похожее?</p>
+  <h2 id="cta-h" class="c-cta-h">Расскажите задачу&nbsp;— <em>предложу решение</em></h2>
+  <a class="btn btn-accent" data-magnet href="https://t.me/Guru_Blockchain" target="_blank" rel="noopener">Обсудить в Telegram <span class="arr ne" aria-hidden="true">↗</span></a>
+</section>
 <nav class="c-next" aria-label="Следующий кейс">
   <a class="wrap c-next-in" href="../andrianov/">
-    <span class="mono">Следующий кейс · 04</span>
+    <span class="mono">Следующий кейс · Сайт и продвижение</span>
     <span class="c-next-title">PR-агентство Андрианова&nbsp;— новый сайт на WordPress</span>
     <span class="c-next-arr" aria-hidden="true">→</span>
     <span class="shot c-next-shot"><img src="../../assets/img/andr-home-800.webp" srcset="../../assets/img/andr-home-800.webp 800w, ../../assets/img/andr-home-1440.webp 1440w" sizes="(min-width:1320px) 1224px, 92vw" width="1440" height="900" alt="" loading="lazy" decoding="async"></span>

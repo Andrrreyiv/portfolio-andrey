@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 424" class="dg dg-wide" role="img" aria-labelledby="bot-title bot-desc">
+<title id="bot-title">Конвейер бота разбора шахматной партии</title>
+<desc id="bot-desc">Фото бланка партии читается дважды независимо, прочтения сверяются, при расхождении бот задаёт игроку вопрос с двумя кнопками, затем каждый ход проверяется на легальность, позиции оцениваются, партия разбирается и ответ уходит в Telegram.</desc>
+<style>
+.dg-box{fill:var(--bg-2);stroke:var(--line-2);stroke-width:1.25}
+.dg-acc{stroke:var(--accent);stroke-width:1.5}
+.dg-off{fill:none;stroke-dasharray:4 5}
+.dg-edge{fill:none;stroke:var(--line-2);stroke-width:1.5}
+.dg-alt{stroke-dasharray:5 6}
+.dg-rule{fill:none;stroke:var(--line-2);stroke-width:1}
+.dg-tip{fill:none;stroke:var(--fg-3);stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.dg-dot{fill:var(--fg-3)}
+.dg-btn{fill:none;stroke:var(--accent);stroke-width:1.25}
+.dg-t{font-family:var(--f-text);font-size:18px;font-weight:500;fill:var(--fg)}
+.dg-t.dg-dim{fill:var(--fg-2)}
+.dg-s{font-family:var(--f-text);font-size:15px;fill:var(--fg-2)}
+.dg-m{font-family:var(--f-mono);font-size:13px;letter-spacing:.06em;fill:var(--fg-3)}
+.dg-h{font-family:var(--f-display);font-size:28px;fill:var(--fg)}
+.dg-tall .dg-t{font-size:22px}
+.dg-tall .dg-s{font-size:18px}
+.dg-tall .dg-m{font-size:16px}
+.dg-tall .dg-h{font-size:32px}
+</style>
+<defs>
+<marker id="bot-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path class="dg-tip" d="M2.5 1.5 9 5 2.5 8.5"/></marker>
+</defs>
+<g class="dg-node">
+<rect class="dg-box" x="24" y="24" width="200" height="88" rx="12"/>
+<text class="dg-t" x="42" y="62">Фото бланка</text>
+<text class="dg-t" x="42" y="86">партии</text>
+</g>
+<path class="dg-edge" pathLength="1" d="M224 56H268" marker-end="url(#bot-arrow)"/>
+<g class="dg-node">
+<rect class="dg-box" x="268" y="24" width="236" height="112" rx="12"/>
+<text class="dg-t" x="286" y="62">Два независимых</text>
+<text class="dg-t" x="286" y="86">прочтения</text>
+<text class="dg-m" x="286" y="112">Gemini 4</text>
+</g>
+<path class="dg-edge" pathLength="1" d="M504 56H548" marker-end="url(#bot-arrow)"/>
+<g class="dg-node">
+<rect class="dg-box" x="548" y="24" width="220" height="64" rx="12"/>
+<text class="dg-t" x="566" y="62">Сверка прочтений</text>
+</g>
+<path class="dg-edge" pathLength="1" d="M768 56H888" marker-end="url(#bot-arrow)"/>
+<g class="dg-node dg-lbl"><text class="dg-m" x="828" y="44" text-anchor="middle">расхождение</text></g>
+<g class="dg-node">
+<rect class="dg-box dg-acc" x="888" y="24" width="288" height="120" rx="12"/>
+<text class="dg-t" x="906" y="62">Вопрос игроку</text>
+<text class="dg-t" x="906" y="86">с двумя кнопками</text>
+<rect class="dg-btn" x="906" y="102" width="60" height="20" rx="6"/>
+<rect class="dg-btn" x="976" y="102" width="60" height="20" rx="6"/>
+</g>
+<path class="dg-edge" pathLength="1" d="M658 88V196"/>
+<g class="dg-node dg-lbl"><text class="dg-m" x="668" y="174">совпало</text></g>
+<path class="dg-edge" pathLength="1" d="M1032 144V188Q1032 196 1024 196H658"/>
+<g class="dg-node dg-lbl"><text class="dg-m" x="1042" y="174">ответ</text></g>
+<g class="dg-node dg-lbl"><circle class="dg-dot" cx="658" cy="196" r="4"/></g>
+<path class="dg-edge" pathLength="1" d="M658 196H156Q148 196 148 204V252" marker-end="url(#bot-arrow)"/>
+<g class="dg-node">
+<rect class="dg-box" x="24" y="252" width="248" height="112" rx="12"/>
+<text class="dg-t" x="42" y="290">Проверка легальности</text>
+<text class="dg-t" x="42" y="314">каждого хода</text>
+<text class="dg-m" x="42" y="340">python-chess</text>
+</g>
+<path class="dg-edge" pathLength="1" d="M272 284H316" marker-end="url(#bot-arrow)"/>
+<g class="dg-node">
+<rect class="dg-box" x="316" y="252" width="224" height="88" rx="12"/>
+<text class="dg-t" x="334" y="290">Оценка позиций</text>
+<text class="dg-m" x="334" y="316">Stockfish + Maia-2</text>
+</g>
+<path class="dg-edge" pathLength="1" d="M540 284H584" marker-end="url(#bot-arrow)"/>
+<g class="dg-node">
+<rect class="dg-box" x="584" y="252" width="296" height="148" rx="12"/>
+<text class="dg-t" x="602" y="290">Разбор партии</text>
+<text class="dg-m" x="602" y="316">Claude Sonnet 5.5</text>
+<path class="dg-rule" d="M602 332H862"/>
+<text class="dg-s" x="602" y="356">угроза соперника</text>
+<text class="dg-s" x="602" y="378">что делает сыгранный ход</text>
+</g>
+<path class="dg-edge" pathLength="1" d="M880 284H924" marker-end="url(#bot-arrow)"/>
+<g class="dg-node">
+<rect class="dg-box" x="924" y="252" width="252" height="64" rx="12"/>
+<text class="dg-t" x="942" y="290">Ответ в Telegram</text>
+</g>
+</svg>

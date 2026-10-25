@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>englishgamematters.ru&nbsp;— доступ к играм по подписке и комнаты для класса&nbsp;— кейс Андрея Брыкуна</title>
+<meta name="description" content="Кейс: englishgamematters.ru&nbsp;— сервис, который проверяет подписку учителя при каждом открытии игры, и сервер игровых комнат Sketch Relay, куда класс входит по QR-коду. 136 проверок доступа без провалов.">
+<link rel="canonical" href="https://andrrreyiv.github.io/portfolio-andrey/cases/englishgamematters/">
+<meta property="og:type" content="article">
+<meta property="og:locale" content="ru_RU">
+<meta property="og:url" content="https://andrrreyiv.github.io/portfolio-andrey/cases/englishgamematters/">
+<meta property="og:title" content="englishgamematters.ru&nbsp;— доступ к играм по подписке и комнаты для класса&nbsp;— кейс Андрея Брыкуна">
+<meta property="og:description" content="Кейс: englishgamematters.ru&nbsp;— сервис, который проверяет подписку учителя при каждом открытии игры, и сервер игровых комнат Sketch Relay, куда класс входит по QR-коду. 136 проверок доступа без провалов.">
+<meta property="og:image" content="https://andrrreyiv.github.io/portfolio-andrey/assets/og/englishgamematters.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#100E0C">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml">
+<link rel="icon" href="../../favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="../../apple-touch-icon.png">
+<link rel="preload" href="../../assets/fonts/playfair.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="../../assets/fonts/onest.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="../../assets/css/tokens.css">
+<link rel="stylesheet" href="../../assets/css/base.css">
+<link rel="stylesheet" href="../../assets/css/case.css">
+<script>
+(function(){var d=document.documentElement;d.classList.add('js');
+try{if(localStorage.getItem('theme')==='light')d.dataset.theme='light';}catch(e){}
+setTimeout(function(){if(!window.__siteOk)d.classList.remove('js');},4000);})();
+</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"CreativeWork","name":"englishgamematters.ru — доступ к играм по подписке и комнаты для класса","description":"Кейс: englishgamematters.ru — сервис, который проверяет подписку учителя при каждом открытии игры, и сервер игровых комнат Sketch Relay, куда класс входит по QR-коду. 136 проверок доступа без провалов.","url":"https://andrrreyiv.github.io/portfolio-andrey/cases/englishgamematters/","image":"https://andrrreyiv.github.io/portfolio-andrey/assets/og/englishgamematters.png","inLanguage":"ru","dateModified":"2026-10-24","creator":{"@type":"Person","@id":"https://andrrreyiv.github.io/portfolio-andrey/#person","name":"Андрей Брыкун"}}</script>
+</head>
+<body class="case-body">
+<a class="skip" href="#main">К содержанию</a>
+<div class="grain" aria-hidden="true"></div>
+<div class="progress" aria-hidden="true"></div>
+<header class="nav" id="nav">
+  <div class="wrap nav-in">
+    <a href="../../#top" class="logo"><span class="logo-mark" aria-hidden="true">АБ</span><span class="logo-name">Андрей Брыкун</span></a>
+    <nav class="nav-links" id="nav-links" aria-label="Разделы">
+      <a href="../../#work">Работы</a>
+      <a href="../../#services">Услуги</a>
+      <a href="../../#solutions">Решения</a>
+      <a href="../../#process">Как работаю</a>
+      <a href="../../#faq">Вопросы</a>
+    </nav>
+    <div class="nav-tools">
+      <button class="theme-btn" id="theme" type="button" aria-label="Переключить светлую или тёмную тему">
+        <svg class="sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.6v2.2M12 19.2v2.2M2.6 12h2.2M19.2 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M18.7 5.3l-1.6 1.6M6.9 17.1l-1.6 1.6"/></svg>
+        <svg class="moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 14.6A8.6 8.6 0 0 1 9.4 3.5a8.6 8.6 0 1 0 11.1 11.1Z"/></svg>
+      </button>
+      <a href="../../#contact" class="btn btn-accent" data-magnet>Обсудить задачу</a>
+      <button class="menu-btn" id="menu-btn" type="button" aria-expanded="false" aria-controls="nav-links" aria-label="Меню разделов"><span></span><span></span></button>
+    </div>
+  </div>
+</header>
+
+<main id="main" class="case-main">
+<header class="c-hero wrap">
+  <div class="c-hero-txt">
+    <a class="c-back mono" href="../../#more"><span aria-hidden="true">←</span> Все работы</a>
+    <p class="c-kicker mono">Сервис доступа и игровые комнаты · 2026</p>
+    <h1 class="c-title" data-split>Игры для уроков <em>по подписке</em></h1>
+    <p class="c-task" data-reveal>Учителя покупают на englishgamematters.ru подписку на игры для уроков. Я сделал сервис, который проверяет подписку при каждом открытии игры, и сервер комнат, куда класс входит по QR-коду.</p>
+    <p class="c-num" data-reveal><span class="c-num-v" data-odo>136</span><span class="c-num-k">проверок доступа в итоговом прогоне, провалов 0</span></p>
+    <div class="c-acts" data-reveal>
+      <a class="btn btn-accent" data-magnet href="https://englishgamematters.ru/" target="_blank" rel="noopener">Открыть englishgamematters.ru <span class="arr ne" aria-hidden="true">↗</span></a>
+    </div>
+  </div>
+  <div class="c-frag vt-englishgamematters"><figure class="frag frag--room" data-frag="room">
+    <div class="rm" lang="en" role="img" aria-label="Лобби игровой комнаты Sketch Relay: ученики вошли по QR-коду, счётчик — 6 из 30, учитель может запускать игру">
+      <div class="rm-top"><span class="rm-logo"><i></i>SKETCH RELAY</span><span class="rm-live"><i></i>LIVE CLASS GAME</span></div>
+      <p class="rm-k">TEACHER’S CONTROL ROOM</p>
+      <p class="rm-h">The room is <em>getting bigger.</em></p>
+      <div class="rm-card">
+        <div class="rm-left">
+          <p class="rm-row"><b>ROOM 4QKTX</b><span class="rm-count"><b class="rm-n">6</b> / 30 joined</span></p>
+          <ul class="rm-players"><li><i>A</i>Alex</li><li><i>S</i>Sam</li><li><i>M</i>Mia</li><li><i>L</i>Leo</li><li><i>Z</i>Zoe</li><li><i>M</i>Max</li></ul>
+          <span class="rm-btn">Shuffle teams &amp; start</span>
+        </div>
+        <div class="rm-right"><span class="rm-scan">Scan to join</span><svg class="rm-qr" viewBox="-2 -2 29 29" aria-hidden="true"><rect x="-2" y="-2" width="29" height="29" rx="2"/><path d="M0 0h7v1h-7zM8 0h1v1h-1zM10 0h1v1h-1zM13 0h1v1h-1zM18 0h7v1h-7zM0 1h1v1h-1zM6 1h1v1h-1zM16 1h1v1h-1zM18 1h1v1h-1zM24 1h1v1h-1zM0 2h1v1h-1zM2 2h3v1h-3zM6 2h1v1h-1zM10 2h4v1h-4zM15 2h2v1h-2zM18 2h1v1h-1zM20 2h3v1h-3zM24 2h1v1h-1zM0 3h1v1h-1zM2 3h3v1h-3zM6 3h1v1h-1zM11 3h1v1h-1zM14 3h1v1h-1zM16 3h1v1h-1zM18 3h1v1h-1zM20 3h3v1h-3zM24 3h1v1h-1zM0 4h1v1h-1zM2 4h3v1h-3zM6 4h1v1h-1zM9 4h1v1h-1zM13 4h1v1h-1zM18 4h1v1h-1zM20 4h3v1h-3zM24 4h1v1h-1zM0 5h1v1h-1zM6 5h1v1h-1zM8 5h1v1h-1zM10 5h1v1h-1zM12 5h1v1h-1zM18 5h1v1h-1zM24 5h1v1h-1zM0 6h7v1h-7zM8 6h3v1h-3zM14 6h1v1h-1zM16 6h1v1h-1zM18 6h7v1h-7zM8 7h2v1h-2zM12 7h1v1h-1zM14 7h1v1h-1zM0 8h3v1h-3zM5 8h1v1h-1zM8 8h1v1h-1zM12 8h2v1h-2zM15 8h1v1h-1zM21 8h4v1h-4zM1 9h1v1h-1zM3 9h1v1h-1zM5 9h3v1h-3zM11 9h1v1h-1zM14 9h1v1h-1zM16 9h1v1h-1zM20 9h1v1h-1zM23 9h2v1h-2zM0 10h1v1h-1zM2 10h1v1h-1zM6 10h1v1h-1zM8 10h1v1h-1zM10 10h4v1h-4zM18 10h2v1h-2zM1 11h4v1h-4zM6 11h2v1h-2zM13 11h2v1h-2zM16 11h3v1h-3zM21 11h1v1h-1zM23 11h2v1h-2zM3 12h7v1h-7zM11 12h1v1h-1zM13 12h7v1h-7zM24 12h1v1h-1zM0 13h1v1h-1zM6 13h3v1h-3zM13 13h2v1h-2zM16 13h1v1h-1zM21 13h1v1h-1zM23 13h2v1h-2zM0 14h2v1h-2zM4 14h1v1h-1zM6 14h2v1h-2zM11 14h2v1h-2zM14 14h2v1h-2zM17 14h1v1h-1zM20 14h1v1h-1zM22 14h2v1h-2zM3 15h1v1h-1zM10 15h1v1h-1zM13 15h1v1h-1zM15 15h1v1h-1zM17 15h1v1h-1zM21 15h2v1h-2zM1 16h3v1h-3zM6 16h2v1h-2zM14 16h2v1h-2zM18 16h1v1h-1zM20 16h1v1h-1zM24 16h1v1h-1zM10 17h3v1h-3zM14 17h3v1h-3zM20 17h5v1h-5zM0 18h7v1h-7zM10 18h3v1h-3zM20 18h2v1h-2zM23 18h1v1h-1zM0 19h1v1h-1zM6 19h1v1h-1zM8 19h1v1h-1zM16 19h1v1h-1zM18 19h4v1h-4zM23 19h2v1h-2zM0 20h1v1h-1zM2 20h3v1h-3zM6 20h1v1h-1zM9 20h2v1h-2zM13 20h3v1h-3zM17 20h2v1h-2zM23 20h2v1h-2zM0 21h1v1h-1zM2 21h3v1h-3zM6 21h1v1h-1zM8 21h1v1h-1zM11 21h1v1h-1zM15 21h1v1h-1zM18 21h1v1h-1zM21 21h1v1h-1zM23 21h2v1h-2zM0 22h1v1h-1zM2 22h3v1h-3zM6 22h1v1h-1zM8 22h1v1h-1zM10 22h1v1h-1zM12 22h2v1h-2zM16 22h2v1h-2zM24 22h1v1h-1zM0 23h1v1h-1zM6 23h1v1h-1zM9 23h2v1h-2zM12 23h1v1h-1zM14 23h1v1h-1zM16 23h1v1h-1zM18 23h1v1h-1zM21 23h2v1h-2zM24 23h1v1h-1zM0 24h7v1h-7zM8 24h1v1h-1zM10 24h1v1h-1zM12 24h5v1h-5zM18 24h1v1h-1zM21 24h2v1h-2z"/></svg><span class="rm-code">4QKTX</span><i class="rm-beam"></i></div>
+      </div>
+      <div class="rm-phone"><div class="rm-phone-in"><span class="rm-ok"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><b>You’re in!</b><span>Waiting for the teacher…</span></div></div>
+    </div>
+    <figcaption class="frag-cap mono">Лобби комнаты Sketch Relay: реконструкция интерфейса игры</figcaption>
+  </figure></div>
+</header>
+<section class="c-intro wrap" aria-label="Коротко о проекте">
+  <p class="c-lead" data-reveal>Игры лежат в закрытом хранилище, и открыть их можно только через мой сервис: ссылка учителя несёт его почту в зашифрованном виде, срок подписки сверяется с базой, при любом сбое доступ закрыт. Для живой игры в классе я поднял сервер комнат Sketch Relay: учитель получает пропуск на 10 минут, ученики входят по QR-коду, в комнате до 30 игроков.</p>
+  <dl class="c-meta" data-reveal><div><dt>Клиент</dt><dd>englishgamematters.ru, игры для уроков английского</dd></div><div><dt>Год</dt><dd>2026</dd></div><div><dt>Роль</dt><dd>сервис доступа, сервер комнат, доработки на Тильде, тесты</dd></div><div><dt>Стек</dt><dd>Node 20, nginx, NocoDB, Tilda, Продамус</dd></div></dl>
+</section>
+
+<section class="c-block wrap">
+  <h2 class="c-h">Задача</h2>
+  <div class="c-body"><p data-reveal>Учитель платит за подписку и получает игры для уроков. Значит, игра должна открываться только у того, чья подписка действует, и не открываться по пересланной ссылке.</p><p data-reveal>Вторая часть&nbsp;— живая игра всем классом. Учитель показывает комнату на экране, ученики заходят с телефонов без регистрации и рисуют по описанию на английском.</p></div>
+</section>
+
+<section class="c-block c-block--wide wrap">
+  <h2 class="c-h">Как устроен доступ</h2>
+  <figure class="c-dg">
+    <div class="dg dg--wide"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 608" class="dg dg-wide" aria-labelledby="egm-title egm-desc" role="img" aria-label="Схема: учитель открывает игру на сайте, ссылка несёт его почту в зашифрованном виде, сервис доступа проверяет срок подписки и открывает игру из закрытого хранилища, а при отказе или сбое закрывает доступ. Вторая цепочка: учитель создаёт комнату, получает пропуск на 10 минут, ученики входят по QR-коду, до 30 игроков.">
+<title id="egm-title">englishgamematters.ru: доступ к играм и игровые комнаты</title>
+<desc id="egm-desc">Две схемы: учитель открывает игру на сайте, ссылка передаёт его почту в зашифрованном виде сервису доступа, тот проверяет срок подписки и открывает игру из закрытого хранилища либо закрывает доступ; учитель создаёт комнату, получает пропуск на 10 минут, ученики входят по QR-коду, в комнате до 30 игроков.</desc>
+<style>
+.dg-box{fill:var(--bg-2);stroke:var(--line-2);stroke-width:1.25}
+.dg-acc{stroke:var(--accent);stroke-width:1.5}
+.dg-off{fill:none;stroke-dasharray:4 5}
+.dg-edge{fill:none;stroke:var(--line-2);stroke-width:1.5}
+.dg-alt{stroke-dasharray:5 6}
+.dg-rule{fill:none;stroke:var(--line-2);stroke-width:1}
+.dg-tip{fill:none;stroke:var(--fg-3);stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.dg-dot{fill:var(--fg-3)}
+.dg-btn{fill:none;stroke:var(--accent);stroke-width:1.25}
+.dg-t{font-family:var(--f-text);font-size:18px;font-weight:500;fill:var(--fg)}
+.dg-t.dg-dim{fill:var(--fg-2)}
+.dg-s{font-family:var(--f-text);font-size:15px;fill:var(--fg-2)}
+.dg-m{font-family:var(--f-mono);font-size:13px;letter-spacing:.06em;fill:var(--fg-3)}
+.dg-h{font-family:var(--f-display);font-size:28px;fill:var(--fg)}
+.dg-tall .dg-t{font-size:22px}
+.dg-tall .dg-s{font-size:18px}
+.dg-tall .dg-m{font-size:16px}
+.dg-tall .dg-h{font-size:32px}
+</style>
+<defs>
+<marker id="egm-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="10" markerHeight="10" markerUnits="userSpaceOnUse" orient="auto"><path class="dg-tip" d="M2.5 1.5 9 5 2.5 8.5"/></marker>
+</defs>
+<g class="dg-node dg-lane"><text class="dg-h" x="24" y="52">Доступ к игре</text></g>
+<g class="dg-node">
+<rect class="dg-box" x="24" y="80" width="224" height="112" rx="12"/>
+<text class="dg-t" x="42" y="118">Учитель открывает</text>
+<text class="dg-t" x="42" y="142">игру на сайте</text>
+<text class="dg-m" x="42" y="168">Тильда</text>
+</g>
+<path class="dg-edge" pathLength="1" d="M248 112H304" marker-end="url(#egm-arrow)"/>
+<g class="dg-node">
+<rect class="dg-box" x="304" y="80" width="264" height="112" rx="12"/>
+<text class="dg-t" x="322" y="118">Ссылка несёт</text>
+<text class="dg-t" x="322" y="142">почту учителя</text>
+<text class="dg-t" x="322" y="166">в зашифрованном виде</text>
+</g>
+<path class="dg-edge" pathLength="1" d="M568 112H624" marker-end="url(#egm-arrow)"/>
+<g class="dg-node">
+<rect class="dg-box" x="624" y="80" width="244" height="88" rx="12"/>
+<text class="dg-t" x="642" y="118">Сервис доступа</text>
+<text class="dg-m" x="642" y="144">Node 20 · nginx · TLS</text>
+</g>
+<path class="dg-edge" pathLength="1" d="M868 112H924" marker-end="url(#egm-arrow)"/>
+<g class="dg-node">
+<rect class="dg-box dg-acc" x="924" y="80" width="252" height="112" rx="12"/>
+<text class="dg-t" x="942" y="118">Проверка срока</text>
+<text class="dg-t" x="942" y="142">подписки</text>
+<text class="dg-m" x="942" y="168">NocoDB</text>
+</g>
+<path class="dg-edge" pathLength="1" d="M1092 192V264" marker-end="url(#egm-arrow)"/>
+<g class="dg-node dg-lbl"><text class="dg-m" x="1102" y="232">да</text></g>
+<g class="dg-node">
+<rect class="dg-box" x="924" y="264" width="252" height="88" rx="12"/>
+<text class="dg-t" x="942" y="302">Игра открывается</text>
+<text class="dg-t" x="942" y="326">из закрытого хранилища</text>
+</g>
+<path class="dg-edge dg-alt" d="M1008 192V220Q1008 228 1000 228H754Q746 228 746 236V264" marker-end="url(#egm-arrow)"/>
+<g class="dg-node dg-lbl"><text class="dg-m" x="877" y="216" text-anchor="middle">нет или сбой</text></g>
+<g class="dg-node">
+<rect class="dg-box dg-off" x="624" y="264" width="244" height="64" rx="12"/>
+<text class="dg-t dg-dim" x="642" y="302">Доступ закрыт</text>
+</g>
+<path class="dg-rule" d="M24 392H1176"/>
+<g class="dg-node dg-lane"><text class="dg-h" x="24" y="444">Игровая комната</text></g>
+<g class="dg-node">
+<rect class="dg-box" x="24" y="472" width="224" height="88" rx="12"/>
+<text class="dg-t" x="42" y="510">Учитель создаёт</text>
+<text class="dg-t" x="42" y="534">комнату</text>
+</g>
+<path class="dg-edge" pathLength="1" d="M248 504H304" marker-end="url(#egm-arrow)"/>
+<g class="dg-node">
+<rect class="dg-box" x="304" y="472" width="264" height="112" rx="12"/>
+<text class="dg-t" x="322" y="510">Пропуск учителя</text>
+<text class="dg-t" x="322" y="534">на 10 минут</text>
+<text class="dg-m" x="322" y="560">подпись Ed25519</text>
+</g>
+<path class="dg-edge" pathLength="1" d="M568 504H624" marker-end="url(#egm-arrow)"/>
+<g class="dg-node">
+<rect class="dg-box" x="624" y="472" width="244" height="88" rx="12"/>
+<text class="dg-t" x="642" y="510">Ученики входят</text>
+<text class="dg-t" x="642" y="534">по QR-коду</text>
+</g>
+<path class="dg-edge" pathLength="1" d="M868 504H924" marker-end="url(#egm-arrow)"/>
+<g class="dg-node">
+<rect class="dg-box" x="924" y="472" width="252" height="88" rx="12"/>
+<text class="dg-t" x="942" y="510">До 30 игроков</text>
+<text class="dg-t" x="942" y="534">в комнате</text>
+</g>
+</svg></div>
+    <div class="dg dg--tall"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 560 1376" class="dg dg-tall" aria-labelledby="egm-tall-title egm-tall-desc" role="img" aria-label="Схема: учитель открывает игру на сайте, ссылка несёт его почту в зашифрованном виде, сервис доступа проверяет срок подписки и открывает игру из закрытого хранилища, а при отказе или сбое закрывает доступ. Вторая цепочка: учитель создаёт комнату, получает пропуск на 10 минут, ученики входят по QR-коду, до 30 игроков.">
+<title id="egm-tall-title">englishgamematters.ru: доступ к играм и игровые комнаты</title>
+<desc id="egm-tall-desc">Две схемы: учитель открывает игру на сайте, ссылка передаёт его почту в зашифрованном виде сервису доступа, тот проверяет срок подписки и открывает игру из закрытого хранилища либо закрывает доступ; учитель создаёт комнату, получает пропуск на 10 минут, ученики входят по QR-коду, в комнате до 30 игроков.</desc>
+<style>
+.dg-box{fill:var(--bg-2);stroke:var(--line-2);stroke-width:1.25}
+.dg-acc{stroke:var(--accent);stroke-width:1.5}
+.dg-off{fill:none;stroke-dasharray:4 5}
+.dg-edge{fill:none;stroke:var(--line-2);stroke-width:1.5}
+.dg-alt{stroke-dasharray:5 6}
+.dg-rule{fill:none;stroke:var(--line-2);stroke-width:1}
+.dg-tip{fill:none;stroke:var(--fg-3);stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.dg-dot{fill:var(--fg-3)}
+.dg-btn{fill:none;stroke:var(--accent);stroke-width:1.25}
+.dg-t{font-family:var(--f-text);font-size:18px;font-weight:500;fill:var(--fg)}
+.dg-t.dg-dim{fill:var(--fg-2)}
+.dg-s{font-family:var(--f-text);font-size:15px;fill:var(--fg-2)}
+.dg-m{font-family:var(--f-mono);font-size:13px;letter-spacing:.06em;fill:var(--fg-3)}
+.dg-h{font-family:var(--f-display);font-size:28px;fill:var(--fg)}
+.dg-tall .dg-t{font-size:22px}
+.dg-tall .dg-s{font-size:18px}
+.dg-tall .dg-m{font-size:16px}
+.dg-tall .dg-h{font-size:32px}
+</style>
+<defs>
+<marker id="egm-tall-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="13" markerHeight="13" markerUnits="userSpaceOnUse" orient="auto"><path class="dg-tip" d="M2.5 1.5 9 5 2.5 8.5"/></marker>
+</defs>
+<g class="dg-node dg-lane"><text class="dg-h" x="24" y="54">Доступ к игре</text></g>
+<g class="dg-node">
+<rect class="dg-box" x="24" y="80" width="512" height="100" rx="14"/>
+<text class="dg-t" x="46" y="122">Учитель открывает игру на сайте</text>
+<text class="dg-m" x="46" y="154">Тильда</text>
+</g>
+<path class="dg-edge" pathLength="1" d="M280 180V224" marker-end="url(#egm-tall-arrow)"/>
+<g class="dg-node">
+<rect class="dg-box" x="24" y="224" width="512" height="96" rx="14"/>
+<text class="dg-t" x="46" y="266">Ссылка несёт почту учителя</text>
+<text class="dg-t" x="46" y="294">в зашифрованном виде</text>
+</g>
+<path class="dg-edge" pathLength="1" d="M280 320V364" marker-end="url(#egm-tall-arrow)"/>
+<g class="dg-node">
+<rect class="dg-box" x="24" y="364" width="512" height="100" rx="14"/>
+<text class="dg-t" x="46" y="406">Сервис доступа</text>
+<text class="dg-m" x="46" y="438">Node 20 · nginx · TLS</text>
+</g>
+<path class="dg-edge" pathLength="1" d="M280 464V508" marker-end="url(#egm-tall-arrow)"/>
+<g class="dg-node">
+<rect class="dg-box dg-acc" x="24" y="508" width="512" height="100" rx="14"/>
+<text class="dg-t" x="46" y="550">Проверка срока подписки</text>
+<text class="dg-m" x="46" y="582">NocoDB</text>
+</g>
+<path class="dg-edge" pathLength="1" d="M148 608V676" marker-end="url(#egm-tall-arrow)"/>
+<g class="dg-node dg-lbl"><text class="dg-m" x="160" y="646">да</text></g>
+<g class="dg-node">
+<rect class="dg-box" x="24" y="676" width="248" height="124" rx="14"/>
+<text class="dg-t" x="46" y="718">Игра открывается</text>
+<text class="dg-t" x="46" y="746">из закрытого</text>
+<text class="dg-t" x="46" y="774">хранилища</text>
+</g>
+<path class="dg-edge dg-alt" d="M412 608V676" marker-end="url(#egm-tall-arrow)"/>
+<g class="dg-node dg-lbl"><text class="dg-m" x="400" y="646" text-anchor="end">нет или сбой</text></g>
+<g class="dg-node">
+<rect class="dg-box dg-off" x="288" y="676" width="248" height="68" rx="14"/>
+<text class="dg-t dg-dim" x="310" y="718">Доступ закрыт</text>
+</g>
+<path class="dg-rule" d="M24 840H536"/>
+<g class="dg-node dg-lane"><text class="dg-h" x="24" y="890">Игровая комната</text></g>
+<g class="dg-node">
+<rect class="dg-box" x="24" y="916" width="512" height="68" rx="14"/>
+<text class="dg-t" x="46" y="958">Учитель создаёт комнату</text>
+</g>
+<path class="dg-edge" pathLength="1" d="M280 984V1028" marker-end="url(#egm-tall-arrow)"/>
+<g class="dg-node">
+<rect class="dg-box" x="24" y="1028" width="512" height="100" rx="14"/>
+<text class="dg-t" x="46" y="1070">Пропуск учителя на 10 минут</text>
+<text class="dg-m" x="46" y="1102">подпись Ed25519</text>
+</g>
+<path class="dg-edge" pathLength="1" d="M280 1128V1172" marker-end="url(#egm-tall-arrow)"/>
+<g class="dg-node">
+<rect class="dg-box" x="24" y="1172" width="512" height="68" rx="14"/>
+<text class="dg-t" x="46" y="1214">Ученики входят по QR-коду</text>
+</g>
+<path class="dg-edge" pathLength="1" d="M280 1240V1284" marker-end="url(#egm-tall-arrow)"/>
+<g class="dg-node">
+<rect class="dg-box" x="24" y="1284" width="512" height="68" rx="14"/>
+<text class="dg-t" x="46" y="1326">До 30 игроков в комнате</text>
+</g>
+</svg></div>
+    <figcaption class="mono">Две цепочки: открытие игры по подписке и вход класса в комнату</figcaption>
+  </figure>
+</section>
+
+<section class="c-block c-block--wide wrap">
+  <h2 class="c-h">Комнаты вживую</h2>
+  <div class="c-screens">
+    <figure class="shot" data-reveal><img src="../../assets/img/egm-gallery-800.webp" srcset="../../assets/img/egm-gallery-800.webp 800w, ../../assets/img/egm-gallery-1100.webp 1100w" sizes="(min-width:1024px) 62vw, 92vw" width="1100" height="720" alt="Экран учителя после раунда: рисунок команды рядом с исходной картинкой" loading="lazy" decoding="async"></figure>
+    <figure class="shot shot--tall" data-reveal><img src="../../assets/img/egm-draw-390.webp" width="390" height="844" alt="Телефон ученика: рисует то, что услышал от напарника" loading="lazy" decoding="async"></figure>
+    <figure class="shot shot--tall" data-reveal><img src="../../assets/img/egm-speaker-390.webp" width="390" height="800" alt="Телефон ученика-рассказчика: секретная картинка, которую нужно описать по-английски" loading="lazy" decoding="async"></figure>
+  </div>
+</section>
+<div class="c-band tone-paper">
+<section class="c-block wrap">
+  <h2 class="c-h">Цифры</h2>
+  <dl class="c-metrics"><div data-reveal><dt>32 из 32</dt><dd>платных игр каталога открываются только через сервис доступа</dd></div><div data-reveal><dt>10 × 30</dt><dd>комнат по 30 учеников в нагрузочном прогоне&nbsp;— без ошибок</dd></div><div data-reveal><dt>272</dt><dd>автотеста сервиса доступа</dd></div><div data-reveal><dt>49 + 21</dt><dd>тест сервера комнат: модульные и сквозные</dd></div></dl>
+</section></div>
+
+<section class="c-block wrap">
+  <h2 class="c-h">Как устроено</h2>
+  <ol class="c-list"><li data-reveal><span class="mono">01</span><p>Ссылка учителя несёт его почту в зашифрованном виде; при каждом открытии игры сервис сверяет срок подписки с базой.</p></li><li data-reveal><span class="mono">02</span><p>Игры лежат в закрытом хранилище: прямой адрес не открывается, только через сервис.</p></li><li data-reveal><span class="mono">03</span><p>При сбое базы или сети доступ закрыт, а не открыт: ошибка не превращается в бесплатную игру.</p></li><li data-reveal><span class="mono">04</span><p>На Тильде&nbsp;— загрузчик игр с кнопкой «Копировать ссылку», сторож страниц и запасная проверка срока; новые тарифы Продамуса подключаются без правки сценариев оплаты.</p></li><li data-reveal><span class="mono">05</span><p>Сервер комнат: пропуск учителя на 10 минут с подписью Ed25519, вход учеников по QR-коду, до 30 игроков. Идея и интерфейс игры&nbsp;— прототип автора сайта, сервер и допуск&nbsp;— мои.</p></li></ol>
+</section>
+<section class="c-cta wrap" aria-labelledby="cta-h">
+  <p class="mono">Нужно похожее?</p>
+  <h2 id="cta-h" class="c-cta-h">Расскажите задачу&nbsp;— <em>предложу решение</em></h2>
+  <a class="btn btn-accent" data-magnet href="https://t.me/Guru_Blockchain" target="_blank" rel="noopener">Обсудить в Telegram <span class="arr ne" aria-hidden="true">↗</span></a>
+</section>
+<nav class="c-next" aria-label="Следующий кейс">
+  <a class="wrap c-next-in" href="../sales-assistant/">
+    <span class="mono">Следующий кейс · AI-ассистент продаж</span>
+    <span class="c-next-title">AI-ассистент продаж для интернет-магазина в Беларуси</span>
+    <span class="c-next-arr" aria-hidden="true">→</span>
+    <span class="shot c-next-shot is-center"><img src="../../assets/img/assistant-cover-800.webp" srcset="../../assets/img/assistant-cover-800.webp 800w, ../../assets/img/assistant-cover-1600.webp 1600w" sizes="(min-width:1320px) 1224px, 92vw" width="1600" height="686" alt="" loading="lazy" decoding="async"></span>
+  </a>
+</nav>
+</main>
+<footer class="foot">
+  <div class="wrap foot-in">
+    <a href="../../#top" class="logo"><span class="logo-mark" aria-hidden="true">АБ</span><span>Андрей Брыкун</span></a>
+    <nav class="foot-links" aria-label="Разделы внизу">
+      <a href="../../#work">Работы</a>
+      <a href="../../#services">Услуги</a>
+      <a href="../../#process">Как работаю</a>
+      <a href="https://t.me/Guru_Blockchain" target="_blank" rel="noopener">Telegram</a>
+      <a href="../../#contact">Контакты</a>
+    </nav>
+    <p class="copy">© 2026 · Решения, которые работают на бизнес</p>
+  </div>
+</footer>
+
+<script defer src="../../assets/vendor/gsap.min.js"></script>
+<script defer src="../../assets/vendor/ScrollTrigger.min.js"></script>
+<script defer src="../../assets/vendor/SplitText.min.js"></script>
+<script defer src="../../assets/vendor/lenis.min.js"></script>
+<script type="module" src="../../assets/js/case.js"></script>
+</body>
+</html>

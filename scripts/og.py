@@ -49,7 +49,14 @@ def card(title, kicker, shot, out, align='left'):
         h = 470
         s = s.resize((int(s.width * h / s.height), h), Image.Resampling.LANCZOS)
         w = min(s.width, 520)
-        s = s.crop((s.width - w, 0, s.width, h)) if align == 'right' else s.crop((0, 0, w, h))
+        if align == 'center':   # обложка-фрагмент по центру поля: берём середину
+            x0 = max(0, (s.width - 520) // 2)
+            s = s.crop((x0, 0, min(s.width, x0 + 520), h))
+        elif align == 'frag':   # обложка — снимок первого экрана кейса: берём правую колонку (живой фрагмент) без обрывков текста
+            x0 = int(s.width * 0.47)
+            s = s.crop((x0, 0, min(s.width, x0 + 520), h))
+        else:
+            s = s.crop((s.width - w, 0, s.width, h)) if align == 'right' else s.crop((0, 0, w, h))
         mask = Image.new('L', s.size, 0)
         ImageDraw.Draw(mask).rounded_rectangle([0, 0, s.width - 1, h - 1], 18, fill=255)
         im.paste(s, (1200 - s.width - 56, 80), mask)
@@ -72,7 +79,7 @@ cases = json.load(open(os.path.join(ROOT, 'content', 'cases.json'), encoding='ut
 card('Превращаю задачи бизнеса в работающие решения', 'портфолио · 2026',
      'jetron-form-800.webp', os.path.join(ROOT, 'assets', 'og', 'home.png'))
 for c in cases:
-    card(c['title'], c['kicker'], f"{c['cover']['img']}-{c['cover']['widths'][0]}.webp", os.path.join(ROOT, 'assets', 'og', c['slug'] + '.png'), c.get('ogAlign', 'left'))
+    card(c.get('ogTitle', c['title']), c['kicker'], f"{c['cover']['img']}-{c['cover']['widths'][0]}.webp", os.path.join(ROOT, 'assets', 'og', c['slug'] + '.png'), c.get('ogAlign', 'left'))
 
 # иконки: круг угля, «АБ» курсивом в акценте
 for size, name in ((32, 'favicon-32.png'), (180, 'apple-touch-icon.png')):

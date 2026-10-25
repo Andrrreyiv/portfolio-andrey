@@ -18,6 +18,7 @@ ready(() => {
   bars();
   processLine();
   servicePreview();
+  workIndex();
   finale();
   startGLAfter(intro);
   // раскрытый вопрос меняет высоту «Вопросов», а ScrollTrigger сам этого не замечает: без пересчёта лист бумаги
@@ -228,6 +229,48 @@ function servicePreview() {
   });
   addEventListener('pointermove', (e) => { if (on) x(e.clientX); }, { passive: true });
   addEventListener('scroll', () => { if (on) hide(); }, { passive: true });
+}
+
+/* ── индекс работ: крупный кадр выбранной работы держится справа и сменяется по наведению, фокусу
+   и прокрутке (строка у середины экрана); новый кадр поднимается шторкой поверх прежнего ── */
+function workIndex() {
+  const view = $('.ix-frame'), rows = $$('.ix-row');
+  if (!view || !rows.length) return;
+  let cur = rows[0], hover = false;
+  cur.classList.add('is-on');
+  const set = (row) => {
+    if (row === cur) return;
+    cur.classList.remove('is-on');
+    cur = row;
+    row.classList.add('is-on');
+    const img = new Image();
+    img.alt = ''; img.decoding = 'async'; img.src = row.dataset.shot;
+    view.appendChild(img);
+    const drop = () => [...view.querySelectorAll('img')].slice(0, -1).forEach((x) => x.remove());
+    if (reduce) { drop(); return; }
+    gsap.fromTo(img, { clipPath: 'inset(100% 0% 0% 0%)', scale: 1.08 },
+      { clipPath: 'inset(0% 0% 0% 0%)', scale: 1, duration: 0.85, ease: 'expo.out', onComplete: drop });
+  };
+  const list = $('.ix-groups');
+  list.addEventListener('pointerenter', () => { hover = true; });
+  list.addEventListener('pointerleave', () => { hover = false; });
+  rows.forEach((r) => {
+    r.addEventListener('pointerenter', () => set(r));
+    $('.ix-a', r).addEventListener('focus', () => set(r));
+  });
+  if (matchMedia('(min-width: 901px)').matches) {
+    rows.forEach((r) => ScrollTrigger.create({
+      trigger: r, start: 'top 58%', end: 'bottom 58%',
+      onToggle: (st) => { if (st.isActive && !hover) set(r); },
+    }));
+  }
+  // пока читают список, частицы стихают до фона: пыль между лупой и сетью шумела поверх строк (замер 25.10)
+  ScrollTrigger.create({ trigger: '.ix', start: 'top 55%', end: 'bottom 45%', toggleClass: { targets: root, className: 'ix-quiet' } });
+  // кадры заранее, пока индекс на подходе, — иначе первый переход ждал бы сеть
+  ScrollTrigger.create({
+    trigger: '.ix', start: 'top bottom', once: true,
+    onEnter: () => rows.forEach((r) => { new Image().src = r.dataset.shot; }),
+  });
 }
 
 /* ── финал: акцентная сцена раскрывается из скруглённой карточки по мере подхода ── */
