@@ -76,10 +76,6 @@ section{position:relative;padding-block:clamp(88px,11vw,150px)}
   transition:color var(--t-ui) var(--e-out),border-color var(--t-ui) var(--e-out)}
 .link-arrow:hover{color:var(--accent);border-color:var(--accent)}
 /* общий элемент перехода «главная ↔ кейс»: кадр работы летит между страницами */
-.vt-jetron{view-transition-name:shot-jetron}
-.vt-sparks{view-transition-name:shot-sparks}
-.vt-stenarium{view-transition-name:shot-stenarium}
-.vt-andrianov{view-transition-name:shot-andrianov}
 
 /* ── навигация: прозрачная над первым экраном, плотная после; прячется вниз по ходу ── */
 .nav{position:fixed;inset:0 0 auto;z-index:100;transition:transform .5s var(--e-out),background-color .3s var(--e-out)}
@@ -111,16 +107,26 @@ section{position:relative;padding-block:clamp(88px,11vw,150px)}
 .theme-btn .sun{display:none}
 :root[data-theme="light"] .theme-btn .sun{display:block}
 :root[data-theme="light"] .theme-btn .moon{display:none}
-::view-transition-old(root),::view-transition-new(root){animation:none;mix-blend-mode:normal}
-::view-transition-old(root){z-index:1}
-::view-transition-new(root){z-index:2;animation:vt-reveal 680ms var(--e-out) both}
+::view-transition-old(root),::view-transition-new(root){mix-blend-mode:normal}
+:root.vt-theme::view-transition-old(root){z-index:1;animation:none}
+:root.vt-theme::view-transition-new(root){z-index:2;animation:vt-reveal 680ms var(--e-out) both}
 @keyframes vt-reveal{
   from{clip-path:circle(0 at var(--vt-x,50%) var(--vt-y,0))}
   to{clip-path:circle(var(--vt-r,150vmax) at var(--vt-x,50%) var(--vt-y,0))}
 }
-/* Переход между страницами кейсов: документы сменяются плавно, общая картинка летит. */
+/* Переход между страницами: документы сменяются наплывом, кадр работы летит на место живого фрагмента кейса
+   (имя «shot» раздаёт core.js). Кадры не совпадают по содержимому (постер ленты ≠ окно фрагмента), поэтому
+   старый уходит в размытие, новый из него выходит — размытие прячет подмену (Emil Kowalski). */
 @view-transition{navigation:auto}
-::view-transition-group(case-shot){animation-duration:700ms;animation-timing-function:var(--e-io)}
+::view-transition-old(root){animation:vt-out 300ms var(--e-out) both}
+::view-transition-new(root){animation:vt-in 420ms var(--e-out) 80ms both}
+::view-transition-group(shot){animation-duration:650ms;animation-timing-function:var(--e-io)}
+::view-transition-old(shot){animation:vt-blur-out 300ms var(--e-out) both}
+::view-transition-new(shot){animation:vt-blur-in 450ms var(--e-out) 150ms both}
+@keyframes vt-out{to{opacity:0}}
+@keyframes vt-in{from{opacity:0}}
+@keyframes vt-blur-out{to{opacity:0;filter:blur(6px)}}
+@keyframes vt-blur-in{from{opacity:0;filter:blur(6px)}}
 
 /* ── фон: зерно на fixed-слое (не на body — иначе перерисовка при каждом кадре) ── */
 .grain{position:fixed;inset:0;z-index:90;pointer-events:none;opacity:var(--grain-op);mix-blend-mode:var(--grain-blend);
@@ -180,6 +186,7 @@ section{position:relative;padding-block:clamp(88px,11vw,150px)}
   .js [data-reveal]{opacity:1;transform:none}
   .js .hero-title,.js .c-title{visibility:visible}
   ::view-transition-new(root){animation:vt-fade 160ms linear both}
+  ::view-transition-group(shot),::view-transition-old(shot),::view-transition-new(shot){animation-duration:0s!important}
   @keyframes vt-fade{from{opacity:0}to{opacity:1}}
 }
 /* смена темы: переходы цвета внутри снимка View Transition играли на полпути — круг открывал смешанные цвета */

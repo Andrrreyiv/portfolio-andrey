@@ -24,7 +24,7 @@
 .c-acts{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin-top:4px}
 
 /* правая колонка: высота — экран минус шапка; фрагмент меряет себя по контейнеру (cqw/cqh) */
-.c-frag{position:relative;height:min(calc(100svh - 150px),860px);min-height:520px;container-type:size}
+.c-frag{position:relative;height:min(calc(100svh - 150px),860px);min-height:520px;container-type:size;view-transition-name:shot}
 .frag{margin:0;height:100%;display:grid;grid-template-rows:minmax(0,1fr) auto;gap:12px}
 .frag-cap{color:var(--fg-3);font-size:11.5px;letter-spacing:.06em;line-height:1.5;max-width:60ch}
 

@@ -12,11 +12,12 @@ ready(() => {
   countUp('.hero-stats dt');
   loopVideos();
   ticker('.ticker-track', 34);
-  ticker('.contact-track', 26);
+  ticker('.contact-track', 17);   // фраза стала меньше — петля короче, темп тот же (~110 px/с)
   manifesto();
   work();
   bars();
   processLine();
+  solutions();
   servicePreview();
   workIndex();
   finale();
@@ -24,7 +25,8 @@ ready(() => {
   // раскрытый вопрос меняет высоту «Вопросов», а ScrollTrigger сам этого не замечает: без пересчёта лист бумаги
   // оставался прежней высоты (низ главы — тёмным по чёрному) и сдвигались отметки финала
   let faqT = 0;
-  $$('#faq details').forEach((d) => d.addEventListener('toggle', () => { clearTimeout(faqT); faqT = setTimeout(() => ScrollTrigger.refresh(), 60); }));
+  // ответ теперь раскрывается по высоте (home.css, ::details-content): пересчёт — когда высота встала
+  $$('#faq details').forEach((d) => d.addEventListener('toggle', () => { clearTimeout(faqT); faqT = setTimeout(() => ScrollTrigger.refresh(), 420); }));
 });
 
 /* ── первый экран: заголовок по словам, потом подводка лесенкой ── */
@@ -78,6 +80,7 @@ function manifesto() {
 }
 
 /* ── 01: закреплённая горизонтальная лента на десктопе, вертикальные сцены на телефоне ── */
+let glApi = null;    // холст частиц, когда поднят: «Индекс работ» собирает из него знак наведённой работы
 let work01 = null;   // { center(k) } — прокрутка, при которой сцена k в центре (опора частиц)
 function work() {
   const pin = $('.work-pin'), track = $('.work-track');
@@ -101,7 +104,9 @@ function work() {
     // pinType 'transform' — закрепление без смены position, иначе каждый проход давал CLS ≈ 2 (замер 18.10).
     const HOLD = 0.5, MOVE = 1;
     // ScrollTrigger зовёт onUpdate прямо при создании — до того, как метки посчитаны: sync() до этого молчит
-    let at = [], T = 0, shown = '';
+    // armed: страница, открытая (или перезагруженная) ниже ленты, звала sync() из ScrollTrigger до объявления warm/show —
+    // ReferenceError обрывал весь сценарий главной: индекс, финал и частицы не запускались (замер 25.10)
+    let at = [], T = 0, shown = '', armed = false;
     const tl = gsap.timeline({
       defaults: { ease: 'power2.inOut' },
       scrollTrigger: {
@@ -143,7 +148,7 @@ function work() {
       onEnter: () => { $$('img[loading="lazy"]', track).forEach((i) => { i.loading = 'eager'; }); scenes.slice(0, 2).forEach(warm); },
     });
     function sync(p) {
-      if (!T) return;
+      if (!T || !armed) return;
       const t = p * T;
       scenes.forEach((sc, k) => {
         if (k && t >= at[k] - MOVE * 0.55) show(k);
@@ -155,6 +160,7 @@ function work() {
       if (cur && txt !== shown) cur.textContent = shown = txt;
       if (bar) bar.style.transform = `scaleX(${p})`;
     }
+    armed = true;
     sync(tl.scrollTrigger.progress);   // страница открыта посреди ленты — сцены, мимо которых уже проехали, показаны
     const st = tl.scrollTrigger;
     // прокрутка, при которой сцена k стоит в центре (середина её паузы) — опора фаз частиц в driveGL
@@ -180,12 +186,96 @@ function bars() {
   });
 }
 
+/* ── «Примеры решений»: каждый макет один раз разыгрывает свой сценарий, когда доезжает до экрана.
+   Разметка — финальное состояние (тексты типовых примеров не меняются, решение владельца 10.10): сценарий только
+   прячет и проявляет. Появления — expo.out, перемещения — power3.inOut, весь сценарий не дольше ~3,5 с. ── */
+function solutions() {
+  if (reduce) return;
+  const once = (el, build) => {
+    if (!el) return;
+    const tl = build(gsap.timeline({ paused: true, defaults: { ease: 'expo.out' } }), el);
+    ScrollTrigger.create({ trigger: el, start: 'top 72%', once: true, onEnter: () => tl.play() });
+  };
+  // перебор цифр или букв, который встаёт ровно в исходный текст (ширину держим заранее — соседи не ездят)
+  const scramble = (el, chars, dur) => {
+    const orig = el.textContent, o = { p: 0 };
+    el.style.minWidth = `${Math.ceil(el.getBoundingClientRect().width)}px`;
+    return gsap.to(o, {
+      p: 1, duration: dur, ease: 'none',
+      onUpdate: () => {
+        const keep = Math.floor(o.p * orig.length);
+        el.textContent = orig.replace(/./g, (ch, i) => (i < keep || !chars.test(ch) ? ch
+          : (chars === DIGIT ? String((Math.random() * 10) | 0) : 'abcdefghijklmnopqrstuvwxyz_'[(Math.random() * 27) | 0])));
+      },
+      onComplete: () => { el.textContent = orig; },
+    });
+  };
+  const DIGIT = /\d/, WORD = /[a-z_]/;
+  const press = (tl, el) => tl.to(el, { scale: 0.94, duration: 0.12, ease: 'power2.in' })
+    .call(() => el.classList.add('on')).to(el, { scale: 1, duration: 0.4, ease: 'back.out(3)' });
+
+  // 1. поддержка магазина: вопрос → ответ ассистента, строка источника раскрывается следом
+  once($('.sol .chat'), (tl, chat) => {
+    const bubs = $$('.bub', chat), src = $('.src', chat);
+    bubs.forEach((b) => gsap.set(b, { autoAlpha: 0, y: 10, scale: 0.96, transformOrigin: b.classList.contains('u') ? '100% 100%' : '0% 100%' }));
+    if (src) gsap.set(src, { clipPath: 'inset(0 100% 0 0)' });
+    bubs.forEach((b, i) => {
+      tl.to(b, { autoAlpha: 1, y: 0, scale: 1, duration: 0.6 }, i ? (b.classList.contains('u') ? '+=0.45' : '+=0.7') : 0.1);
+      if (src && b.contains(src)) tl.to(src, { clipPath: 'inset(0 0% 0 0)', duration: 0.5, ease: 'power3.inOut' }, '-=0.2');
+    });
+    return tl;
+  });
+
+  // 2. мониторинг цен: строки въезжают лесенкой, цены перебираются и встают, оповещение выезжает снизу
+  once($('.dash-top')?.closest('.sol-visual'), (tl, box) => {
+    const rows = $$('tbody tr', box), foot = $('.dash-foot', box);
+    tl.from(rows, { x: -12, autoAlpha: 0, duration: 0.6, stagger: 0.08 }, 0.1);
+    rows.forEach((r, i) => { const td = r.children[2]; if (td) tl.add(scramble(td, DIGIT, 0.7), 0.25 + i * 0.1); });
+    if (foot) tl.from(foot, { yPercent: 100, autoAlpha: 0, duration: 0.5 }, '-=0.2');
+    return tl;
+  });
+
+  // 3. бот записи: реплики по очереди, «Комплекс» и «14:30» нажимаются, кнопка оплаты заливается
+  once($('.tg-body'), (tl, body) => {
+    const kids = [...body.children], pick = (txt) => $$('.tg-kb span', body).find((s) => s.textContent.trim() === txt);
+    const pay = $('.pb', body);
+    gsap.set(kids, { autoAlpha: 0, y: 8 });
+    kids.forEach((k, i) => {
+      tl.to(k, { autoAlpha: 1, y: 0, duration: 0.5 }, i ? '+=0.25' : 0.1);
+      if (k.classList.contains('tg-kb')) {
+        const btn = pick(i < 3 ? 'Комплекс' : '14:30');
+        if (btn) { tl.to({}, { duration: 0.35 }); press(tl, btn); }
+      }
+    });
+    if (pay) tl.fromTo(pay, { '--fill': '0%' }, { '--fill': '100%', duration: 0.7, ease: 'power3.inOut' }, '+=0.15');
+    return tl;
+  });
+
+  // 4. аудит смарт-контракта: счётчики находок, находки лесенкой, имена ошибок «докручиваются», critical пульсирует раз
+  once($('.sev-row')?.closest('.sol-visual'), (tl, box) => {
+    $$('.sev .v', box).forEach((v, i) => { const play = counter(v); if (play) tl.call(play, null, 0.1 + i * 0.1); });
+    const fs = $$('.finding', box);
+    tl.from(fs, { y: 12, autoAlpha: 0, duration: 0.6, stagger: 0.15 }, 0.35);
+    fs.forEach((f, i) => { const ft = $('.ft', f); if (ft) tl.add(scramble(ft, WORD, 0.6), 0.45 + i * 0.15); });
+    const crit = $('.badge.c', box);
+    if (crit) tl.fromTo(crit, { boxShadow: '0 0 0 0 rgba(192,57,43,.55)' }, { boxShadow: '0 0 0 10px rgba(192,57,43,0)', duration: 0.9, ease: 'power2.out' }, '-=0.1');
+    return tl;
+  });
+}
+
 /* ── линия процесса прорисовывается вместе с прокруткой ── */
 function processLine() {
   const line = $('.proc-line');
   if (!line) return;
   if (reduce) { line.style.transform = 'none'; return; }
-  gsap.to(line, { scaleX: 1, ease: 'none', scrollTrigger: { trigger: '.proc', start: 'top 75%', end: 'bottom 60%', scrub: true } });
+  const steps = $$('.proc-steps li');
+  const lit = (p) => steps.forEach((li) => {
+    const at = (li.offsetLeft + 40) / Math.max(1, line.parentElement.offsetWidth);
+    li.classList.toggle('on', p >= at - 0.02);
+  });
+  gsap.to(line, { scaleX: 1, ease: 'none', scrollTrigger: { trigger: '.proc', start: 'top 75%', end: 'bottom 60%', scrub: true, onUpdate: (st) => lit(st.progress) } });
+  // на телефоне линии нет: шаг загорается сам, когда доезжает до экрана
+  if (getComputedStyle(line).display === 'none') steps.forEach((li) => ScrollTrigger.create({ trigger: li, start: 'top 75%', once: true, onEnter: () => li.classList.add('on') }));
 }
 
 /* ── услуги: при наведении у курсора всплывает кадр живой работы (только мышь, без reduced-motion) ── */
@@ -236,13 +326,15 @@ function servicePreview() {
 function workIndex() {
   const view = $('.ix-frame'), rows = $$('.ix-row');
   if (!view || !rows.length) return;
-  let cur = rows[0], hover = false;
+  // inIx объявлен до всех триггеров: страница, открытая посреди индекса, зовёт set() прямо при их создании
+  let cur = rows[0], hover = false, inIx = false;
   cur.classList.add('is-on');
   const set = (row) => {
     if (row === cur) return;
     cur.classList.remove('is-on');
     cur = row;
     row.classList.add('is-on');
+    if (inIx && glApi && !root.classList.contains('ix-quiet')) glApi.glyph(row.dataset.glyph);
     const img = new Image();
     img.alt = ''; img.decoding = 'async'; img.src = row.dataset.shot;
     view.appendChild(img);
@@ -264,8 +356,32 @@ function workIndex() {
       onToggle: (st) => { if (st.isActive && !hover) set(r); },
     }));
   }
-  // пока читают список, частицы стихают до фона: пыль между лупой и сетью шумела поверх строк (замер 25.10)
-  ScrollTrigger.create({ trigger: '.ix', start: 'top 55%', end: 'bottom 45%', toggleClass: { targets: root, className: 'ix-quiet' } });
+  // Пока читают список, облако частиц не сыплется пылью поверх строк: на компьютере оно собирается в знак
+  // наведённой работы в свободном поле под кадром (конь, QR, зёрна, чат…), при смене строки перетекает по дуге.
+  // Где места или WebGL нет (телефон, низкий экран) — частицы просто стихают до фона.
+  const wide = matchMedia('(pointer: fine) and (min-width: 1024px)');
+  const placeGlyph = () => {
+    if (!glApi || !wide.matches) return false;
+    const r = view.getBoundingClientRect(), vh = innerHeight;
+    const top = parseFloat(getComputedStyle($('.ix-view')).top) || 140;
+    const free = vh - 28 - (top + r.height);
+    const z = Math.min(r.width / 2, free / 2) / (vh / 2) * 0.9;
+    if (z < 0.16) return false;
+    const aspect = innerWidth / vh;
+    glApi.place(((r.left + r.width / 2) / innerWidth * 2 - 1) * aspect, 1 - (top + r.height + 14 + free / 2) / vh * 2, z);
+    return true;
+  };
+  const enter = (on) => {
+    inIx = on;
+    const glyphs = on && placeGlyph();
+    root.classList.toggle('ix-quiet', on && !glyphs);
+    if (!glApi) return;
+    if (glyphs) glApi.glyph(cur.dataset.glyph);
+    glApi.focus(glyphs ? 1 : 0);
+  };
+  ScrollTrigger.create({ trigger: '.ix', start: 'top 55%', end: 'bottom 45%', onToggle: (st) => enter(st.isActive) });
+  addEventListener('gl-ready', () => { if (inIx) enter(true); });
+  ScrollTrigger.addEventListener('refresh', () => { if (inIx) placeGlyph(); });
   // кадры заранее, пока индекс на подходе, — иначе первый переход ждал бы сеть
   ScrollTrigger.create({
     trigger: '.ix', start: 'top bottom', once: true,
@@ -313,10 +429,11 @@ function layout(aspect) {
   // светятся и складываются, свет не должен спорить с текстом. На телефоне «?» — у заголовка, а не на ответах.
   return wide
     ? { anchors: [[aspect * 0.54, 0.16, 0.9], [0, 0, 1], scene, scene, scene, scene,
-        [-aspect * 0.5, 0.22, 0.52], [aspect * 0.5, 0.2, 0.55], [-aspect * 0.62, -0.62, 0.46]],
-        alphas: [0.72, 0.3, 0.26, 0.26, 0.26, 0.26, 0.45, 0.4, 0.5], size: 2.2 }
-    : { anchors: [[aspect * 0.2, 0.56, aspect * 0.78], [0, 0, 1], scene, scene, scene, scene, ghost, ghost, [0, 0.62, aspect * 0.5]],
-        alphas: [0.3, 0.26, 0.24, 0.24, 0.24, 0.24, 0.24, 0.22, 0.26], size: 1.8 };
+        [-aspect * 0.5, 0.22, 0.52], [aspect * 0.5, 0.2, 0.55], [-aspect * 0.62, -0.62, 0.46],
+        [aspect * 0.5, -0.5, 0.3], [aspect * 0.5, -0.5, 0.3]],
+        alphas: [0.72, 0.3, 0.26, 0.26, 0.26, 0.26, 0.45, 0.4, 0.5, 0.62, 0.62], size: 2.2 }
+    : { anchors: [[aspect * 0.2, 0.56, aspect * 0.78], [0, 0, 1], scene, scene, scene, scene, ghost, ghost, [0, 0.62, aspect * 0.5], ghost, ghost],
+        alphas: [0.3, 0.26, 0.24, 0.24, 0.24, 0.24, 0.24, 0.22, 0.26, 0.24, 0.24], size: 1.8 };
 }
 
 function startGL() {
@@ -328,7 +445,9 @@ function startGL() {
     try { api = await createGL($('#gl'), { count, layout }); } catch (e) { console.warn('[gl]', e); return; }
     if (!api) return;
     root.classList.add('gl-on');
+    glApi = api;
     driveGL(api, paperBands(api));
+    dispatchEvent(new Event('gl-ready'));
   });
   ('requestIdleCallback' in window) ? requestIdleCallback(go, { timeout: 1500 }) : setTimeout(go, 600);
 }

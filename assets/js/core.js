@@ -115,10 +115,31 @@ if (themeBtn) {
     root.style.setProperty('--vt-x', x + 'px');
     root.style.setProperty('--vt-y', y + 'px');
     root.style.setProperty('--vt-r', Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y)) + 'px');
-    document.startViewTransition(flip);
+    // круг — только у смены темы; переход между страницами — свой (vt-theme отличает их в base.css)
+    root.classList.add('vt-theme');
+    document.startViewTransition(flip).finished.finally(() => root.classList.remove('vt-theme'));
   });
   paintMeta();
 }
+
+/* ── перелёт кадра работы между страницами (cross-document View Transitions). Имя «shot» получает только
+   источник нажатой ссылки: кадр сцены ленты, крупный кадр «Индекса работ» или обложка «Следующего кейса»;
+   на странице кейса его ловит живой фрагмент (.c-frag, case.css). Два одинаковых имени отменили бы переход,
+   поэтому прежний фрагмент уходящей страницы имя теряет. ── */
+let vtSrc = null;
+document.addEventListener('click', (e) => {
+  const a = e.target.closest?.('a[href]');
+  vtSrc = !a ? null : a.closest('.scene')?.querySelector('.shot-main')
+    || (a.closest('.ix-row') ? document.querySelector('.ix-frame') : null)
+    || a.querySelector('.c-next-shot') || null;
+}, true);
+addEventListener('pageswap', (e) => {
+  if (!e.viewTransition) return;
+  if (vtSrc) {
+    document.querySelectorAll('.c-frag').forEach((f) => { f.style.viewTransitionName = 'none'; });
+    vtSrc.style.viewTransitionName = 'shot';
+  }
+});
 
 /* ── магнит на главных кнопках: пишет только --tx/--ty, нажатие остаётся за CSS ── */
 if (fine && !reduce) {

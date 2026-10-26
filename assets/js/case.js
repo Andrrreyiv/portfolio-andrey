@@ -11,6 +11,7 @@ ready(() => {
   // первый экран целиком: подводка, табло и кнопка выходят лесенкой сразу, а не по порогу прокрутки
   // (низ левой колонки на 900 px высоты лежал ниже порога batchReveal и кнопка не появлялась)
   if (!reduce) gsap.to('.c-hero [data-reveal]', { opacity: 1, y: 0, duration: 0.9, ease: 'expo.out', stagger: 0.09, delay: 0.35 });
+  if (!reduce) shots();   // до batchReveal: кадры работ выходят своим языком, а не общим проявлением
   batchReveal('main [data-reveal]:not(.c-hero [data-reveal])');
   loopVideos();
   countUp('.c-metrics dt');
@@ -22,6 +23,13 @@ ready(() => {
   if (play) ScrollTrigger.create({ trigger: frag, start: 'top 80%', once: true, onEnter: () => play.delay(0.55).play() });
   $$('.c-dg').forEach(diagram);
   $$('.c-steps').forEach(steps);
+  // бежевая полоса цифр входит карточкой, как листы главной и финал (только мышь: clip-path по прокрутке на таче дорог)
+  if (matchMedia('(pointer: fine)').matches) {
+    $$('.c-band').forEach((b) => gsap.fromTo(b, { clipPath: 'inset(0% 4% 0% 4% round 28px)' }, {
+      clipPath: 'inset(0% 0% 0% 0% round 0px)', ease: 'none',
+      scrollTrigger: { trigger: b, start: 'top 95%', end: 'top 35%', scrub: true },
+    }));
+  }
   // обложка следующего кейса раскрывается из карточки тем же языком, что бежевые листы и финал главной;
   // на тач-экранах без анимации: clip-path по прокрутке перерисовывает картинку в каждом кадре
   if (matchMedia('(pointer: fine)').matches) {
@@ -31,6 +39,22 @@ ready(() => {
     });
   }
 });
+
+/* ── кадры работы в кейсе раскрываются тем же языком, что сцены ленты на главной: шторка снизу и лёгкий наезд,
+   текст продукта — следом лесенкой. Один раз, по времени, когда кадр доехал до экрана. ── */
+function shots() {
+  $$('.c-prod, .c-screens > .shot, .c-gallery > .shot, .c-split-shot, .c-video').forEach((f) => {
+    f.removeAttribute('data-reveal');
+    const frame = f.matches('.shot') ? f : $('.shot', f);
+    if (!frame) return;
+    const tl = gsap.timeline({ paused: true })
+      .from(frame, { clipPath: 'inset(100% 0% 0% 0% round 18px)', duration: 1.2, ease: 'expo.out' }, 0)
+      .from($$('img, video', frame), { scale: 1.18, duration: 1.6, ease: 'expo.out' }, 0);
+    const text = $$('.c-prod-body > *, figcaption', f);
+    if (text.length) tl.from(text, { x: 40, autoAlpha: 0, duration: 1, ease: 'expo.out', stagger: 0.06 }, 0.1);
+    ScrollTrigger.create({ trigger: f, start: 'top 82%', once: true, onEnter: () => tl.play() });
+  });
+}
 
 /* ── цифра-табло: каждая цифра — барабан 0…9 0…9, крутится на полный круг и встаёт на свою ──
    Читалке остаётся исходный текст, барабаны скрыты от неё. */

@@ -4,13 +4,16 @@
 // одного вызова drawArrays(POINTS).
 
 // Порядок форм в атрибутах: 0 «АБ», 1 пыль, 2 форма с номером, 3 облака чата, 4 стеновые панели,
-// 5 окно браузера (сайт andrianov-agency.ru), 6 лупа, 7 сеть, 8 вопрос — последние три живут на бежевых главах.
-export const SHAPES = 9;
+// 5 окно браузера (сайт andrianov-agency.ru), 6 лупа, 7 сеть, 8 вопрос — последние три живут на бежевых главах;
+// 9 и 10 — два слота «фокуса» «Индекса работ»: прежний и новый знак наведённой работы (glyph()).
+export const SHAPES = 11;
 const ZONES = 6;   // бежевых глав на странице меньше: шейдер смотрит не дальше uZoneN
 
 const VERT = `#version 300 es
-in vec2 aP0; in vec2 aP1; in vec2 aP2; in vec2 aP3; in vec2 aP4; in vec2 aP5; in vec2 aP6; in vec2 aP7; in vec2 aP8; in vec4 aR;
+in vec2 aP0; in vec2 aP1; in vec2 aP2; in vec2 aP3; in vec2 aP4; in vec2 aP5; in vec2 aP6; in vec2 aP7; in vec2 aP8; in vec2 aP9; in vec2 aP10; in vec4 aR;
 uniform float uFrom, uTo, uMix, uTime, uAspect, uSize, uDpr, uMouseOn;
+// фокус «Индекса работ»: uFocus — насколько облако ушло в знак (0…1), uFocusMix — переход слот 9 → слот 10
+uniform float uFocus, uFocusMix;
 uniform vec3 uAnchor[${SHAPES}];
 uniform float uAlpha[${SHAPES}];
 uniform vec2 uMouse;
@@ -26,9 +29,9 @@ uniform float uShift, uShiftAB;
 out float vA; out vec3 vC; out float vP;
 vec2 shape(float i){
   vec2 p = i < .5 ? aP0 : i < 1.5 ? aP1 : i < 2.5 ? aP2 : i < 3.5 ? aP3 : i < 4.5 ? aP4
-         : i < 5.5 ? aP5 : i < 6.5 ? aP6 : i < 7.5 ? aP7 : aP8;
+         : i < 5.5 ? aP5 : i < 6.5 ? aP6 : i < 7.5 ? aP7 : i < 8.5 ? aP8 : i < 9.5 ? aP9 : aP10;
   vec3 a = uAnchor[int(i + .5)];
-  return a.xy + p * a.z + vec2(0., i > 5.5 ? uShift : i < .5 ? uShiftAB : 0.);
+  return a.xy + p * a.z + vec2(0., i > 5.5 && i < 8.5 ? uShift : i < .5 ? uShiftAB : 0.);
 }
 // точка над листом бумаги: z = (верх, низ, полуширина); край по высоте мягкий на uEdge — на тач-экранах
 // прокрутка нативная, и граница, посчитанная в главном потоке, на кадр-другой отстаёт от листа
@@ -46,8 +49,17 @@ void main(){
   // (только при смене формы: «АБ → АБ» над «Обо мне» — это удержание, без разлёта)
   vec2 dir = normalize(b - a + 1e-5);
   p += vec2(-dir.y, dir.x) * sin(t * 3.14159) * (aR.x - .5) * .55 * step(.5, abs(uFrom - uTo));
-  // дыхание на месте; пыль дрейфует заметнее
-  float dust = (uFrom == 1. ? 1. - t : 0.) + (uTo == 1. ? t : 0.);
+  // «Индекс работ»: облако собирается в знак наведённой работы; смена знака — тот же перелёт по дуге, лесенкой по aR.w
+  float tf = clamp((uFocusMix - d) / .65, 0., 1.);
+  tf = tf * tf * (3. - 2. * tf);
+  vec2 fa = shape(9.), fb = shape(10.);
+  vec2 fd = normalize(fb - fa + 1e-5);
+  vec2 fp = mix(fa, fb, tf) + vec2(-fd.y, fd.x) * sin(tf * 3.14159) * (aR.x - .5) * .4;
+  float tk = clamp((uFocus - d) / .65, 0., 1.);
+  tk = tk * tk * (3. - 2. * tk);
+  p = mix(p, fp, tk);
+  // дыхание на месте; пыль дрейфует заметнее (в знаке фокуса — нет)
+  float dust = ((uFrom == 1. ? 1. - t : 0.) + (uTo == 1. ? t : 0.)) * (1. - tk);
   float tt = uTime * .35;
   p += vec2(sin(tt * (.6 + aR.y) + aR.z * 6.283), cos(tt * (.5 + aR.x) + aR.y * 6.283)) * (.004 + .01 * aR.z + .05 * dust);
   // курсор раздвигает и закручивает точки, рядом с ним они загораются акцентом
@@ -68,7 +80,7 @@ void main(){
   }
   gl_Position = vec4(p.x / uAspect, p.y, 0., 1.);
   gl_PointSize = uSize * uDpr * (.55 + aR.y * .9) * (1. + f * .5) * mix(1., 1.15, paper);
-  vA = mix(uAlpha[int(uFrom + .5)], uAlpha[int(uTo + .5)], t) * (.45 + .55 * aR.z) * (1. + f * .9 + w)
+  vA = mix(mix(uAlpha[int(uFrom + .5)], uAlpha[int(uTo + .5)], t), uAlpha[9], tk) * (.45 + .55 * aR.z) * (1. + f * .9 + w)
      * mix(1., uPaperK, paper);
   vec3 ca = mix(uColA, uPaperA, paper), cb = mix(uColB, uPaperB, paper);
   // угли акцента: на чёрном 14 % точек, на бумаге 20 % — печать в две краски
@@ -172,6 +184,52 @@ function drawAsk(ctx) {
   ctx.fillText('?', 50, 56);
 }
 
+/* знаки «Индекса работ» сверх фигур глав: конь (бот), QR (комнаты по коду), зёрна шлифа (ML) */
+function drawKnight(ctx) {
+  // силуэт коня по контуру фигуры python-chess (45×45), растянут на квадрат 100
+  ctx.save(); ctx.translate(4, 3); ctx.scale(2.62, 2.62); ctx.translate(-5, -6);
+  ctx.fill(new Path2D('M22 10C32.5 11 38.5 18 38 39L15 39C15 30 25 32.5 23 18Z'));
+  ctx.fill(new Path2D('M24 18C24.38 20.91 18.45 25.37 16 27C13 29 13.18 31.34 11 31C9.958 30.06 12.41 27.96 11 28C10 28 11.19 29.23 10 30C9 30 5.997 31 6 26C6 24 12 14 12 14C12 14 13.89 12.1 14 10.5C13.27 9.506 13.5 8.5 13.5 7.5C14.5 6.5 16.5 10 16.5 10L18.5 10C18.5 10 19.28 8.008 21 7C22 7 22 10 22 10Z'));
+  ctx.fillRect(12, 37, 29, 3.4);
+  ctx.globalCompositeOperation = 'destination-out';
+  ctx.beginPath(); ctx.arc(9, 25.5, 1, 0, Math.PI * 2); ctx.fill();
+  ctx.restore();
+}
+function drawQR(ctx) {
+  const n = 21, m = 92 / n, at = (x, y) => ctx.fillRect(4 + x * m, 4 + y * m, m + .05, m + .05);
+  let seed = 305;
+  const rnd = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
+  const finder = (x0, y0) => {
+    for (let y = 0; y < 7; y++) for (let x = 0; x < 7; x++) {
+      const ring = Math.max(Math.abs(x - 3), Math.abs(y - 3));
+      if (ring !== 2) at(x0 + x, y0 + y);
+    }
+  };
+  const inFinder = (x, y) => (x < 8 && y < 8) || (x > n - 9 && y < 8) || (x < 8 && y > n - 9);
+  for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) if (!inFinder(x, y) && rnd() < .47) at(x, y);
+  finder(0, 0); finder(n - 7, 0); finder(0, n - 7);
+}
+function drawGrains(ctx) {
+  // шлиф под микроскопом: круг поля, внутри зёрна Вороного с тонкими границами (рисуем прямо в пиксели)
+  const S = ctx.canvas.width, k = S / 100, img = ctx.createImageData(S, S), d = img.data;
+  let seed = 7032;
+  const rnd = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
+  const pts = Array.from({ length: 15 }, () => [10 + rnd() * 80, 10 + rnd() * 80]);
+  for (let y = 0; y < S; y++) for (let x = 0; x < S; x++) {
+    const u = x / k, v = y / k, dx0 = u - 50, dy0 = v - 50, r = Math.hypot(dx0, dy0);
+    if (r > 46) continue;
+    let a = 1e9, b = 1e9;
+    for (const [px, py] of pts) {
+      const q = (u - px) ** 2 + (v - py) ** 2;
+      if (q < a) { b = a; a = q; } else if (q < b) b = q;
+    }
+    if (Math.sqrt(b) - Math.sqrt(a) < 3.4 && r < 43) continue;   // граница зерна — широкая, иначе точки её заливают
+    d[(y * S + x) * 4 + 3] = 255;
+  }
+  ctx.putImageData(img, 0, 0);
+}
+const GLYPHS = { knight: drawKnight, qr: drawQR, grains: drawGrains };
+
 function sample(draw, n, edgeShare) {
   // 200 px хватает: точка всё равно разбрасывается внутри пикселя, а обход в 3,2 раза короче (на телефоне ×4
   // одна выборка 360 px стоила 65 мс и попадала на вступление первого экрана)
@@ -232,7 +290,7 @@ export async function createGL(canvas, { count, layout }) {
 
   const U = {};
   ['uFrom', 'uTo', 'uMix', 'uTime', 'uAspect', 'uSize', 'uDpr', 'uMouseOn', 'uAnchor', 'uAlpha', 'uMouse', 'uPulse', 'uColA', 'uColB',
-    'uZone', 'uZoneN', 'uPaperA', 'uPaperB', 'uPaperK', 'uEdge', 'uShift', 'uShiftAB', 'uGlow']
+    'uZone', 'uZoneN', 'uPaperA', 'uPaperB', 'uPaperK', 'uEdge', 'uShift', 'uShiftAB', 'uGlow', 'uFocus', 'uFocusMix']
     .forEach((n) => { U[n] = gl.getUniformLocation(prog, n); });
 
   const vao = gl.createVertexArray();
@@ -251,10 +309,23 @@ export async function createGL(canvas, { count, layout }) {
   // Формы выбираются по одной в свободное время между кадрами: девять выборок 360×360 подряд —
   // заметная заминка, если человек в этот миг листает страницу.
   const idle = () => new Promise((r) => ('requestIdleCallback' in window ? requestIdleCallback(() => r(), { timeout: 150 }) : setTimeout(r, 16)));
-  for (const [name, draw, edge] of [['aP0', drawAB, .45], ['aP2', drawJersey, .4], ['aP3', drawChat, .4], ['aP4', drawWall, .25],
-    ['aP5', drawBrowser, .35], ['aP6', drawLoupe, .35], ['aP7', drawNet, .3], ['aP8', drawAsk, .45]]) {
-    buf(name, sample(draw, count, edge), 2);
+  // выборки фигур глав запоминаем: знаки «Индекса работ» (футболка, чат, панели, сайт, лупа) — те же самые
+  const lib = {};
+  for (const [name, draw, edge, key] of [['aP0', drawAB, .45], ['aP2', drawJersey, .4, 'jersey'], ['aP3', drawChat, .4, 'chat'],
+    ['aP4', drawWall, .25, 'wall'], ['aP5', drawBrowser, .35, 'browser'], ['aP6', drawLoupe, .35, 'loupe'], ['aP7', drawNet, .3], ['aP8', drawAsk, .45]]) {
+    const pts = sample(draw, count, edge);
+    if (key) lib[key] = pts;
+    buf(name, pts, 2);
     await idle();
+  }
+  const slots = [buf('aP9', lib.loupe, 2), buf('aP10', lib.loupe, 2)];
+  // новые знаки (конь, QR, зёрна) — в свободное время после старта: нужны только на компьютере, у индекса
+  const glyphOf = (key) => {
+    if (!lib[key] && GLYPHS[key]) lib[key] = sample(GLYPHS[key], count, .35);
+    return lib[key] || lib.browser;
+  };
+  if (matchMedia('(pointer: fine)').matches) {
+    (async () => { for (const key of Object.keys(GLYPHS)) { await idle(); glyphOf(key); } })();
   }
   const r = new Float32Array(count * 4);
   for (let i = 0; i < r.length; i++) r[i] = Math.random();
@@ -264,8 +335,11 @@ export async function createGL(canvas, { count, layout }) {
   gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
   gl.clearColor(0, 0, 0, 0);
 
-  const state = { from: 0, to: 0, mix: 0, mx: 9, my: 9, tx: 9, ty: 9, px: 9, py: 9, pulse: 0, running: false, raf: 0, t0: performance.now(), shift: 0, shiftAB: 0, sy: scrollY };
-  let dpr = 1, vw = 0, vh = innerHeight;
+  const state = { focus: 0, focusT: 0, fmix: 0, fmixT: 0, glyph: 'loupe', pending: null, busy: false, from: 0, to: 0, mix: 0, mx: 9, my: 9, tx: 9, ty: 9, px: 9, py: 9, pulse: 0, running: false, raf: 0, t0: performance.now(), shift: 0, shiftAB: 0, sy: scrollY };
+  let dpr = 1, vw = 0, vh = innerHeight, L = null;
+  // опоры фигур: из раскладки, а слотам фокуса (9, 10) home.js даёт место под кадром «Индекса работ»
+  const pinned = {};
+  const putAnchors = () => gl.uniform3fv(U.uAnchor, L.anchors.map((a, i) => pinned[i] || a).flat());
 
   function resize() {
     // Холст стоит на 100lvh (home.css): на телефоне адресная строка меняет innerHeight при каждой прокрутке,
@@ -282,8 +356,8 @@ export async function createGL(canvas, { count, layout }) {
       gl.bufferData(gl.ARRAY_BUFFER, dust(count, a), gl.STATIC_DRAW);
     }
     aspect = a;
-    const L = layout(aspect);
-    gl.uniform3fv(U.uAnchor, L.anchors.flat());
+    L = layout(aspect);
+    putAnchors();
     gl.uniform1fv(U.uAlpha, L.alphas);
     gl.uniform1f(U.uSize, L.size);
     gl.uniform1f(U.uAspect, aspect);
@@ -329,6 +403,15 @@ export async function createGL(canvas, { count, layout }) {
     gl.uniform1f(U.uTo, state.to);
     gl.uniform1f(U.uMix, state.mix);
     gl.uniform2f(U.uMouse, state.mx, state.my);
+    // фокус «Индекса работ»: облако уходит в знак и возвращается; смена знака доводится до конца, потом следующий
+    state.focus += (state.focusT - state.focus) * (1 - .93 ** k);
+    state.fmix += (state.fmixT - state.fmix) * (1 - .9 ** k);
+    if (state.busy && Math.abs(state.fmixT - state.fmix) < .01) {
+      state.fmix = state.fmixT; state.busy = false;
+      if (state.pending) { const p = state.pending; state.pending = null; glyph(p); }
+    }
+    gl.uniform1f(U.uFocus, state.focus);
+    gl.uniform1f(U.uFocusMix, state.fmix);
     state.pulse *= .94 ** k;
     gl.uniform3f(U.uPulse, state.px, state.py, state.pulse);
     putZones();
@@ -337,6 +420,19 @@ export async function createGL(canvas, { count, layout }) {
     gl.clear(gl.COLOR_BUFFER_BIT);
     gl.drawArrays(gl.POINTS, 0, count);
   }
+  /** Знак наведённой работы: пишется в скрытый слот, затем облако перетекает в него. Пока идёт переход,
+      новый знак ждёт своей очереди (иначе точки прыгали бы посреди перелёта). */
+  function glyph(key) {
+    if (!key || key === state.glyph) { state.pending = null; return; }
+    if (state.busy) { state.pending = key; return; }
+    const hidden = state.focus < .02 && state.focusT === 0;   // облако не в знаке — переписываем видимый слот сразу
+    const slot = hidden ? (state.fmixT > .5 ? 1 : 0) : (state.fmixT > .5 ? 0 : 1);
+    gl.bindBuffer(gl.ARRAY_BUFFER, slots[slot]);
+    gl.bufferSubData(gl.ARRAY_BUFFER, 0, glyphOf(key));
+    state.glyph = key;
+    if (!hidden) { state.fmixT = slot; state.busy = true; }
+  }
+
   const start = () => { if (!state.running) { state.running = true; state.raf = requestAnimationFrame(frame); } };
   const stop = () => { state.running = false; cancelAnimationFrame(state.raf); };
 
@@ -371,6 +467,11 @@ export async function createGL(canvas, { count, layout }) {
     /** Текущая прокрутка (из обработчика ScrollTrigger) и сдвиг фигур бежевых глав в координатах экрана. */
     scroll(y) { state.sy = y; },
     shift(v, ab = 0) { state.shift = v; state.shiftAB = ab; },
+    /** «Индекс работ»: 1 — облако собирается в знак работы, 0 — возвращается к фазе прокрутки. */
+    focus(v) { state.focusT = v; },
+    glyph,
+    /** Место знака в координатах холста: x, y (−1…1 по высоте) и полуразмер z — для слотов 9 и 10. */
+    place(x, y, z) { pinned[9] = pinned[10] = [x, y, z]; if (L) putAnchors(); },
     resize,
   };
 }

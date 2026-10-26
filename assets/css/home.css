@@ -286,6 +286,11 @@ main{position:relative;z-index:1}
 .faq details[open] summary::after{transform:rotate(45deg)}
 .faq .ans{color:var(--fg-2);padding-bottom:28px;max-width:62ch}
 .faq details[open] .ans{animation:ans-in .45s var(--e-out)}
+/* ответ раскрывается по высоте и так же закрывается (Chrome 131+; в остальных — как раньше, сразу) */
+.faq details{interpolate-size:allow-keywords}
+.faq details::details-content{block-size:0;overflow:clip;transition:block-size 260ms var(--e-io),content-visibility 260ms allow-discrete}
+.faq details[open]::details-content{block-size:auto;transition-duration:380ms}
+@media (prefers-reduced-motion:reduce){.faq details::details-content{transition:none}}
 @keyframes ans-in{from{opacity:0;transform:translateY(-6px)}}
 
 /* Акцент дозирован: курсив в заголовках разделов — цветом текста; оранжевый у кнопок,
@@ -297,9 +302,15 @@ main{position:relative;z-index:1}
 .contact{--ink:var(--on-accent);padding-block:clamp(72px,9vw,140px);overflow:clip;background:var(--accent);color:var(--ink);
   clip-path:inset(0 round 0)}
 .contact-ticker{overflow:hidden;margin-bottom:clamp(48px,6vw,88px)}
+/* края строки растворяются в заливку, повторы разделены точкой: слово, срезанное краем, не читается как «бсудить» (владелец 25.10) */
+.contact-ticker{-webkit-mask-image:linear-gradient(90deg,transparent,#000 10%,#000 90%,transparent);mask-image:linear-gradient(90deg,transparent,#000 10%,#000 90%,transparent)}
 .contact-track{display:flex;width:max-content}
-.contact-track span{font-family:var(--f-display);font-style:italic;font-size:clamp(72px,13vw,220px);line-height:1;padding-right:.35em;white-space:nowrap;color:var(--ink)}
-.contact-track span:nth-child(even){color:transparent;-webkit-text-stroke:1.5px var(--ink)}
+
+/* фраза целиком помещается в кадр (на 1440 — 56 % ширины, было 87 %), повторы разделены точкой языком верхней строки */
+.contact-track span{display:flex;align-items:center;font-family:var(--f-display);font-style:italic;font-size:clamp(48px,8.4vw,168px);line-height:1;white-space:nowrap;color:var(--ink)}
+.contact-track span::after{content:"";flex:none;width:.14em;height:.14em;border-radius:50%;background:var(--ink);margin-inline:.42em}
+.contact-track span:nth-child(even){color:transparent;-webkit-text-stroke:max(1.5px,.012em) var(--ink)}
+@media (prefers-reduced-motion:reduce){.contact-track{padding-left:var(--gut)}.contact-track span+span{display:none}}
 .contact-in{display:grid;gap:24px;justify-items:start}
 .contact-in .mono{display:flex;align-items:center;gap:12px;color:var(--ink);opacity:.8}
 .contact-in .dot,.contact-in .dot::after{background:var(--ink)}
@@ -365,3 +376,15 @@ main{position:relative;z-index:1}
   .hero-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
   .hero-stats dt{font-size:30px}
 }
+
+/* «Как работаю»: кружок шага заливается акцентом, когда линия до него дошла (home.js → processLine) */
+.proc-n{position:relative;isolation:isolate;transition:color 220ms var(--e-out)}
+.proc-n::before{content:"";position:absolute;inset:-1px;border-radius:50%;background:var(--accent);z-index:-1;
+  opacity:0;transform:scale(.4);transition:transform 480ms var(--e-out),opacity 300ms var(--e-out)}
+.proc-steps li.on .proc-n{color:var(--on-accent)}
+.proc-steps li.on .proc-n::before{opacity:1;transform:scale(1)}
+@media (prefers-reduced-motion:reduce){.proc-steps li .proc-n::before{opacity:1;transform:none}.proc-steps li .proc-n{color:var(--on-accent)}}
+/* «Примеры решений»: выбранная кнопка бота подсвечивается, кнопка оплаты заливается (home.js → solutions) */
+.tg-kb span{transition:background-color 220ms var(--e-out),color 220ms var(--e-out)}
+.tg-kb span.on{background:#3D6FA5;color:#fff}
+.tg-pay .pb{background:linear-gradient(#3D6FA5,#3D6FA5) no-repeat 0 0/var(--fill,100%) 100%,rgba(61,111,165,.32)}

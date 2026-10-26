@@ -178,7 +178,7 @@ export function renderMain(c, all, root) {
   return `<main id="main" class="case-main">
 <header class="c-hero wrap">
   <div class="c-hero-txt">
-    <a class="c-back mono" href="${root}#more"><span aria-hidden="true">←</span> Все работы</a>
+    <a class="c-back mono" href="${root}#more"><span aria-hidden="true">←</span> Примеры работ</a>
     <p class="c-kicker mono">${esc(c.dir)} · ${esc(c.year)}</p>
     <h1 class="c-title" data-split>${c.titleHtml.replace(/ — /g, '&nbsp;— ')}</h1>
     <p class="c-task" data-reveal>${esc(c.task || c.lead)}</p>${num}
@@ -247,7 +247,7 @@ export function renderIndex(cases, index) {
     const a = r.href
       ? `<a class="ix-a" href="${esc(r.href)}"${outer ? ' target="_blank" rel="noopener"' : ''}>${body}<span class="ix-ar" aria-hidden="true">${outer ? '↗' : '→'}</span></a>`
       : `<div class="ix-a ix-a--off">${body}</div>`;
-    return `<li class="ix-row" data-shot="${src}">${a}</li>`;
+    return `<li class="ix-row" data-shot="${src}" data-glyph="${r.glyph || 'browser'}">${a}</li>`;
   };
   const groups = index.groups.map((g) => {
     const list = rows.filter((r) => r.group === g);
