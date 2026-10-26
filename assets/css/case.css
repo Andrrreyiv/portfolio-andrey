@@ -163,13 +163,14 @@
 .as-ava{display:grid;place-items:center;width:36px;height:36px;border-radius:50%;background:#1B1F24;color:#fff;font:700 12px/1 var(--f-mono)}
 .as-head p{display:grid;line-height:1.25}
 .as-head b{font-size:14.5px}
-.as-head span{font-size:12px;color:#2E8A5E}
+/* только подпись «онлайн»: прежнее «.as-head span» красило и аватар «AI» зелёным по тёмному (Lighthouse 26.10, 3,87:1) */
+.as-head p span{font-size:12px;color:#1E7A50}
 .as-feed{list-style:none;display:flex;flex-direction:column;justify-content:flex-end;gap:9px;padding:14px 12px;overflow:hidden}
 .as-m{align-self:flex-start;max-width:86%;padding:10px 12px;border-radius:15px 15px 15px 5px;background:#fff;font-size:14px;line-height:1.45;
   box-shadow:0 1px 1px rgba(0,0,0,.05)}
 .as-me{align-self:flex-end;border-radius:15px 15px 5px 15px;background:#1B1F24;color:#fff}
 .as-input{display:flex;align-items:center;justify-content:space-between;margin:0 10px 12px;padding:10px 14px;border-radius:99px;background:#fff;
-  font-size:13px;color:#8A9099;border:1px solid rgba(0,0,0,.07)}
+  font-size:13px;color:#646B75;border:1px solid rgba(0,0,0,.07)}   /* плейсхолдер 5,4:1 (был 3,2:1) */
 .as-input i{width:22px;height:22px;border-radius:50%;background:#1B1F24}
 
 /* ── ML: шлиф под микроскопом (иллюстрация кодом) и входы, сходящиеся в модель ── */
