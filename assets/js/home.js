@@ -270,13 +270,15 @@ function processLine() {
   if (!line) return;
   if (reduce) { line.style.transform = 'none'; return; }
   const steps = $$('.proc-steps li');
-  const lit = (p) => steps.forEach((li) => {
+  // на телефоне линии нет и шаги стоят столбиком с одним отступом слева: порог по линии зажёг бы все кружки разом
+  const flat = getComputedStyle(line).display === 'none';
+  const lit = (p) => !flat && steps.forEach((li) => {
     const at = (li.offsetLeft + 40) / Math.max(1, line.parentElement.offsetWidth);
     li.classList.toggle('on', p >= at - 0.02);
   });
   gsap.to(line, { scaleX: 1, ease: 'none', scrollTrigger: { trigger: '.proc', start: 'top 75%', end: 'bottom 60%', scrub: true, onUpdate: (st) => lit(st.progress) } });
   // на телефоне линии нет: шаг загорается сам, когда доезжает до экрана
-  if (getComputedStyle(line).display === 'none') steps.forEach((li) => ScrollTrigger.create({ trigger: li, start: 'top 75%', once: true, onEnter: () => li.classList.add('on') }));
+  if (flat) steps.forEach((li) => ScrollTrigger.create({ trigger: li, start: 'top 75%', once: true, onEnter: () => li.classList.add('on') }));
 }
 
 /* ── услуги: при наведении у курсора всплывает кадр живой работы (только мышь, без reduced-motion) ── */
@@ -362,6 +364,8 @@ function workIndex() {
   // Где места или WebGL нет (телефон, низкий экран) — частицы просто стихают до фона.
   const wide = matchMedia('(pointer: fine) and (min-width: 1024px)');
   const placeGlyph = () => {
+    // на телефоне знак не ставим: места рядом со списком нет, а водяным знаком под текстом он читался шумом
+    // (проверено 26.10 на 390 px: QR рассыпался точками по строке) — там частицы просто стихают
     if (!glApi || !wide.matches) return false;
     const r = view.getBoundingClientRect(), vh = innerHeight;
     const top = parseFloat(getComputedStyle($('.ix-view')).top) || 140;
