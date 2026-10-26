@@ -73,7 +73,8 @@ function manifesto() {
   if (!el || reduce || matchMedia('(prefers-contrast: more)').matches) return;
   // aria: 'none' — на <p> aria-label запрещён (Lighthouse 10.10), а слова и так остаются текстом.
   const { words } = SplitText.create(el, { type: 'words', wordsClass: 'w', aria: 'none' });
-  gsap.fromTo(words, { opacity: 0.22 }, {
+  // старт 0.5, а не 0.22: непрочитанные слова тоже читаются (3,3:1 на бумаге вместо 1,6:1 — норма для крупного текста, impeccable 26.10)
+  gsap.fromTo(words, { opacity: 0.5 }, {
     opacity: 1, ease: 'none', stagger: 0.12,
     scrollTrigger: { trigger: el, start: 'top 78%', end: 'bottom 42%', scrub: true },
   });
